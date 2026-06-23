@@ -1,0 +1,874 @@
+=== BRIEF DE DEMARRAGE SITE VODUN CONCEPT STORE ===
+V
+V OD UN CONC EPT S TOR E
+Là où le sacré devient désirable
+BRIEF POUR LE SITE WEB
+Version de démarrage
+On commence avec les photos infos disponibles, on complète selon le planning
+
+01 Le projet en bref
+Vodun Concept Store est une marque béninoise basée à Ouidah. Elle crée du mobilier, de la déco, de la
+mode, des accessoires et des décorations lumineuses, inspirés du Vodun.
+On veut un site qui donne l'impression de visiter la boutique : on se promène, on découvre les produits, on lit
+leur histoire, on écoute une ambiance, puis on commande. Slogan : « Là où le sacré devient désirable ».
+Prix des produits : de 1 500 FCFA à 2,5 millions FCFA. Clients visés : Bénin, Afrique de l'Ouest et diaspora.
+02 On démarre maintenant
+Ce qu'on veut : le développeur peut commencer tout de suite, avec ce qu'on a déjà. Le reste arrive ensuite
+(planning section 11).
+Ce qu'on a aujourd'hui
+• Les photos des produits.
+• Les noms des produits.
+• Certains prix (voir les pièces jointes / la plaquette).
+Ce que le développeur gère lui-même
+• La 3D des produits : il la réalise à partir des photos et des références.
+• Les musiques d'ambiance : il s'en occupe (recherche de musiques libres de droits ou création).
+Ce qu'il peut déjà construire
+• La structure du site et le design (à partir des photos et de la charte).
+• La visite animée et les pages.
+• Le système 3D / 360° et le lecteur de musique.
+• Les fiches produits, avec les photos, les noms et les prix déjà connus.
+• Le panier (les prix manquants et les règles seront ajoutés ensuite).
+Important : tant qu'un élément manque, le développeur avance sur le reste. On ne bloque pas le chantier.
+
+03 Ce qu'on veut obtenir
+• Un site beau et haut de gamme, qui donne envie.
+• Une visite immersive : on a l'impression de se promener dans la boutique.
+• Voir les produits en 3D : pouvoir les tourner et zoomer.
+• Une petite histoire pour chaque produit.
+• Une musique de fond qui change selon le produit ou la catégorie.
+• Commander en ligne, avec livraison et délais clairs selon la région.
+• Site en français et en anglais.
+Règle d'or : beau et simple. On ne surcharge pas la page d'informations inutiles.
+04 Pour qui
+Public Ce qu'il attend
+Clients au Bénin et en Découvrir les produits, commander facilement, payer par Mobile Money,
+Afrique de l'Ouest être livré vite.
+Se reconnecter à la culture, lire l'histoire des pièces, payer par carte, être
+Diaspora
+livré à l'étranger.
+Pros (hôtels, restaurants,
+Projets sur mesure et grandes installations, demander un devis.
+bureaux)
+Découvrir le Vodun, faire le lien avec la boutique de Ouidah et les
+Touristes et curieux
+événements.
+05 L'idée principale : une visite de boutique
+Le site n'est pas un simple catalogue, c'est une visite. Quand on descend la page, le contenu apparaît petit à
+petit, univers par univers : l'entrée, les luminaires, le mobilier, la mode, les accessoires, les décorations
+festives.
+Quatre ingrédients font l'expérience :
+• Le mouvement : des animations douces, de la lumière dorée.
+• La 3D : on tourne les pièces comme si on les tenait en main.
+• L'histoire : chaque pièce a un récit avant d'être vendue.
+• Le son : une ambiance musicale discrète (voir 7.5).
+Important : les animations et le son doivent rester légers. Le site doit toujours rester rapide et facile à lire.
+06 Les pages du site
+Ce qu'on veut : peu de pages, mais bien faites. On évite de se disperser.
+Page À quoi elle sert
+
+L'entrée de la boutique : une belle ouverture animée, puis on entre dans la
+Accueil
+visite.
+La visite La promenade dans les univers de la boutique. C'est le cœur du site.
+Mobilier, Déco, Mode, Accessoires, Décorations festives. On peut aussi
+Collections
+naviguer par divinité.
+La vue 3D / 360°, l'histoire du produit, les détails, les options, le bouton
+Page produit
+commander ou devis.
+Le Panthéon Vodun Présentation des divinités, leurs couleurs et les collections liées.
+Projets pros (B2B) Pour hôtels, restaurants, bureaux : exemples et formulaire de devis.
+La marque L'histoire, les valeurs, Ouidah, les artisans, les événements.
+Panier et commande Le tunnel d'achat : livraison selon la région, puis paiement.
+Mon compte Suivi des commandes et historique. (Facultatif au début.)
+Boutique de Ouidah, réseaux sociaux, et questions fréquentes sur la
+Contact
+livraison.
+07 Les fonctions du site
+7.1 · La visite animée
+Ce qu'on veut : en descendant la page, le contenu apparaît petit à petit, univers par univers.
+• Des animations douces et de la profondeur (effet de relief).
+• Deux façons de visiter : suivre la promenade, ou aller directement à une collection.
+• Un petit repère montre où on en est dans la visite.
+7.2 · Voir les produits en 3D / 360°
+Ce qu'on veut : pouvoir tourner et zoomer les produits, comme si on les avait en main.
+• Les produits stars (10 à 20) : vraie 3D, on les fait tourner à 360° et on zoome.
+• Le reste des produits : une rotation faite à partir de photos (360° photo) plus un zoom de qualité.
+• Les images et la 3D se chargent au fur et à mesure, pour ne pas ralentir le site.
+7.3 · L'histoire de chaque produit
+Ce qu'on veut : chaque produit a un court texte qui raconte son sens et la divinité liée.
+• « La Couronne de l'Oracle » est liée à Fâ (les oracles).
+• « Le Sentinelle » et « Le Veilleur » sont liés à Legba (le gardien).
+• « Cristal de la Prospérité » et « Les Perles de l'Océan » sont liés aux cauris (l'abondance) et à Mami
+Wata.
+Histoires courtes : un titre, 2 à 4 petits paragraphes, les couleurs liées, et le certificat de symbolique quand il y
+en a un.
+7.4 · Choisir par divinité (le Panthéon)
+Ce qu'on veut : en plus des catégories habituelles, pouvoir explorer les produits par divinité.
+
+Divinité Univers Couleurs / formes
+DAN · le serpent Fluidité, protection Spirales · indigo · turquoise
+LEGBA · le gardien Carrefours, seuils Croisements · rouge · noir
+SAKPATA · la terre Ancrage, abondance Formes rondes · brun · vert
+OGU · le fer Force, métal Angles · rouge sang · or
+MAMI WATA Beauté, eaux Courbes · violet · or nacré
+XEVIOSO · la foudre Puissance, éclat Éclairs · blanc · noir
+7.5 · La musique de fond
+Ce qu'on veut : une musique discrète qui change selon le produit ou la catégorie.
+• Un bouton son / silence reste toujours visible, et le choix est retenu.
+• Une ambiance par univers ou par divinité : percussions douces, instruments traditionnels, sons inspirés
+du Vodun.
+• Changement en douceur et volume bas par défaut.
+7.6 · Commander, et demander un devis
+Ce qu'on veut : acheter en ligne les produits simples, et demander un devis pour les gros projets.
+• Produits en stock : ajout au panier et paiement direct.
+• Pièces sur mesure et grand format (meubles, installations, pros) : bouton « Demander un devis » avec
+un petit formulaire.
+• Délai de fabrication affiché clairement (par exemple montres : 3 à 4 semaines ; trône : 4 à 6 semaines).
+7.7 · Livraison et paiement
+Ce qu'on veut : afficher le délai et le prix de livraison selon la région, avant de payer.
+• Zones : Bénin, Afrique de l'Ouest, reste de l'Afrique, diaspora (règles à confirmer par la marque).
+• Paiement : Mobile Money (MTN MoMo, Moov Money) et carte bancaire (service à choisir : KkiaPay,
+etc…).
+• Prix affichés en FCFA, option dollars ; ou Euro.
+7.8 · Langues, Google et confort
+• Langues : français d'abord, anglais ensuite.
+• Google : le site doit bien remonter dans les recherches.
+• Confort : bons contrastes, son coupé par défaut, animations désactivées si l'utilisateur l'a demandé sur
+son appareil.
+08 Le style visuel
+Ce qu'on veut : sacré, haut de gamme, chaleureux. Beaucoup de noir et d'ivoire, l'or en touches, le rouge par
+petites doses. Épuré : le vide fait partie du luxe.
+Les couleurs
+
+Codes indicatifs, à ajuster sur le vrai logo. (Les pastilles montrent juste la teinte, aucun fond coloré n'est mis
+derrière le texte du site.)
+Couleur Code Usage
+Rouge rituel #8E2420 Couleur principale, accents
+Or #B8860B Touches précieuses, détails
+Noir #1A1410 Fond des sections immersives
+Ivoire #F4F0E6 Fond clair
+Indigo (Dan) #1C4A66 Univers Dan
+Vert (Sakpata) #20603C Univers Sakpata
+Brun #4A3120 Texte
+Sable #D2B98E Lumières, fonds doux
+Les polices
+• Titres : une police à empattements élégante (comme Georgia ; pour le web : Playfair Display ou
+Cormorant).
+• Texte : une police simple et lisible (comme Calibri ; pour le web : Inter ou Source Sans).
+Les animations
+• Douces et fluides, jamais clignotantes ni agressives.
+• Au survol, on révèle l'or, on met légèrement en lumière.
+• Rien qui gêne la lecture.
+09 Ce que la marque doit fournir
+La 3D et les musiques sont gérées par le développeur. La marque fournit le reste :
+• Déjà disponible : les photos des produits, les noms, et certains prix (pièces jointes).
+• Le logo en fichier vectoriel et les couleurs / polices exactes.
+• Pour les produits stars : des photos sous tous les angles (utiles au développeur pour la 3D et le 360°).
+• Les textes d'histoire de chaque produit (la matière existe déjà côté marque).
+• La liste complète des produits : noms, prix, options, divinité, délais, tailles, en stock ou sur devis.
+• Les règles de livraison définitives et les comptes de paiement.
+• Les photos d'ambiance (boutique, événements) et les mentions légales / CGV.
+• Pour la 3D et la musique : valider les produits prioritaires et le style sonore souhaité.
+10 Côté technique (en simple)
+Ce qu'on veut : un site rapide, sécurisé, qui marche bien sur téléphone et facile à gérer par la marque.
+• Rapide partout : chargement vite, même sur téléphone et connexion moyenne.
+• Pensé mobile : tout doit bien marcher sur smartphone (la majorité des visiteurs).
+
+• 3D, 360° et son : produits par le développeur, en fichiers légers et compressés.
+• Boutique en ligne : une solution e-commerce simple à gérer (par exemple Shopify ou WooCommerce).
+Le développeur peut proposer mieux.
+• Espace d'administration : la marque doit pouvoir modifier produits, prix, textes et photos sans
+développeur.
+• Sécurité : site sécurisé (HTTPS), sauvegardes, paiement protégé.
+• Statistiques : un suivi des visites et des ventes dès le lancement.
+11 Planning urgent (le reste à livrer)
+Ce qu'on veut : fournir vite les éléments manquants pour ne pas bloquer le développeur.
+Pr. Élément à fournir Qui Échéance
+1 Logo vectoriel + couleurs et polices exactes Marque Semaine 1
+Liste complète des produits (prix, options, divinité,
+2 Marque Semaine 1
+délais, tailles, stock ou devis)
+3 Choix des produits stars (3D) et du style de musique Marque Semaine 1
+Photos sous tous les angles des produits stars (pour la
+4 Marque Semaine 2
+3D / 360°)
+5 Textes d'histoire des produits Marque Semaine 2
+6 Règles de livraison définitives + comptes de paiement Marque Semaine 3
+7 Photos d'ambiance (boutique, événements) Marque Semaine 3
+8 Mentions légales + CGV Marque Semaine 3
+12 On avance par étapes
+Étape But Contenu
+Accueil animé, la visite, les collections, les fiches produits
+Étape 1 (le Mettre en ligne et avec les photos et prix connus, le 360° plus la 3D des
+lancement) vendre produits stars, la musique par catégorie, le panier, la
+livraison, le paiement, les devis, le français et l'anglais.
+Personnalisation des produits, espace client, certificats en
+Étape 2 Aller plus loin
+ligne, musique par divinité, page Panthéon enrichie.
+3D sur plus de produits, visite « boutique virtuelle » plus
+Étape 3 Étendre
+poussée, autres langues, contenus événementiels.
+
+
+
+=== DECORATION FESTIVES VODUN CONCEPT STORE ===
+Mobilier Décoration Mode Accessoires
+
+Le Sentinelle
+Lanternes festives
+multicolores inspirées des
+masques traditionnelles.
+UTILISATION
+Inspirées des célèbres gardiens de nuit
+du patrimoine Vodun, transformées en
+sculptures lumineuses monumentales
+pour espaces publics et centres
+commerciaux..
+
+La Voute
+céleste
+Installations lumineuses
+grand format en cauris .
+UTILISATION
+Halls d'hôtels, galeries commerciales,
+espaces de réception, salons de
+prestige et installations artistiques
+monumentales.
+
+
+
+Le nuage
+de cauris
+Installations lumineuses
+grand format en cauris .
+UTILISATION
+Halls d'hôtels, galeries commerciales,
+espaces de réception, salons de prestige
+et installations artistiques
+monumentales.
+
+Le
+UTILISATION
+Veilleur
+Entrées d'hôtels, centres commerciaux, espaces publics, jardins, halls
+d'accueil et installations événementielles.
+Totems en métal perforé et
+raphia naturel, H 1m à 3m
+
+Les Perles
+de l’Océan
+Boules lumineuses de cauris
+UTILISATION
+Halls d'hôtels, galeries commerciales,
+espaces de réception, salons de
+prestige et installations artistiques
+monumentales.
+
+Cristal de la
+Prospérité
+sphère décorative en verre et
+cauris, symbole d'abondance
+UTILISATION
+Décoration de sapins, hôtels, centres
+commerciaux, bureaux, vitrines,
+réceptions, événements festifs,
+cadeaux d'entreprise et espaces
+prestigieux
+
+La Couronne
+de l’oracle
+Boules lumineuses de cauris
+UTILISATION
+Halls d'hôtels, galeries commerciales,
+espaces de réception, salons de
+prestige et installations artistiques
+monumentales.
+
+La Pluie de
+cauris
+Cloisons de lumière en cauris,
+fils d'or et micro-LED.
+UTILISATION
+Séparation d'espaces, vitrines
+premium, restaurants, salles de
+réception, hôtels et scénographies
+événementielles.
+
+Lanternes
+Cérémonielles
+Lanternes festives
+multicolores inspirées des
+masques traditionnelles.
+UTILISATION
+Festivals, places publiques, centres
+commerciaux, événements culturels et
+installations urbaines temporaires.
+
+Lanternes
+Cérémonielles
+Lanternes festives
+multicolores inspirées des
+masques traditionnelles.
+UTILISATION
+Festivals, places publiques, centres
+commerciaux, événements culturels et
+installations urbaines temporaires.
+
+Le Rideau
+Patrimoine
+Installations sur mesure,
+symboles Vodun illuminés,
+grand format.
+UTILISATION
+Sièges sociaux, hôtels premium,
+showrooms, ambassades
+culturelles, résidences de prestige
+et grands projets architecturaux.
+
+Là où le sacré devient désirable.
+V O D U N C O N C E P T S T O R E
+vodun-concept-store.com · @vodunconceptstore
+
+
+
+=== VODUN CONCEPT STORE VERSION 1 ===
+Mobilier Décoration Mode Accessoires
+
+0 1 · V I S I O N F O N D A T R I C E
+Mission
+Valoriser la richesse symbolique du Vodun encréations
+contemporaines, conçues au Bénin, pour le monde.
+CRÉATION
+Pièces et collections inspiréesde la comoslogieVodun avec
+exigence artisanale.
+TRANSMISSION
+Valoriser les savoir-faire béninois. Intégrer les artisans
+dignement.
+RAYONNEMENT
+Faire de Ouidah la capitale mondiale du design inspire du
+Vodun.
+ACCESSIBILITÉ
+Permettre à chacun de commander, recevoir et porter l'identité
+Vodun.
+
+0 1 · V I S I O N F O N D A T R I C E
+Valeurs & Ambition
+AUTHENTICITÉ
+Ancré dans unetradition et spiritualitévivante
+EXCELLENCE
+Beau, solide, durable
+RESPECT
+Le Vodun est vivant. Toute création le respecte.
+FLUIDITÉ
+L'expérience client est aussi soignée que le produit.
+RAYONNEMENT
+Chaque vente exporte la beauté béninoise dans le monde.
+
+0 2 · P O S I T I O N N E M E N T S T R A T É G I Q U E
+Marché &
+Positionnement
+« Premium accessible · Artisanal contemporain · Livré
+partout »
+Légitimité unique
+Seule marque ancrée à Ouidah, berceau du Vodun
+Modèle intégré
+Création · Exposition · Stock · E-commerce · Événements
+Gamme complète
+1 500 FCFA (utilitaire) → 2,5 M FCFA (mobilier)
+Accessibilité mondiale
+Livraison Bénin, Afrique de l'Ouest, diaspora
+
+0 2 · P O S I T I O N N E M E N T S T R A T É G I Q U E
+BOUTIQUE DIGITALE
+Le Vodunaccessible partout dans le monde
+Vodun Concept Store est avant tout une plateforme digitale
+pensée pour faire rayonner l’esthétique et l’artisanat
+inspiré de la spiritualité Vodun au-delà des frontières du
+Bénin.
+Notre showroom physique à Ouidah représente l’âme de la
+marque, mais le cœur du modèle repose sur une
+expériencee-commerce.
+Grâce à notre boutique en ligne, chaque client peut :
+• Découvrir les collections mobilier, mode, décoration et
+accessoires
+• Personnaliser certains produits selon les symboliques des
+divinités
+• Commander depuis n’importe quel pays
+• Payer via Mobile Money ou carte internationale
+
+0 3 · D I R E C T I O N A R T I S T I Q U E
+Le Panthéon Vodun
+Chaquedivinité inspire une collection ,sescouleurs, ses formes, ses
+matières.
+DAN : Le Serpent
+Spirales · Indigo · Turquoise
+LEGBA : Le Gardien
+Croisements · Rouge · Noir
+SAKPATA : La Terre
+Formes organiques · Brun · Vert
+OGU :Le Fer
+Angles · Rouge sang · Or
+MAMI WATA
+Courbes · Violet · Or nacré
+XEVIOSO :Foudre
+Éclairs · Blanc · Noir
+
+0 3 · I D E N T I T É V I S U E L L E
+Palette Chromatique
+Rouge Rituel Or Cérémoniel Noir Absolu Ivoire Rituel
+Principal Accent Fond premium Fond clair
+Indigo Dan Vert Sakpata Brun Profond Sable Chaud
+Vodun Dan Vodun Sakpata Texte Lumières
+Là où le sacré devient désirable
+
+0 4 · G A M M E V E S T I M E N T A I R E
+Porter le Sacré
+8 000 —65 000 FCFA
+T-shirts sérigraphiés
+Coton 220g/m², motifs vévés, collections par divinités (XS→3XL)
+Casquettes & Headwear
+5-panel, dad hat, bucket hat wax , broderie ton-sur-ton
+Chemises
+Col mao, broderies géométriques, boutons bois
+
+0 4 · G A M M E V E S T I M E N T A I R E
+Casquettes &
+Headwear
+Bucket Hat Wax 12 000 FCFA
+Tissu wax premium, motifs géométriques Vodun, doublure soie
+Dad Hat brodé 8 000 FCFA
+Coton brossé 6 panneaux, broderie vévé ton-sur-ton
+5-Panel classic 9 000 FCFA
+Logo brodé or, fermeture laiton gravé symbole marque
+Kufi premium 15 000 FCFA
+Tissu local wax, doublure satin noir, édition limitée signée
+
+0 5 · G A M M E A C C E S S O I R E S
+Montres
+Artisanales
+65 000 —250 000 FCFA · Éditions numérotées
+Boîtier en bois béninois gravé ou métal forgé
+Cadran avec vévé Vodun sérigraphié ou gravé
+Bracelet cuir naturel tanné ou raphia tressé
+Gravure personnalisée au dos sur demande
+Certification et numérotation de chaque pièce
+Délai de fabrication : 3 à 4 semaines
+
+0 5 · G A M M E A C C E S S O I R E S
+Maroquinerie
+& Sacoches
+Tote bag coton 8 000 FCFA
+Motifs sérigraphiés, porte-drapeau de la marque
+Pochettes en cuir 25 000 FCFA
+Cuir naturel, applications métal repoussé Vodun
+Sacoche bandoulière 55 000 FCFA
+Cuir tanné végétalement, finitions artisanales
+Sac cabas raphia 35 000 FCFA
+Tressage raphia, doublure wax premium béninois
+Sacoche Business 95 000 FCFA
+Cuir pleine fleur, motifs vévé incrustés à chaud
+
+0 5 · G A M M E A C C E S S O I R E S
+Bracelets de
+Puissance
+Un bracelet Vodun n'est pas un bijou. C'est une
+protection.
+Perles Asso
+Couleurs codées par Vodun · Livré avec certificat de symbolique
+Joncs Bronze coulé
+Motifs géométriques en relief · Finition brunie à l'ancienne
+Cuir & Métal
+Cuir tanné végétalement · FermoirlaitongravévévéLegba
+Lapis-lazuli 3 500 —28 000 FCFA · Chaque bracelet livré avec son certificat de symbolique
+Collection Dan ,Indigo · Protection et fluidité cosmique
+
+0 6 · G A M M E D É C O R A T I O N
+Présences
+Ces objets ne meublent pas un espace. Ils l'habitent.
+Masques contemporains
+Bois sculpté, métal repoussé ou techniques mixtes
+Tableaux & bas-reliefs
+Motifs vévés peints sur bois, fer ou toile
+Sculptures Bocio
+Figurines contemporaines —œuvre de création originale
+Textiles muraux
+Tapisseries, tentures, macramés en fibres naturelles locales
+25 000 —500 000 FCFA · Particuliers · Hôtels · Bureaux · B2B sur devis
+Miroirs encadrés
+Cadres bois sculptés ou métal avec motifs symboliques
+
+0 6 · G A M M E D É C O R A T I O N
+Luminaires
+sacrés
+Des ombres sacrées sur vos murs.
+Suspension métal perforé
+Projette des ombres de vévés, ambiance unique et mémorable
+Lampe raphia tressé
+Abat-jour en fibres naturelles locales, lumière tamisée chaude
+Lanterne bronze
+Motifs géométriques découpés au laser , édition artisanale
+Bougeoir sculpté bois
+Bois massif béninois, formes symboliquesciselées
+
+0 7 · G A M M E M O B I L I E R — T R Ô N E S
+Mobilier
+Résidentiel
+Chaque meuble : une œuvre d'art fonctionnelle pour une
+génération.
+Sièges sculptés 300 000+ FCFA
+Bois massif, pyrogravure, incrustations métal
+Tables & Consoles 250 000+ FCFA
+Plateaux bois brut, pieds fer forgé symbolique
+Lits & Têtes de lit 600 000+ FCFA
+Bois massif sculpté, baldaquin forgé optionnel
+Rangements 350 000+ FCFA
+Étagères, commodes, panneaux motifs sacrés
+
+0 7 · G A M M E M O B I L I E R — T R Ô N E S
+Le Trône
+de Direction
+Dirigez depuis un siège qui incarne votre vision. Sculpté
+pour durer une génération.
+Structure Bois massif béninois sculpté à la main
+Finition Laque mate noire + incrustations or
+Motifs Vévés Vodun gravés en relief
+Garnissage Cuir pleine fleur, capitonné artisanal
+Mécanismes Pivotant, réglable en hauteur
+Délai 4 à 6 semaines · Pièce unique signée
+
+0 7 · M O B I L I E R — E S P A C E S P R O F E S S I O N N E L S
+Hôtels &
+Restaurants
+Habiller votre espace d'une identité africaine d'exception.
+Mobilier de salle (chaises, tables) avec motifs vévés intégrés
+Luminaires sur mesure pour salles et lobbies premium
+Masques et sculptures pour espaces de réception
+Textiles muraux et tentures pour ambiance identitaire
+Projets B2B sur devis · Livraison + installation incluses
+Vaisselle artisanale pour dressage de table premium
+Consultation design & sourcing complet sur devis
+
+0 7 · M O B I L I E R — E S P A C E S P R O F E S S I O N N E L S
+Bureaux &
+Espaces Commerciaux
+Bureau de Direction
+Bureau sculpté bois massif noir & incrustations or
+Bibliothèques rétroéclairées avec sculptures
+Fauteuil Trône personnalisé, pièce unique signée
+Salle d'Attente
+Sièges design identitaire en bois et cuir
+Textiles muraux vévés pour ambiance sacrée
+Éclairage raphia ambiancé, luminaires suspendus
+Espace d'Accueil
+Comptoir sur mesure avec vévé incrusté
+Signalétique bois gravé aux couleurs de la marque
+Sculptures de bienvenue, masques contemporains
+
+0 8 · M O D È L E G É O G R A P H I Q U E & L O G I S T I Q U E
+Architecture
+à 4 Pôles
+OUIDAH - Showroom
+Siège · Exposition · Accueil touristes · Événements culturels
+COTONOU -Hub Stock
+Ateliers PDG · Production · Logistique · Expéditions mondiales
+E-COMMERCE GLOBAL
+Commandes 24h/24 · Configurateurs · Livraison mondiale
+PRÉSENCE ÉVÉNEMENTIELLE
+Vodun Days · FInAB · festival des Masques· MASA. Autres
+Marchés créatifs
+
+0 9 · S T R A T É G I E É V É N E M E N T I E L L E
+Présence dans les
+Grands Rendez-vous
+Janvier VODUN DAYS
+Ouidah · Toutes gammes,vitrine d'excellence
+Fév./Mars FInAB + Fashion Week
+Cotonou · Mode & Accessoires
+25-26 Juil. Festival des Masques
+Porto-Novo · Décoration & Mobilier
+Décembre WeLovEya Festival
+Cotonou · Mode & Lifestyle
+MASA CI. Chill & Groove · Festichill · Eat &
+Annuel
+Drink · Fênu Higbé
+Cotonou · Lifestyle
+
+Là où le sacré devient désirable.
+V O D U N C O N C E P T S T O R E
+vodun-concept-store.com · @vodunconceptstore
+
+
+
+=== V CONCEPT STORE CATALOGUE DES PRODUITS ===
+VODUN CONCEPT STORE
+CATALOGUE PRODUITS
+Fiches Produits
+pour la Boutique Digitale
+
+Décorations festives · Mode · Accessoires · Décoration · Mobilier
+Récit · Visuel · Caractéristiques · Modèles · Prix · Délais · Livraison
+
+
+NOTE DE CADRAGE
+Comment lire ce catalogue
+
+Chaque article est présenté sous forme de fiche prête à alimenter la boutique en ligne : un visuel, un récit qui raconte l’histoire et le sens de l’objet, une fiche technique (matériaux, formats, modèles, personnalisation, délais, livraison) et un prix.
+PARTIE 01
+Décorations Festives
+
+
+01 · DÉCORATIONS FESTIVES
+Le Sentinelle
+Lanternes festives multicolores inspirées des masques traditionnels.
+
+
+L’HISTOIRE
+Gardiens de nuit du patrimoine Vodun, les Sentinelles veillaient autrefois sur les passages et les seuils. La collection les réimagine en sculptures lumineuses monumentales : des cascades de fils teints : rouge, or, indigo, turquoise : qui s’embrasent à la tombée du jour. Posées en allée ou en duo, elles transforment une place ou une galerie marchande en théâtre de lumière.
+FICHE TECHNIQUE
+
+
+02 · DÉCORATIONS FESTIVES
+La Voûte céleste
+Installations lumineuses grand format en cauris.
+
+
+L’HISTOIRE
+Le cauris fut monnaie, parure et oracle. Suspendu par milliers, il devient ici un ciel. La Voûte céleste tapisse un plafond entier de fils de cauris lumineux et compose une canopée scintillante au-dessus des halls et des réceptions. On ne traverse pas cet espace : on entre sous une voûte d’abondance.
+FICHE TECHNIQUE
+
+
+03 · DÉCORATIONS FESTIVES
+Le Nuage de cauris
+Suspensions sculpturales en cauris, en forme de nuages de lumière.
+
+
+L’HISTOIRE
+Imaginez un nuage descendu se poser dans un salon. Le Nuage de cauris est une suspension organique faite de centaines de coquillages nacrés qui captent et diffusent une lumière douce. Seul, il devient pièce maîtresse ; en archipel, il dessine un ciel intérieur suspendu au-dessus de vos invités.
+FICHE TECHNIQUE
+
+
+04 · DÉCORATIONS FESTIVES
+Le Veilleur
+Totems de lumière en métal perforé et raphia naturel, H 1 m à 3 m.
+
+
+L’HISTOIRE
+Le Veilleur se tient à l’entrée comme une présence bienveillante. Sa partie haute, en métal perforé au laser, projette des vévés de lumière ; sa base de raphia tressé diffuse une lueur chaude et vivante. Aligné le long d’une allée ou posté à un seuil, il accueille, oriente et protège.
+FICHE TECHNIQUE
+
+
+05 · DÉCORATIONS FESTIVES
+Les Perles de l’Océan
+Boules lumineuses de cauris, suspendues ou sur socle.
+
+
+L’HISTOIRE
+Chaque perle est un océan condensé : des cauris sertis d’or autour d’un cœur de lumière. Déclinées du diamètre d’un fruit à celui d’une lune, Les Perles de l’Océan se suspendent en grappes ou se posent en majesté sur socle, pour signer halls, vitrines et salons d’une élégance rituelle.
+FICHE TECHNIQUE
+
+
+06 · DÉCORATIONS FESTIVES
+Cristal de la Prospérité
+Sphère décorative en verre et cauris : symbole d’abondance.
+
+
+L’HISTOIRE
+Petite par la taille, grande par le sens. Le Cristal de la Prospérité enferme de vrais cauris et des vévés dorés dans une sphère de verre transparent : un vœu d’abondance que l’on suspend au sapin, à une vitrine, ou que l’on offre. Le cadeau d’entreprise qui porte une intention.
+FICHE TECHNIQUE
+
+
+07 · DÉCORATIONS FESTIVES
+La Couronne de l’Oracle
+Couronne de cauris : l’accueil festif du seuil.
+
+
+L’HISTOIRE
+Sur une porte, une vitrine ou un mur, la Couronne de l’Oracle annonce la fête tout en racontant une histoire. Cercle de cauris serrés : symbole de prospérité et de protection : elle remplace la couronne de houx par un emblème né du golfe de Guinée. Un cercle qui dit : ici, l’abondance est bienvenue.
+FICHE TECHNIQUE
+
+
+08 · DÉCORATIONS FESTIVES
+La Pluie de cauris
+Cloisons de lumière en cauris, fils d’or et micro-LED.
+
+
+L’HISTOIRE
+Ni mur, ni vide : un voile. La Pluie de cauris tombe du plafond en rideaux scintillants qui séparent sans cloisonner. Modulaire, elle s’étire en ligne ou tourne à l’angle pour dessiner des espaces : un salon dans un hall, une scène dans une salle, une vitrine dans la ville.
+FICHE TECHNIQUE
+
+
+09 · DÉCORATIONS FESTIVES
+Lanternes Cérémonielles
+Lanternes festives multicolores inspirées des masques traditionnels.
+
+
+L’HISTOIRE
+Suspendues en guirlandes au-dessus d’une place ou d’un marché, les Lanternes Cérémonielles ravivent l’esprit de fête. Chaque lanterne porte un visage : masque stylisé percé de lumière : dans des coloris vifs : rouge, vert, indigo, or, blanc. La nuit, elles dessinent un ciel de visages bienveillants au-dessus de la foule.
+FICHE TECHNIQUE
+
+
+10 · DÉCORATIONS FESTIVES
+Le Rideau Patrimoine
+Installations sur mesure : symboles Vodun illuminés, grand format.
+
+
+L’HISTOIRE
+Quand une marque ou une nation veut inscrire son identité dans la lumière, le Rideau Patrimoine répond. Façades de cauris et de fils d’or, vévés monumentaux dessinés en LED, symboles qui s’allument à la nuit : c’est une œuvre architecturale autant qu’une décoration. Une signature de prestige pour sièges sociaux, hôtels et ambassades culturelles.
+FICHE TECHNIQUE
+
+
+PARTIE 02
+Mode
+
+
+MODE · GAMME VESTIMENTAIRE
+T-shirts sérigraphiés
+Le vévé à même la peau : coton 220 g/m², collections par divinité.
+
+
+L’HISTOIRE
+Porter le sacré au quotidien. Chaque t-shirt est une toile : un vévé sérigraphié à l’or ou en ton-sur-ton, tiré des symboles du panthéon. Coupe contemporaine, coton lourd, et une collection par divinité pour choisir son signe autant que son style.
+FICHE TECHNIQUE
+
+
+MODE · GAMME VESTIMENTAIRE
+Casquettes & Headwear
+Couvre-chefs sacrés : du bucket wax au kufi d’édition limitée.
+
+
+L’HISTOIRE
+La tête se couronne aussi. Du bucket hat en wax premium au kufi signé en édition limitée, chaque pièce porte la broderie d’un vévé, discrète ou affirmée. Un vestiaire de tête qui passe du street au cérémoniel sans changer d’âme.
+FICHE TECHNIQUE
+
+
+MODE · GAMME VESTIMENTAIRE
+Chemises Col Mao
+Col mao, broderies géométriques, boutons bois.
+
+
+L’HISTOIRE
+L’élégance posée. La chemise col mao réinterprète le vestiaire formel avec des broderies géométriques tirées des vévés et des boutons de bois tournés. À porter au bureau comme en cérémonie : l’identité Vodun, dans sa version habillée.
+FICHE TECHNIQUE
+
+
+PARTIE 03
+Accessoires
+
+
+ACCESSOIRES
+Montres Artisanales
+Boîtier bois ou métal forgé, cadran vévé : éditions numérotées.
+
+
+L’HISTOIRE
+Le temps, gravé dans le bois du Bénin. Chaque montre est une pièce numérotée : boîtier en bois local ou métal forgé, cadran orné d’un vévé, bracelet en cuir tanné ou raphia tressé. Au dos, votre gravure. Un objet qui se transmet.
+FICHE TECHNIQUE
+
+
+ACCESSOIRES
+Maroquinerie & Sacoches
+Du tote bag porte-drapeau à la sacoche business en cuir pleine fleur.
+
+
+L’HISTOIRE
+Le cuir comme support du symbole. De la sacoche business en cuir pleine fleur aux incrustations vévé à chaud, jusqu’au tote bag sérigraphié qui porte les couleurs de la marque, chaque pièce mêle artisanat du cuir et identité Vodun.
+FICHE TECHNIQUE
+
+
+ACCESSOIRES
+Bracelets de Puissance
+« Un bracelet Vodun n’est pas un bijou. C’est une protection. »
+
+
+L’HISTOIRE
+Chaque bracelet est codé. Perles Asso aux couleurs d’une divinité, joncs en bronze coulé, cuir et laiton gravé du vévé Legba, ou lapis-lazuli de la collection Dan : tous sont livrés avec leur certificat de symbolique. On ne le porte pas pour briller, mais pour être protégé.
+FICHE TECHNIQUE
+
+
+PARTIE 04
+Décoration
+
+
+DÉCORATION
+Présences
+« Ces objets ne meublent pas un espace. Ils l’habitent. »
+
+
+L’HISTOIRE
+Une présence change une pièce. Masques contemporains, bas-reliefs peints, sculptures Bocio originales, textiles muraux en fibres locales, miroirs encadrés de symboles : chaque objet décoratif porte le geste de l’artisan et la charge du symbole. Des œuvres à vivre, pas seulement à regarder.
+FICHE TECHNIQUE
+
+
+PARTIE 05
+Mobilier
+
+
+MOBILIER
+Mobilier Résidentiel
+« Chaque meuble : une œuvre d’art fonctionnelle pour une génération. »
+
+
+L’HISTOIRE
+Du mobilier qui se transmet. Sièges sculptés à la pyrogravure, tables aux pieds de fer forgé symbolique, lits à baldaquin forgé, rangements à panneaux sacrés : chaque pièce est en bois massif béninois, pensée pour durer une génération et porter, gravée, la mémoire d’un symbole.
+FICHE TECHNIQUE
+
+
+MOBILIER · TRÔNES
+Le Trône de Direction
+« Dirigez depuis un siège qui incarne votre vision. »
+
+
+L’HISTOIRE
+La pièce signature. Bois massif sculpté à la main, laque noire mate et incrustations or, vévés gravés en relief, cuir pleine fleur capitonné : Le Trône de Direction est un fauteuil de pouvoir, pivotant et réglable, fabriqué en pièce unique signée pour durer une génération.
+FICHE TECHNIQUE
+
+
+MOBILIER · ESPACES PROFESSIONNELS
+Hôtels & Restaurants
+Habiller votre espace d’une identité africaine d’exception.
+
+
+L’HISTOIRE
+Un projet d’ambiance complet. Mobilier de salle à motifs vévés, luminaires sur mesure pour lobbies premium, masques et sculptures de réception, textiles muraux et vaisselle artisanale : un accompagnement design et sourcing de bout en bout pour donner à votre établissement une identité forte.
+FICHE TECHNIQUE
+
+
+MOBILIER · ESPACES PROFESSIONNELS
+Bureaux & Espaces Commerciaux
+Bureau de direction, salle d’attente, espace d’accueil : l’identité sur mesure.
+
+
+L’HISTOIRE
+Une marque, jusque dans les murs. Du bureau de direction en bois massif noir incrusté d’or au comptoir d’accueil gravé d’un vévés, en passant par la signalétique et les sculptures de bienvenue, nous équipons vos espaces professionnels d’une identité Vodun cohérente et mémorable.
+FICHE TECHNIQUE
+
+
+SYNTHÈSE
+Conditions commerciales
+
+
+
+Voici la liste des produits à modéliser en 3D pour la boutique, classés par priorité. Pour chacun, le type de 3D et les options à gérer.
+Priorité 1 : Configurateurs (le client choisit ses options)
+Le Veilleur : configurateur + AR. Options : 2 motifs (Dan, Legba), 3 hauteurs (1 m / 2 m / 3 m).
+La Pluie de cauris : configurateur + AR. Options : 3 finitions de rail (Or / Noir Mat / Bois Naturel), 3 longueurs (2 / 5 / 10 m), pose linéaire ou en angle.
+Les Perles de l'Océan : configurateur. Options : 5 diamètres (Ø20 à Ø120), suspendu ou sur socle.
+Montres Artisanales : configurateur. Options : boîtier (bois / métal), bracelet (cuir / raphia), gravure au dos .
+Le Trône de Direction : vue 3D 360° (rotation), options de finition.
+Priorité 2 : Réalité augmentée « voir dans mon espace »
+Le Nuage de cauris
+La Voûte céleste
+Le Sentinelle
+Le Rideau Patrimoine
+Luminaires sacrés
+Priorité 3 : Vue 360° (rotation simple)
+Cristal de la Prospérité
+La Couronne de l'Oracle (version mate / version lumineuse)
+Bracelets de Puissance
+Mobilier Résidentiel (360° + AR)
+Sans 3D (rester en photo)
+T-shirts, Chemises, Casquettes : photos haute qualité (360° possible pour les casquettes).
+Pour commencer (3 pilotes) : Le Veilleur, Le Nuage de cauris, Montres.
+
+
