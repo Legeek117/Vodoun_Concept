@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 
 export default function Hero() {
@@ -54,14 +55,14 @@ export default function Hero() {
   }, []);
 
   return (
-    <section ref={heroRef} className="relative h-screen flex items-center justify-center bg-noir overflow-hidden">
+    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center bg-noir overflow-hidden pb-32">
       {/* Background grid */}
       <div ref={gridRef} className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#B8860B_1px,transparent_1px),linear-gradient(to_bottom,#B8860B_1px,transparent_1px)] bg-[size:4vw_4vw] opacity-20"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-noir via-transparent to-noir"></div>
       </div>
 
-      <div className="relative z-10 text-center px-[5vw]">
+      <div className="relative z-10 text-center px-[5vw] pt-20">
         <span className="section-label mb-8">V O D O U N · C O N C E P T · S T O R E</span>
         
         <h1 ref={titleRef} className="editorial-heading text-ivoire mb-8 overflow-hidden">
@@ -71,17 +72,17 @@ export default function Hero() {
           <span className="block">désirable</span>
         </h1>
         
-        <p ref={subtitleRef} className="editorial-body text-ivoire/80 max-w-xl mx-auto mb-12 uppercase tracking-[0.3em] text-sm">
+        <p ref={subtitleRef} className="editorial-body text-ivoire/80 max-w-xl mx-auto mb-16 uppercase tracking-[0.3em] text-sm">
           Expérience immersive · Artisanat de Ouidah
         </p>
 
-        <div ref={ctaRef} className="flex flex-col sm:flex-row gap-6 justify-center">
-          <button className="btn-premium">
+        <div ref={ctaRef} className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
+          <Link to="/accueil" className="btn-premium">
             Entrer dans la boutique
-          </button>
-          <button className="btn-premium bg-transparent text-ivoire border-ivoire hover:bg-ivoire hover:text-noir">
+          </Link>
+          <Link to="/#pantheon" className="btn-premium bg-transparent text-ivoire border-ivoire hover:bg-ivoire hover:text-noir">
             Notre héritage
-          </button>
+          </Link>
         </div>
       </div>
 

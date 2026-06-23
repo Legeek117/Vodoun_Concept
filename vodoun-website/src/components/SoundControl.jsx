@@ -48,7 +48,7 @@ export default function SoundControl() {
   return (
     <button
       onClick={toggleSound}
-      className="fixed bottom-8 right-8 z-[100] w-14 h-14 rounded-full bg-noir border-2 border-or flex items-center justify-center text-ivoire hover:bg-or hover:text-noir transition-all duration-500 group"
+      className="fixed bottom-8 left-8 z-[100] w-14 h-14 rounded-full bg-noir border-2 border-or flex items-center justify-center text-ivoire hover:bg-or hover:text-noir transition-all duration-500 group"
       aria-label={isMuted ? "Activer le son" : "Désactiver le son"}
     >
       {isMuted ? (

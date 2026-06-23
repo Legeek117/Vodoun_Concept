@@ -340,22 +340,28 @@ const GameScene = ({ setGameStarted, quality, joystickRef }) => {
 
       {/* Portals */}
       <Portal 
-        position={[-5, 0, -8]} 
+        position={[-8, 0, -8]} 
         label="BOUTIQUE" 
         color="#8E2420" 
         onClick={(e) => { e.stopPropagation(); navigate('/boutique'); }} 
       />
       <Portal 
-        position={[5, 0, -8]} 
-        label="HÉRITAGE" 
+        position={[8, 0, -8]} 
+        label="PANTHEON" 
         color="#1C4A66" 
-        onClick={(e) => { e.stopPropagation(); alert('Page Héritage en cours de construction!'); }} 
+        onClick={(e) => { e.stopPropagation(); navigate('/pantheon'); }} 
       />
       <Portal 
         position={[0, 0, 8]} 
         label="CONTACT" 
         color="#20603C" 
-        onClick={(e) => { e.stopPropagation(); alert('Page Contact en cours de construction!'); }} 
+        onClick={(e) => { e.stopPropagation(); navigate('/contact'); }} 
+      />
+      <Portal 
+        position={[-8, 0, 0]} 
+        label="MARQUE" 
+        color="#4A1942" 
+        onClick={(e) => { e.stopPropagation(); navigate('/a-propos'); }} 
       />
 
       {/* Player */}
