@@ -5,9 +5,9 @@ import SoundControl from './components/SoundControl';
 import FloatingCart from './components/FloatingCart';
 import ScrollToTop from './components/ScrollToTop';
 import App from './App';
-import GameWorld from './components/GameWorld';
+import CinematicEntrance from './components/CinematicEntrance';
 import ShopPage from './pages/ShopPage';
-import ProductPage from './pages/ProductPage';
+import ProductPage3D from './pages/ProductPage3D';
 import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
 import B2BPage from './pages/B2BPage';
@@ -20,7 +20,7 @@ export default function RootRouter() {
       <Router>
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<GameWorld />} />
+          <Route path="/" element={<CinematicEntrance />} />
           <Route path="/accueil" element={
             <>
               <Navbar currentPath="/accueil" />
@@ -45,14 +45,7 @@ export default function RootRouter() {
               <FloatingCart />
             </>
           } />
-          <Route path="/boutique/produit/:productId" element={
-            <>
-              <Navbar currentPath="/boutique" />
-              <ProductPage />
-              <SoundControl />
-              <FloatingCart />
-            </>
-          } />
+          <Route path="/boutique/produit/:productId" element={<ProductPage3D />} />
           <Route path="/contact" element={
             <>
               <Navbar currentPath="/contact" />

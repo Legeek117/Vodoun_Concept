@@ -14,45 +14,14 @@ function App() {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Initialize Lenis for smooth scrolling
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
-    });
-
+    const lenis = new Lenis();
     function raf(time) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
-
     requestAnimationFrame(raf);
 
-    // Sync ScrollTrigger with Lenis
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-    gsap.ticker.lagSmoothing(0);
-
-    // Background color transitions
-    const sections = document.querySelectorAll('[data-bg-color]');
-    sections.forEach((section) => {
-      const bgColor = section.getAttribute('data-bg-color');
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top 50%',
-        end: 'bottom 50%',
-        onEnter: () => gsap.to('body', { backgroundColor: bgColor, duration: 1.5, ease: 'power2.out' }),
-        onEnterBack: () => gsap.to('body', { backgroundColor: bgColor, duration: 1.5, ease: 'power2.out' }),
-      });
-    });
-
-    return () => {
-      lenis.destroy();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
+    return () => lenis.destroy();
   }, []);
 
   const decorationsFestives = ALL_PRODUCTS
@@ -103,7 +72,7 @@ function App() {
     },
     {
       name: 'MAMI WATA',
-      title: 'L’Eau',
+      title: "L'Eau",
       color: '#4A1942',
       description: 'Courbes · Violet · Or nacré',
     },
@@ -174,7 +143,7 @@ function App() {
       </Section>
 
       {/* Panthéon Vodun Section */}
-      <div id="pantheon" data-bg-color="#1A1410" className="py-32">
+      <div id="pantheon" data-bg-color="#1A1410" className="py-32 relative z-0">
         <div className="max-w-7xl mx-auto px-[5vw]">
           <div className="mb-20">
             <span className="section-label">04 / Héritage</span>
@@ -190,12 +159,15 @@ function App() {
                 <div className="absolute inset-0 bg-noir/40 group-hover:bg-noir/0 transition-all duration-700" />
                 <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-10">
                   <div className="transform translate-y-4 md:translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
-                    <span className="text-[0.45rem] md:text-[0.6rem] uppercase tracking-[0.2em] md:tracking-[0.4em] text-ivoire/70 block mb-2 md:mb-4">
+                    <span className="text-[0.55rem] md:text-[0.65rem] uppercase tracking-[0.2em] md:tracking-[0.3em] text-ivoire/70 block mb-2 md:mb-4">
                       {deity.title}
                     </span>
-                    <h3 className="font-playfair text-2xl md:text-5xl font-black text-ivoire mb-3 md:mb-6">{deity.name}</h3>
-                    <p className="text-ivoire/80 text-xs md:text-sm mb-4 md:mb-8">{deity.description}</p>
-                    <div className="w-0 h-[1px] bg-or group-hover:w-full transition-all duration-1000 ease-out" />
+                    <h3 className="text-ivoire font-playfair text-xl md:text-3xl lg:text-4xl font-black">
+                      {deity.name}
+                    </h3>
+                    <p className="text-ivoire/70 text-xs md:text-sm mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
+                      {deity.description}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -205,7 +177,7 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer data-bg-color="#1A1410" className="bg-noir text-ivoire pt-20 md:pt-32 pb-8 md:pb-16 border-t border-ivoire/10">
+      <footer data-bg-color="#1A1410" className="bg-noir text-ivoire pt-20 md:pt-32 pb-8 md:pb-16 border-t border-ivoire/10 relative z-0">
         <div className="max-w-7xl mx-auto px-[5vw]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 mb-12 md:mb-24">
             <div>
