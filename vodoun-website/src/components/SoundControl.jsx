@@ -1,28 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { Howl } from 'howler';
 
+// Shared global sound (same as in CinematicEntrance)
+let globalSound = null;
+
+const initSound = () => {
+  if (!globalSound) {
+    globalSound = new Howl({
+      src: ['/ambient.mp3'],
+      loop: true,
+      volume: 0.5,
+      html5: true,
+    });
+  }
+  return globalSound;
+};
+
 export default function SoundControl() {
   const [isMuted, setIsMuted] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
-  const soundRef = useRef(null);
 
   useEffect(() => {
-    if (isInitialized && !soundRef.current) {
-      // Initialiser le son ambiant (remplacez par votre propre fichier audio)
-      soundRef.current = new Howl({
-        src: ['https://assets.mixkit.co/sfx/preview/mixkit-wind-chimes-135.mp3'],
-        loop: true,
-        volume: 0.3,
-        html5: true,
-      });
-    }
-    
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.unload();
-      }
-    };
-  }, [isInitialized]);
+    // Pre-initialize sound in case user hasn't clicked start yet
+    initSound();
+  }, []);
 
   const toggleSound = () => {
     const newMuted = !isMuted;
@@ -30,17 +31,14 @@ export default function SoundControl() {
     
     if (!isInitialized) {
       setIsInitialized(true);
-      // Démarrer le son après l'initialisation (pour éviter l'erreur de autoplay)
-      setTimeout(() => {
-        if (soundRef.current) {
-          soundRef.current.play();
-        }
-      }, 100);
-    } else if (soundRef.current) {
+    }
+
+    const sound = initSound();
+    if (sound) {
       if (newMuted) {
-        soundRef.current.pause();
+        sound.pause();
       } else {
-        soundRef.current.play();
+        sound.play();
       }
     }
   };

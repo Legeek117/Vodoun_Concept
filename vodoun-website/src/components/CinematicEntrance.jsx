@@ -2,106 +2,98 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import ScrollToPlugin from 'gsap/ScrollToPlugin';
 import Lenis from '@studio-freight/lenis';
-import { Howl } from 'howler';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-const FRAME_COUNT = 217;
-const FRAME_PATH = '/frames/entrance/frame_';
+import { useSound } from '../context/SoundContext';
+
+const FRAME_COUNT = 193; 
+const FRAME_SPEED = 2.0;
 
 export default function CinematicEntrance() {
   const navigate = useNavigate();
+  const { playSound } = useSound();
   const canvasRef = useRef(null);
   const scrollContainerRef = useRef(null);
-  const [frames, setFrames] = useState([]);
+  const framesRef = useRef([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
-  const soundRef = useRef(null);
+  const [isStarted, setIsStarted] = useState(false);
+  const [currentFrame, setCurrentFrame] = useState(0);
 
-  // 0. Audio Setup
-  useEffect(() => {
-    soundRef.current = new Howl({
-      src: ['https://assets.mixkit.co/sfx/preview/mixkit-wind-chimes-135.mp3'], // Placeholder sacred sound
-      loop: true,
-      volume: 0.5,
-    });
-
-    return () => {
-      if (soundRef.current) soundRef.current.stop();
-    };
-  }, []);
-
-  // 1. Preload frames
+  // Preload frames
   useEffect(() => {
     let loadedCount = 0;
-    const loadedFrames = [];
-
+    const frames = [];
     const loadFrame = (index) => {
-      const img = new Image();
-      const paddedIndex = String(index).padStart(4, '0');
-      img.src = `${FRAME_PATH}${paddedIndex}.webp`;
-      img.onload = () => {
-        loadedCount++;
-        setLoadProgress(Math.round((loadedCount / FRAME_COUNT) * 100));
-        if (loadedCount === FRAME_COUNT) {
-          setFrames(loadedFrames);
-          setIsLoading(false);
-        }
-      };
-      loadedFrames[index - 1] = img;
+      return new Promise((resolve) => {
+        const img = new Image();
+        const frameIndex = (index + 1).toString().padStart(4, '0');
+        img.src = `/frames/entrance/frame_${frameIndex}.webp`;
+        img.onload = () => {
+          frames[index] = img;
+          loadedCount++;
+          setLoadProgress(Math.floor((loadedCount / FRAME_COUNT) * 100));
+          resolve();
+        };
+      });
     };
 
-    for (let i = 1; i <= FRAME_COUNT; i++) {
-      loadFrame(i);
-    }
+    const phase1 = Array.from({ length: 20 }, (_, i) => loadFrame(i));
+    Promise.all(phase1).then(() => {
+      framesRef.current = frames;
+      const phase2 = Array.from({ length: FRAME_COUNT - 20 }, (_, i) => loadFrame(i + 20));
+      Promise.all(phase2);
+    });
   }, []);
 
-  // 2. Initialize Scroll & Canvas
-  useEffect(() => {
-    if (isLoading || frames.length === 0) return;
-
+  const drawFrame = (index) => {
     const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    
-    // Set canvas size
-    const setCanvasSize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      renderFrame(0);
-    };
+    if (!canvas || !framesRef.current[index]) return;
+    const ctx = canvas.getContext('2d');
+    const img = framesRef.current[index];
+    const cw = window.innerWidth * window.devicePixelRatio;
+    const ch = window.innerHeight * window.devicePixelRatio;
+    if (canvas.width !== cw || canvas.height !== ch) {
+      canvas.width = cw;
+      canvas.height = ch;
+    }
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    const scale = Math.max(cw / iw, ch / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const dx = (cw - dw) / 2;
+    const dy = (ch - dh) / 2;
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, dx, dy, dw, dh);
+  };
 
-    const renderFrame = (index) => {
-      const img = frames[index];
-      if (!img) return;
+  const handleTransition = () => {
+    gsap.killTweensOf(window);
+    gsap.to('.transition-overlay', {
+      opacity: 1,
+      duration: 1.0,
+      ease: 'power4.inOut',
+      onComplete: () => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        ScrollTrigger.getAll().forEach(st => st.kill());
+        navigate('/accueil');
+      },
+    });
+  };
 
-      const canvasRatio = canvas.width / canvas.height;
-      const imgRatio = img.width / img.height;
-      let drawWidth, drawHeight, offsetX, offsetY;
+  useEffect(() => {
+    if (isLoading || !isStarted) return;
 
-      if (canvasRatio > imgRatio) {
-        drawWidth = canvas.width;
-        drawHeight = canvas.width / imgRatio;
-        offsetX = 0;
-        offsetY = (canvas.height - drawHeight) / 2;
-      } else {
-        drawWidth = canvas.height * imgRatio;
-        drawHeight = canvas.height;
-        offsetX = (canvas.width - drawWidth) / 2;
-        offsetY = 0;
-      }
-
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-    };
-
-    window.addEventListener('resize', setCanvasSize);
-    setCanvasSize();
-
-    // Lenis smooth scroll
     const lenis = new Lenis({
       duration: 1.5,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
     });
 
     function raf(time) {
@@ -110,174 +102,181 @@ export default function CinematicEntrance() {
     }
     requestAnimationFrame(raf);
 
-    // GSAP ScrollTrigger for video frames
-    const scrollTrigger = ScrollTrigger.create({
-      trigger: scrollContainerRef.current,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 0.1, // Faster scrub for more responsive frames
-      onUpdate: (self) => {
-        const frameIndex = Math.min(
-          FRAME_COUNT - 1,
-          Math.floor(self.progress * FRAME_COUNT)
-        );
-        renderFrame(frameIndex);
+    if (isStarted) {
+      const timer = setTimeout(() => {
+        gsap.to(window, {
+          scrollTo: { y: document.body.scrollHeight, autoKill: false },
+          duration: 22,
+          ease: 'none',
+          onComplete: () => handleTransition()
+        });
+      }, 500);
+      
+      // 1. Initial draw
+      drawFrame(0);
 
-        // Transition to main site at the end
-        if (self.progress > 0.99) { // Trigger slightly later
-          gsap.to('.entrance-overlay', {
-            opacity: 1,
-            duration: 0.5,
-            onComplete: () => {
-              if (soundRef.current) soundRef.current.stop();
-              navigate('/accueil');
-            }
-          });
-        }
-      },
-    });
-
-    // Text animations
-    const sections = document.querySelectorAll('.scroll-section');
-    sections.forEach((section) => {
-      const enter = parseFloat(section.dataset.enter) / 100;
-      const leave = parseFloat(section.dataset.leave) / 100;
-
+      // 2. Frame Scrubbing
       ScrollTrigger.create({
         trigger: scrollContainerRef.current,
-        start: () => `${enter * 100}% top`,
-        end: () => `${leave * 100}% top`,
-        onEnter: () => gsap.to(section, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }),
-        onLeave: () => gsap.to(section, { opacity: 0, y: -50, duration: 1, ease: 'power3.in' }),
-        onEnterBack: () => gsap.to(section, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }),
-        onLeaveBack: () => gsap.to(section, { opacity: 0, y: 50, duration: 1, ease: 'power3.in' }),
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true,
+        onUpdate: (self) => {
+          const p = self.progress;
+          const accelerated = Math.min(p * (FRAME_SPEED * 1.2), 1);
+          const index = Math.min(Math.floor(accelerated * (FRAME_COUNT - 1)), FRAME_COUNT - 1);
+          if (index !== currentFrame) {
+            setCurrentFrame(index);
+            requestAnimationFrame(() => drawFrame(index));
+          }
+          if (p > 0.96) handleTransition();
+        }
       });
-    });
 
-    return () => {
-      window.removeEventListener('resize', setCanvasSize);
-      lenis.destroy();
-      scrollTrigger.kill();
-    };
-  }, [isLoading, frames, navigate]);
+      // 3. Section Animations
+      const sections = gsap.utils.toArray('.scroll-section');
+      sections.forEach((section, index) => {
+        const children = section.querySelectorAll('.anim-item');
+        gsap.set(section, { opacity: 0 });
+        ScrollTrigger.create({
+          trigger: scrollContainerRef.current,
+          start: `${2 + index * 25}% top`,
+          end: `${28 + index * 25}% top`,
+          scrub: 0.5,
+          onUpdate: (self) => {
+            const p = self.progress;
+            const opacity = Math.sin(p * Math.PI); 
+            gsap.set(section, { 
+              opacity: opacity,
+              pointerEvents: opacity > 0.5 ? 'auto' : 'none'
+            });
+            gsap.set(children, {
+              y: 15 * (1 - p),
+              opacity: p > 0.1 && p < 0.9 ? 1 : 0
+            });
+          }
+        });
+      });
 
-  const startGame = (quality) => {
-    if (soundRef.current && !soundRef.current.playing()) {
-      soundRef.current.play();
+      return () => {
+        clearTimeout(timer);
+        lenis.destroy();
+        ScrollTrigger.getAll().forEach(st => st.kill());
+      };
     }
-    setIsLoading(false);
-  };
+  }, [isLoading, isStarted, navigate]);
 
   return (
-    <div className="relative bg-noir overflow-hidden" onClick={() => {
-      if (soundRef.current && !soundRef.current.playing()) soundRef.current.play();
-    }}>
-      {/* Loading Screen */}
-      {isLoading && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-noir">
-          <div className="text-or font-playfair text-4xl mb-8 tracking-[0.2em]">VODOUN</div>
-          <div className="w-64 h-[1px] bg-ivoire/10 relative">
-            <div 
-              className="absolute inset-0 bg-or transition-all duration-300" 
-              style={{ width: `${loadProgress}%` }}
-            />
+    <div className="relative bg-[#1A1410]">
+      {(isLoading || !isStarted) && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0A0705]">
+          <div className="mb-12 relative text-center">
+            <span className="text-[#B8860B] font-playfair text-[12vw] md:text-[8vw] font-black tracking-tighter uppercase leading-[0.8] block opacity-20 blur-xl absolute inset-0">
+              VODOUN<br/><span className="text-[0.4em] tracking-[0.4em]">CONCEPT</span>
+            </span>
+            <span className="text-[#B8860B] font-playfair text-[12vw] md:text-[8vw] font-black tracking-tighter uppercase leading-[0.8] block relative z-10 animate-pulse">
+              VODOUN<br/><span className="text-[0.4em] tracking-[0.4em]">CONCEPT</span>
+            </span>
           </div>
-          <div className="text-ivoire/40 font-playfair text-xs mt-4 tracking-widest uppercase">
-            Initialisation du Temple... {loadProgress}%
-          </div>
-          {loadProgress === 100 && (
-            <button 
-              onClick={() => {
-                if (soundRef.current) soundRef.current.play();
-                setIsLoading(false);
-              }}
-              className="mt-12 px-10 py-4 border border-or text-or font-playfair text-sm tracking-[0.3em] uppercase hover:bg-or hover:text-noir transition-all duration-500 animate-pulse"
-            >
-              Entrer dans l'expérience
-            </button>
+
+          {loadProgress < 100 ? (
+            <div className="flex flex-col items-center">
+              <div className="w-64 md:w-80 h-[1px] bg-white/5 relative overflow-hidden mb-6">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#B8860B] to-transparent transition-all duration-300 ease-out" 
+                     style={{ width: `${loadProgress}%` }} />
+              </div>
+              <div className="flex justify-center w-80 text-[10px] uppercase tracking-[0.5em] font-bold text-or/60 font-playfair">
+                <span>INITIATION... {loadProgress}%</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-6">
+              <button 
+                onClick={() => {
+                  playSound();
+                  setIsStarted(true);
+                  setIsLoading(false);
+                }}
+                className="group relative px-12 py-6 border border-or/40 overflow-hidden transition-all duration-700 hover:border-or shadow-[0_0_30px_rgba(184,134,11,0.2)]"
+              >
+                <div className="absolute inset-x-0 inset-y-0 bg-or/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="relative z-10 text-or text-xs md:text-sm uppercase tracking-[0.6em] font-bold">
+                  ENTRER DANS LA BOUTIQUE
+                </span>
+              </button>
+              <button 
+                onClick={() => {
+                  playSound();
+                  handleTransition();
+                }}
+                className="text-white/40 hover:text-white text-[10px] uppercase tracking-[0.4em] transition-colors duration-300"
+              >
+                PASSER L'INITIATION
+              </button>
+            </div>
           )}
         </div>
       )}
 
-      {/* Background Canvas */}
-      <div className="fixed inset-0 w-full h-full pointer-events-none">
-        <canvas ref={canvasRef} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-noir/20" /> {/* Slight overlay for readability */}
+      <div className="fixed inset-0 w-full h-full z-10 pointer-events-none">
+        <canvas ref={canvasRef} className="w-full h-full object-cover opacity-100" 
+                style={{ filter: 'contrast(1.1) brightness(1.2)' }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1A1410]/20 via-transparent to-[#1A1410]/40" />
       </div>
 
-      {/* Transition Overlay */}
-      <div className="entrance-overlay fixed inset-0 bg-noir opacity-0 pointer-events-none z-[90]" />
+      <div className="transition-overlay fixed inset-0 bg-[#1A1410] opacity-0 pointer-events-none z-[90]" />
 
-      {/* Scroll Container */}
-      <div ref={scrollContainerRef} className="relative h-[800vh]">
-        {/* Section 1: Intro */}
-        <section 
-          className="scroll-section fixed inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none px-6"
-          data-enter="5" data-leave="20"
-        >
-          <span className="text-or font-playfair text-xs md:text-sm tracking-[0.4em] uppercase mb-4">L'Entrée du Temple</span>
-          <h1 className="text-ivoire font-playfair text-5xl md:text-8xl lg:text-9xl text-center leading-tight">
-            VODOUN <br /> <span className="text-or">CONCEPT STORE</span>
-          </h1>
+      <div ref={scrollContainerRef} className="relative h-[750vh] z-50">
+        <section className="scroll-section fixed inset-0 flex items-center justify-center pointer-events-none px-6">
+          <div className="text-center w-full max-w-7xl">
+            <span className="section-label mb-8">001 / Bienvenue</span>
+            <h1 className="editorial-heading text-white">WELCOME TO<br/><span className="text-[#B8860B]">VODUN CONCEPT</span></h1>
+            <p className="font-playfair text-xl mt-10 text-white/40 tracking-[0.3em] uppercase">Découvrez le temple du sacré</p>
+          </div>
         </section>
 
-        {/* Section 2: Opening Doors */}
-        <section 
-          className="scroll-section fixed inset-0 flex flex-col items-start justify-center opacity-0 pointer-events-none px-[10vw]"
-          data-enter="30" data-leave="50"
-        >
-          <span className="text-or font-playfair text-xs md:text-sm tracking-[0.4em] uppercase mb-4">01 / L'Appel</span>
-          <h2 className="text-ivoire font-playfair text-4xl md:text-6xl max-w-2xl leading-tight">
-            Ouvrez les portes d'un <span className="italic">monde sacré</span>.
-          </h2>
-          <p className="text-ivoire/60 font-playfair text-lg md:text-xl mt-8 max-w-xl">
-            L'héritage Vodoun se révèle à travers l'artisanat d'exception et le design contemporain.
-          </p>
+        <section className="scroll-section fixed inset-0 flex flex-col justify-center pointer-events-none px-[8vw] lg:pr-[55vw]">
+          <div className="w-full">
+            <span className="section-label mb-6">002 / Héritage</span>
+            <h2 className="font-playfair text-[clamp(2.5rem,6vw,8rem)] font-black leading-[0.95] text-white uppercase mb-8">
+              HÉRITAGE<br/>ANCESTRAL
+            </h2>
+            <p className="font-playfair text-xl md:text-2xl text-white/60 leading-relaxed max-w-xl">
+              Chaque objet raconte une histoire séculaire, portée par le souffle des ancêtres.
+            </p>
+          </div>
         </section>
 
-        {/* Section 3: Interior Reveal */}
-        <section 
-          className="scroll-section fixed inset-0 flex flex-col items-end justify-center opacity-0 pointer-events-none px-[10vw] text-right"
-          data-enter="60" data-leave="80"
-        >
-          <span className="text-or font-playfair text-xs md:text-sm tracking-[0.4em] uppercase mb-4">02 / L'Immersion</span>
-          <h2 className="text-ivoire font-playfair text-4xl md:text-6xl max-w-2xl leading-tight">
-            Une galerie de <span className="text-or">puissance</span> et de <span className="italic text-or">beauté</span>.
-          </h2>
-          <p className="text-ivoire/60 font-playfair text-lg md:text-xl mt-8 max-w-xl">
-            Bracelets de protection, maroquinerie de luxe et rideaux de cauris : chaque objet porte une âme.
-          </p>
+        <section className="scroll-section fixed inset-0 flex flex-col justify-center items-end pointer-events-none px-[8vw] lg:pl-[55vw] text-right">
+          <div className="w-full text-right">
+            <span className="section-label mb-6">003 / Design</span>
+            <h2 className="font-playfair text-[clamp(2.5rem,6vw,8rem)] font-black leading-[0.95] text-white uppercase mb-8">
+              LUXE<br/><span className="text-[#B8860B]">CONTEMPORAIN</span>
+            </h2>
+            <p className="font-playfair text-xl md:text-2xl text-white/60 leading-relaxed max-w-xl ml-auto">
+              Une vision résolument moderne où le design rencontre la puissance des symboles.
+            </p>
+          </div>
         </section>
 
-        {/* Section 4: Final - Towards the Throne */}
-        <section 
-          className="scroll-section fixed inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none px-6"
-          data-enter="85" data-leave="95"
-        >
-          <span className="text-or font-playfair text-xs md:text-sm tracking-[0.4em] uppercase mb-4">03 / Le Sanctuaire</span>
-          <h2 className="text-ivoire font-playfair text-4xl md:text-7xl lg:text-8xl text-center leading-tight">
-            Entrez dans le <span className="italic">Cercle</span>.
-          </h2>
-          <div className="mt-12 flex flex-col items-center">
-            <div className="w-12 h-12 border-2 border-or rounded-full flex items-center justify-center animate-bounce">
-              <svg className="w-6 h-6 text-or" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
+        <section className="scroll-section fixed inset-0 flex items-center justify-center pointer-events-none px-6">
+          <div className="text-center w-full max-w-5xl">
+            <span className="section-label mb-8">004 / Signature</span>
+            <h2 className="font-playfair text-[clamp(2.5rem,5vw,7rem)] font-black leading-none text-white uppercase mb-12">
+              L'ÉVEIL DU<br/><span className="text-[#B8860B]">TEMPLE INTÉRIEUR</span>
+            </h2>
+            <div className="mt-16 flex justify-center items-center flex-col gap-4">
+              <span className="text-[10px] uppercase tracking-[0.5em] text-white/30">Scrollez pour entrer</span>
+              <div className="w-px h-24 bg-gradient-to-b from-[#B8860B] to-transparent animate-pulse" />
             </div>
-            <span className="text-or/60 font-playfair text-xs tracking-widest uppercase mt-4">Continuez pour entrer</span>
           </div>
         </section>
       </div>
 
-      {/* Skip Button */}
-      {!isLoading && (
-        <button 
-          onClick={() => navigate('/accueil')}
-          className="fixed bottom-10 right-10 z-[100] text-ivoire/40 hover:text-or font-playfair text-xs tracking-[0.3em] uppercase transition-colors"
-        >
-          Passer l'introduction →
-        </button>
-      )}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .editorial-heading { font-size: clamp(3.5rem, 12vw, 16rem); line-height: 0.85; font-weight: 900; letter-spacing: -0.04em; text-transform: uppercase; }
+        .section-label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5em; font-weight: 800; color: #B8860B; }
+      `}} />
     </div>
   );
 }

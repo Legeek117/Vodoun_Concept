@@ -43,7 +43,7 @@ export default function Navbar({ currentPath }) {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${
         isScrolled || location.pathname !== '/' ? 'bg-noir py-4 border-b border-ivoire/10' : 'bg-transparent py-8'
       }`}
     >
@@ -51,13 +51,13 @@ export default function Navbar({ currentPath }) {
         <div className="flex items-center justify-between">
           <Link
             to="/accueil"
-            className="font-playfair text-3xl font-black text-or cursor-pointer tracking-tighter hover:scale-105 transition-transform duration-500"
+            className="font-playfair text-2xl md:text-3xl font-black text-or cursor-pointer tracking-[0.2em] transform hover:scale-105 transition-transform duration-500 uppercase"
           >
-            V O D O U N
+            VODOUN
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-10">
             {navLinks.map((link) => {
               const isActive = currentPath === link.path || 
                 (link.path === '/boutique' && currentPath?.startsWith('/boutique'));
@@ -65,7 +65,7 @@ export default function Navbar({ currentPath }) {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`relative transition-all duration-300 font-bold uppercase tracking-[0.3em] text-[0.6rem] ${
+                  className={`relative transition-all duration-300 font-playfair font-black uppercase tracking-[0.4em] text-[0.55rem] ${
                     isActive ? 'text-or' : 'text-ivoire/70 hover:text-or'
                   }`}
                 >

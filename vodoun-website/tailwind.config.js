@@ -18,6 +18,8 @@ export default {
       },
       fontFamily: {
         'playfair': ['Playfair Display', 'serif'],
+        'cormorant': ['Cormorant Garamond', 'serif'],
+        'inter': ['Inter', 'sans-serif'],
         'source-sans': ['Source Sans Pro', 'sans-serif'],
       },
     },
