@@ -31,10 +31,16 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
     line-height: 0.95;
     text-transform: uppercase;
+    font-weight: 800;
   }
 }
 
@@ -44,7 +50,10 @@
   }
 
   .editorial-heading {
-    @apply font-playfair text-[clamp(3rem,8vw,12rem)] font-black leading-[0.9] tracking-tighter uppercase;
+    @apply font-playfair font-black leading-[0.9] tracking-tighter uppercase;
+    font-size: clamp(2.5rem, 8vw, 8rem);
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .editorial-body {
@@ -81,8 +90,13 @@
 }
 
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 ::-webkit-scrollbar {

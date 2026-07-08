@@ -25,9 +25,9 @@ export default function ProductCard({ product, index, isDark = false, variant = 
 
   if (variant === 'immersive') {
     return (
-      <Link to={`/boutique/produit/${product.id}`} ref={containerRef} className="group cursor-pointer block max-w-[280px]">
-        <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20">
-          <div className="w-full h-[65%] overflow-hidden rounded-2xl mb-4">
+      <Link to={`/boutique/produit/${product.id}`} ref={containerRef} className="group cursor-pointer block w-full">
+        <div className="relative overflow-hidden aspect-[3/4] mb-3 md:mb-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/20">
+          <div className="w-full h-[65%] overflow-hidden rounded-xl md:rounded-2xl mb-3 md:mb-4">
             {product.video ? (
               <video src={product.video} className="w-full h-full object-cover" autoPlay muted loop playsInline />
             ) : (
@@ -35,13 +35,13 @@ export default function ProductCard({ product, index, isDark = false, variant = 
             )}
           </div>
           <div>
-            <span className="text-[0.5rem] uppercase tracking-[0.2em] text-or font-bold block mb-1">
+            <span className="text-[0.45rem] md:text-[0.5rem] uppercase tracking-[0.15em] md:tracking-[0.2em] text-or font-bold block mb-1">
               {product.category.split('/')[1] || product.category}
             </span>
-            <h3 className="font-playfair text-lg font-black text-white group-hover:text-or transition-colors line-clamp-1">
+            <h3 className="font-playfair text-base md:text-lg font-black text-white group-hover:text-or transition-colors line-clamp-1">
               {product.name}
             </h3>
-            <p className="font-playfair text-sm font-bold text-white/60 mt-1">{product.price}</p>
+            <p className="font-playfair text-xs md:text-sm font-bold text-white/60 mt-1">{product.price}</p>
           </div>
         </div>
       </Link>
@@ -50,23 +50,34 @@ export default function ProductCard({ product, index, isDark = false, variant = 
 
   if (variant === 'square') {
     return (
-      <Link to={`/boutique/produit/${product.id}`} ref={containerRef} className="group cursor-pointer block w-full max-w-[380px] relative z-10 transition-transform duration-500 hover:-translate-y-2">
-        <div className="relative overflow-hidden aspect-square mb-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-[2.5rem] p-6 transition-all duration-700 group-hover:bg-white/15 group-hover:border-or/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col justify-between">
-          <div className="w-full h-[65%] overflow-hidden rounded-2xl bg-noir/20">
+      <Link to={`/boutique/produit/${product.id}`} ref={containerRef} className="group cursor-pointer block w-full relative z-10 transition-transform duration-500 hover:-translate-y-3">
+        <div className="relative overflow-hidden aspect-[3/4] mb-4 md:mb-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-5 transition-all duration-700 group-hover:bg-white/15 group-hover:border-or/60 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col justify-between">
+          {/* Shine effect */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          </div>
+          
+          <div className="w-full h-[70%] overflow-hidden rounded-xl md:rounded-2xl bg-noir/20 relative">
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-noir/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
             {product.video ? (
               <video src={product.video} className="w-full h-full object-cover" autoPlay muted loop playsInline />
             ) : (
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-115" />
             )}
           </div>
-          <div className="text-center pb-2">
-            <span className="text-[0.6rem] uppercase tracking-[0.3em] text-or font-bold block mb-2">
+          
+          <div className="text-center pt-2 z-10">
+            <span className="text-[0.5rem] md:text-[0.6rem] uppercase tracking-[0.25em] md:tracking-[0.3em] text-or font-bold block mb-1 md:mb-2 transition-colors duration-300">
               {product.category.split('/')[1] || product.category}
             </span>
-            <h3 className="font-playfair text-lg md:text-xl font-black text-white group-hover:text-or transition-colors duration-300">
+            <h3 className="font-playfair text-base md:text-xl font-black text-white group-hover:text-or transition-colors duration-300 line-clamp-2">
               {product.name}
             </h3>
-            <p className="font-playfair text-lg text-white/60 mt-2">{product.price.toLocaleString()} FCFA</p>
+            <p className="font-playfair text-sm md:text-lg text-white/60 mt-1 md:mt-2 group-hover:text-white/80 transition-colors duration-300">
+              {product.price.toLocaleString()} FCFA
+            </p>
           </div>
         </div>
       </Link>

@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ALL_PRODUCTS, useCart } from '../store';
+import { useCurrency } from '../context/CurrencyContext';
 import Navbar from '../components/Navbar';
 import SoundControl from '../components/SoundControl';
 import FloatingCart from '../components/FloatingCart';
 
 export default function ProductPage3D() {
   const { productId } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
   const product = ALL_PRODUCTS.find((p) => p.id === productId);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || 'Default');
   const [added, setAdded] = useState(false);
-  
+
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product, quantity, { variant: 'Default' });
+      addToCart(product, quantity, { variant: selectedVariant });
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);
     }
@@ -36,7 +40,7 @@ export default function ProductPage3D() {
       <Navbar currentPath="/boutique" />
       <div className="relative w-full min-h-screen bg-[#1A1410] overflow-x-hidden">
         <div className="flex flex-col md:flex-row w-full min-h-screen">
-          
+
           {/* Left Panel - Product Info */}
           <div className="w-full md:w-1/2 flex flex-col justify-center px-[8vw] md:px-12 lg:px-24 py-32 md:py-20 order-2 md:order-1">
             <nav className="flex flex-wrap items-center gap-2 text-[10px] md:text-sm uppercase tracking-widest opacity-60 mb-8 md:mb-12 text-ivoire">
@@ -53,42 +57,94 @@ export default function ProductPage3D() {
             <h1 className="font-playfair text-3xl md:text-5xl lg:text-7xl font-bold text-ivoire mb-6 leading-tight">
               {product.name}
             </h1>
-            
+
             <p className="text-ivoire/70 text-sm md:text-base lg:text-lg mb-8 leading-relaxed max-w-md">
               {product.story}
             </p>
-            
-            <div className="flex items-baseline gap-6 mb-10">
+
+
+            {product.hasCertificate && (
+              <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 border border-or/30 rounded-lg bg-or/5 text-or">
+                <span>✦</span>
+                <span className="text-xs font-bold uppercase tracking-widest">Certificat de symbolique inclus</span>
+              </div>
+            )}
+
+            {product.isNumbered && (
+              <div className="inline-flex items-center gap-2 mb-6 ml-2 px-4 py-2 border border-or/30 rounded-lg bg-or/20 text-or font-bold">
+                <span className="text-xs uppercase tracking-widest">Édition Numérotée</span>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2 mb-10">
               <p className="font-playfair text-2xl md:text-4xl font-bold text-or">
-                {product.price.toLocaleString('fr-FR')} FCFA
+                {formatPrice(product.price)}
               </p>
+              {product.delay && (
+                <p className="text-ivoire/60 text-xs md:text-sm uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-or"></span> Fabrication : {product.delay}
+                </p>
+              )}
             </div>
 
-            {/* Quantity & Add to Cart */}
-            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center mb-10">
-              <div className="flex items-center justify-between sm:justify-start gap-4">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-12 h-12 border border-ivoire/30 flex items-center justify-center text-ivoire text-xl font-bold hover:border-or hover:text-or transition-all duration-300"
-                >
-                  -
-                </button>
-                <span className="w-12 text-center text-ivoire text-xl md:text-2xl font-bold">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-12 h-12 border border-ivoire/30 flex items-center justify-center text-ivoire text-xl font-bold hover:border-or hover:text-or transition-all duration-300"
-                >
-                  +
-                </button>
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-10">
+                <h3 className="font-playfair text-xl md:text-2xl font-bold text-ivoire mb-4">
+                  Personnalisation
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {product.variants.map((variant) => (
+                    <button
+                      key={variant}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`px-4 py-2 border text-xs md:text-sm uppercase tracking-widest transition-all duration-300 ${selectedVariant === variant
+                          ? 'border-or text-noir bg-or font-bold'
+                          : 'border-ivoire/30 text-ivoire/70 hover:border-or hover:text-or'
+                        }`}
+                    >
+                      {variant}
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              <button
-                onClick={handleAddToCart}
-                disabled={!product.available}
-                className={`flex-1 min-w-[200px] px-8 py-5 bg-or text-noir font-playfair font-bold uppercase tracking-widest text-xs md:text-sm hover:bg-ivoire hover:text-or transition-all duration-300 shadow-[0_10px_30px_rgba(184,134,11,0.2)] ${!product.available ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {added ? 'Ajouté ✦' : 'Ajouter au panier'}
-              </button>
+            {/* Quantity & Actions */}
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center mb-10">
+              {!product.isCustomOrder && (
+                <div className="flex items-center justify-between sm:justify-start gap-4">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-12 h-12 border border-ivoire/30 flex items-center justify-center text-ivoire text-xl font-bold hover:border-or hover:text-or transition-all duration-300"
+                  >
+                    -
+                  </button>
+                  <span className="w-12 text-center text-ivoire text-xl md:text-2xl font-bold">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-12 h-12 border border-ivoire/30 flex items-center justify-center text-ivoire text-xl font-bold hover:border-or hover:text-or transition-all duration-300"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
+
+              {product.isCustomOrder ? (
+                <button
+                  onClick={() => navigate('/projets-pro')}
+                  className="flex-1 min-w-[200px] px-8 py-5 bg-transparent border border-or text-or font-playfair font-bold uppercase tracking-widest text-xs md:text-sm hover:bg-or hover:text-noir transition-all duration-300"
+                >
+                  Demander un devis
+                </button>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  disabled={!product.available}
+                  className={`flex-1 min-w-[200px] px-8 py-5 bg-or text-noir font-playfair font-bold uppercase tracking-widest text-xs md:text-sm hover:bg-ivoire hover:text-or transition-all duration-300 shadow-[0_10px_30px_rgba(184,134,11,0.2)] ${!product.available ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {added ? 'Ajouté ✦' : 'Ajouter au panier'}
+                </button>
+              )}
             </div>
 
             <Link to="/boutique" className="text-or/70 hover:text-or text-xs md:text-sm uppercase tracking-widest transition-colors inline-block text-center sm:text-left">
@@ -99,14 +155,14 @@ export default function ProductPage3D() {
           {/* Right Panel - Product Image */}
           <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative order-1 md:order-2">
             <div className="absolute inset-0">
-              <img 
-                src={product.image} 
-                alt="" 
+              <img
+                src={product.image}
+                alt=""
                 className="w-full h-full object-cover blur-[40px] scale-[1.2] opacity-40"
               />
               <div className="absolute inset-0 bg-[#1A1410]/40" />
             </div>
-            
+
             <div className="absolute inset-0 flex items-center justify-center p-6 md:p-12 lg:p-24">
               <img
                 src={product.image}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../store';
 import gsap from 'gsap';
@@ -136,7 +136,7 @@ export default function CartPage() {
                 <button onClick={() => setIsCheckingOut(false)} className="btn-premium-outline flex-grow">
                   Retour
                 </button>
-                <a href="mailto:contact@vodoun-concept-store.com" className="btn-premium flex-grow text-center">
+                <a href="mailto:contact@VODUN-concept-store.com" className="btn-premium flex-grow text-center">
                   Nous contacter
                 </a>
               </div>

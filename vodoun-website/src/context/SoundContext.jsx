@@ -18,30 +18,9 @@ export const SoundProvider = ({ children }) => {
         onloaderror: (id, err) => console.error('Sound load error:', err),
         onplayerror: (id, err) => {
           console.error('Sound play error:', err);
-          globalSound.once('unlock', () => globalSound.play());
         }
       });
     }
-
-    const handleFirstInteraction = () => {
-      if (globalSound && !globalSound.playing()) {
-        globalSound.play();
-        setIsPlaying(true);
-      }
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('scroll', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
-    };
-
-    window.addEventListener('click', handleFirstInteraction);
-    window.addEventListener('scroll', handleFirstInteraction);
-    window.addEventListener('touchstart', handleFirstInteraction);
-
-    return () => {
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('scroll', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
-    };
   }, []);
 
   const playSound = () => {
@@ -53,13 +32,21 @@ export const SoundProvider = ({ children }) => {
 
   const stopSound = () => {
     if (globalSound) {
-      globalSound.stop();
+      globalSound.pause();
       setIsPlaying(false);
     }
   };
 
+  const toggleSound = () => {
+    if (isPlaying) {
+      stopSound();
+    } else {
+      playSound();
+    }
+  };
+
   return (
-    <SoundContext.Provider value={{ isPlaying, playSound, stopSound }}>
+    <SoundContext.Provider value={{ isPlaying, playSound, stopSound, toggleSound }}>
       {children}
     </SoundContext.Provider>
   );
