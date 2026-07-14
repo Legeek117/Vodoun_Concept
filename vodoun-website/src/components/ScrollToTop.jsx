@@ -6,16 +6,21 @@ export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    // La page admin gère son propre scroll — on ne touche à rien
+    if (pathname.startsWith('/admin')) return;
+
     // Nettoie les ScrollTrigger en premier
     ScrollTrigger.getAll().forEach((st) => st.kill(true));
 
+    // Remet le body scrollable au cas où Lenis l'aurait verrouillé
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+
     const resetScroll = () => {
-      // Réinitialise le scroll natif
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
 
-      // Réinitialise Lenis si disponible
       if (window.lenis && typeof window.lenis.scrollTo === 'function') {
         try {
           window.lenis.scrollTo(0, { immediate: true });
@@ -25,10 +30,8 @@ export default function ScrollToTop() {
       }
     };
 
-    // Réinitialise immédiatement
     resetScroll();
 
-    // Réinitialise à nouveau après un court délai pour les composants lazy-loaded
     const timeoutId = setTimeout(() => {
       resetScroll();
       ScrollTrigger.refresh();

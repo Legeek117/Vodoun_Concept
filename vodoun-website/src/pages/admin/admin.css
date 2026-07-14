@@ -1,0 +1,295 @@
+/* ── Admin Liquid Glass Design System ──────────────────────────────────────
+   Utilisé exclusivement dans le panneau d'administration.
+   Toutes les classes sont préfixées "ag-" pour éviter les conflits Tailwind.
+*/
+
+/* Fond global avec bruit de texture */
+.ag-bg {
+  background: #080604;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(184,134,11,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(28,74,102,0.05) 0%, transparent 50%);
+  min-height: 100vh;
+}
+
+/* ── Liquid Glass Card ──────────────────────────────────────────────────── */
+.ag-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.045) 0%,
+    rgba(255,255,255,0.015) 100%
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Reflet supérieur (highlight) */
+.ag-glass::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.12) 30%,
+    rgba(255,255,255,0.18) 50%,
+    rgba(255,255,255,0.12) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Variante plus sombre */
+.ag-glass-dark {
+  background: linear-gradient(
+    135deg,
+    rgba(10,7,5,0.85) 0%,
+    rgba(15,11,8,0.92) 100%
+  );
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 40px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.ag-glass-dark::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent, rgba(184,134,11,0.15) 50%, transparent
+  );
+  pointer-events: none;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+.ag-sidebar {
+  background: linear-gradient(
+    180deg,
+    rgba(12,9,6,0.96) 0%,
+    rgba(20,14,10,0.98) 100%
+  );
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 4px 0 32px rgba(0,0,0,0.5);
+}
+
+/* ── Nav Item ───────────────────────────────────────────────────────────── */
+.ag-nav-item {
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ag-nav-item:hover {
+  background: rgba(255,255,255,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.ag-nav-item.active {
+  background: linear-gradient(135deg, rgba(184,134,11,0.9), rgba(212,160,23,0.85));
+  box-shadow:
+    0 4px 16px rgba(184,134,11,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  color: #1A1410 !important;
+}
+
+.ag-nav-item.active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Stat Card ──────────────────────────────────────────────────────────── */
+.ag-stat {
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.01) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  box-shadow:
+    0 2px 16px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.ag-stat::after {
+  content: '';
+  position: absolute;
+  top: -40%; right: -20%;
+  width: 80%; height: 80%;
+  background: radial-gradient(circle, rgba(184,134,11,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ag-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* ── Input / Select ─────────────────────────────────────────────────────── */
+.ag-input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: #F4F0E6;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  outline: none;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  backdrop-filter: blur(8px);
+}
+
+.ag-input:focus {
+  border-color: rgba(184,134,11,0.6);
+  background: rgba(184,134,11,0.04);
+  box-shadow: 0 0 0 3px rgba(184,134,11,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.ag-input::placeholder { color: rgba(244,240,230,0.2); }
+
+/* ── Button primary ─────────────────────────────────────────────────────── */
+.ag-btn-primary {
+  background: linear-gradient(135deg, #B8860B 0%, #D4A017 50%, #B8860B 100%);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  color: #0D0B08;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-position 0.4s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 4px 16px rgba(184,134,11,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.ag-btn-primary:hover {
+  background-position: 100% 0%;
+  box-shadow: 0 6px 24px rgba(184,134,11,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+.ag-btn-primary:active { transform: translateY(0); }
+
+/* Shimmer au hover */
+.ag-btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+.ag-btn-primary:hover::after { left: 150%; }
+
+/* ── Button ghost ───────────────────────────────────────────────────────── */
+.ag-btn-ghost {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: rgba(244,240,230,0.55);
+  font-weight: 900;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.ag-btn-ghost:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(244,240,230,0.2);
+  color: #F4F0E6;
+}
+
+/* ── Badge ──────────────────────────────────────────────────────────────── */
+.ag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.55rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  backdrop-filter: blur(8px);
+  border: 1px solid;
+}
+
+/* ── Table ──────────────────────────────────────────────────────────────── */
+.ag-table-row {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s ease;
+}
+.ag-table-row:hover {
+  background: rgba(255,255,255,0.025);
+}
+
+/* ── Modal overlay ──────────────────────────────────────────────────────── */
+.ag-modal-overlay {
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── Scrollbar custom ───────────────────────────────────────────────────── */
+.ag-scroll::-webkit-scrollbar { width: 4px; }
+.ag-scroll::-webkit-scrollbar-track { background: transparent; }
+.ag-scroll::-webkit-scrollbar-thumb {
+  background: rgba(184,134,11,0.3);
+  border-radius: 999px;
+}
+.ag-scroll::-webkit-scrollbar-thumb:hover { background: rgba(184,134,11,0.5); }
+
+/* ── Divider ────────────────────────────────────────────────────────────── */
+.ag-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── Progress bar ───────────────────────────────────────────────────────── */
+.ag-progress-track {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.ag-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #B8860B, #D4A017);
+  box-shadow: 0 0 8px rgba(184,134,11,0.4);
+  transition: width 0.6s ease;
+}

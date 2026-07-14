@@ -9,7 +9,7 @@ import { ALL_PRODUCTS, COLLECTIONS } from './store';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FRAME_COUNT = 450;
+const FRAME_COUNT = 470;
 
 function App() {
   const containerRef = useRef(null);
@@ -19,49 +19,65 @@ function App() {
 
   // Preload frames for global home scroll
   useEffect(() => {
-    let loadedCount = 0;
     const frames = [];
+
     const loadFrame = (index) => {
       return new Promise((resolve) => {
+        if (frames[index]) { resolve(); return; }
         const img = new Image();
         const frameIndex = (index + 1).toString().padStart(4, '0');
-
         img.onload = () => {
           frames[index] = img;
+          framesRef.current = frames;
           resolve();
         };
-        img.onerror = () => {
-          resolve();
-        };
-
+        img.onerror = () => resolve();
         img.src = `/frames/coris/frame_${frameIndex}.jpg`;
       });
     };
 
-    // Load first frame ASAP to unblock FCP
     loadFrame(0).then(() => {
       framesRef.current = frames;
-      setIsFirstFrameLoaded(true); // Unblock the drawFrame effect
+      setIsFirstFrameLoaded(true);
 
-      // Load remaining frames in manageable batches perfectly without slamming the browser limit
-      const loadRestSequence = async () => {
-        for (let i = 1; i < FRAME_COUNT; i += 20) {
+      // Charge en 3 phases de priorité :
+      // P1 (critique) : toutes les frames 1-131 (sac + transition) en batch de 6
+      // P2 (important) : frames 132-470 (coris) en batch de 6 à la suite
+      const loadPhased = async () => {
+        const BATCH = 6;
+        // Phase prioritaire : frames sac + transition (déjà partiellement chargées)
+        for (let i = 1; i < 132; i += BATCH) {
           const chunk = [];
-          for (let j = i; j < Math.min(i + 20, FRAME_COUNT); j++) {
-            chunk.push(loadFrame(j));
-          }
+          for (let j = i; j < Math.min(i + BATCH, 132); j++) chunk.push(loadFrame(j));
+          await Promise.all(chunk);
+        }
+        // Phase secondaire : frames coris originales
+        for (let i = 132; i < FRAME_COUNT; i += BATCH) {
+          const chunk = [];
+          for (let j = i; j < Math.min(i + BATCH, FRAME_COUNT); j++) chunk.push(loadFrame(j));
           await Promise.all(chunk);
         }
       };
-      loadRestSequence();
+      loadPhased();
     });
   }, []);
 
   const drawFrame = (index) => {
     const canvas = canvasRef.current;
-    if (!canvas || !framesRef.current[index]) return;
+    if (!canvas) return;
+
+    // Cherche la frame la plus proche disponible (vers l'arrière puis vers l'avant)
+    let i = index;
+    while (i >= 0 && !framesRef.current[i]) i--;
+    if (i < 0) {
+      // Rien derrière, cherche devant
+      i = index + 1;
+      while (i < FRAME_COUNT && !framesRef.current[i]) i++;
+      if (i >= FRAME_COUNT) return; // Aucune frame disponible
+    }
+
     const ctx = canvas.getContext('2d');
-    const img = framesRef.current[index];
+    const img = framesRef.current[i];
     const cw = window.innerWidth * window.devicePixelRatio;
     const ch = window.innerHeight * window.devicePixelRatio;
     if (canvas.width !== cw || canvas.height !== ch) {
@@ -87,7 +103,6 @@ function App() {
       smoothWheel: true,
     });
 
-    // Sauvegarde lenis sur window pour que ScrollToTop.jsx puisse le réinitialiser
     window.lenis = lenis;
 
     function raf(time) {
@@ -96,6 +111,18 @@ function App() {
     }
     requestAnimationFrame(raf);
 
+    // Resize : redessine la frame courante quand la fenêtre change de taille
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        // Force le recalcul des dimensions au prochain drawFrame
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener('resize', handleResize);
+
     setTimeout(() => {
       ScrollTrigger.refresh();
       lenis.scrollTo(0, { immediate: true });
@@ -103,7 +130,8 @@ function App() {
 
     return () => {
       lenis.destroy();
-      delete window.lenis; // Nettoie la référence quand on quitte la page
+      delete window.lenis;
+      window.removeEventListener('resize', handleResize);
       ScrollTrigger.getAll().forEach(st => st.kill());
     };
   }, []);
@@ -118,20 +146,36 @@ function App() {
       end: 'bottom bottom',
       scrub: true,
       onUpdate: (self) => {
-        const targetIndex = Math.min(Math.floor(self.progress * (FRAME_COUNT - 1)), FRAME_COUNT - 1);
-        let i = targetIndex;
-        while (i >= 0 && !framesRef.current[i]) i--;
-        if (i >= 0) {
-          requestAnimationFrame(() => drawFrame(i));
+        const targetIndex = Math.min(
+          Math.floor(self.progress * (FRAME_COUNT - 1)),
+          FRAME_COUNT - 1
+        );
+
+        // Si la frame exacte est disponible, on la dessine directement
+        if (framesRef.current[targetIndex]) {
+          requestAnimationFrame(() => drawFrame(targetIndex));
+          return;
         }
+
+        // Cherche dans un rayon de ±5 frames autour de la cible
+        // Priorité aux frames AVANT (sens du scroll) pour éviter de revenir en arrière
+        for (let k = 1; k <= 5; k++) {
+          if (framesRef.current[targetIndex - k]) {
+            requestAnimationFrame(() => drawFrame(targetIndex - k));
+            return;
+          }
+          if (framesRef.current[targetIndex + k]) {
+            requestAnimationFrame(() => drawFrame(targetIndex + k));
+            return;
+          }
+        }
+        // Si rien dans le rayon, ne rien faire — conserver la dernière frame affichée
       }
     });
 
     ScrollTrigger.refresh();
 
-    return () => {
-      st.kill();
-    };
+    return () => { st.kill(); };
   }, [isFirstFrameLoaded]);
 
   const universProducts = {
@@ -141,10 +185,12 @@ function App() {
   };
 
   const divinities = [
-    { name: 'DAN', title: 'Le Serpent', color: '#1C4A66', description: 'Spirales · Indigo · Turquoise' },
-    { name: 'LEGBA', title: 'Le Gardien', color: '#8E2420', description: 'Croisements · Rouge · Noir' },
-    { name: 'SAKPATA', title: 'La Terre', color: '#20603C', description: 'Formes organiques · Brun · Vert' },
-    { name: 'MAMI WATA', title: "L'Eau", color: '#4A1942', description: 'Courbes · Violet · Or nacré' },
+    { name: 'DAN', title: 'Le Serpent', color: '#1C4A66', image: '/Divinités/DAN (1).webp', description: 'Spirales · Indigo · Turquoise' },
+    { name: 'LEGBA', title: 'Le Gardien', color: '#8E2420', image: '/Divinités/LEGBA.webp', description: 'Croisements · Rouge · Noir' },
+    { name: 'SAKPATA', title: 'La Terre', color: '#20603C', image: '/Divinités/sakpata.webp', description: 'Formes organiques · Brun · Vert' },
+    { name: 'OGOU', title: 'Le Fer', color: '#8B0000', image: '/Divinités/OGU2.webp', description: 'Angles · Rouge sang · Or' },
+    { name: 'MAMI WATA', title: "L'Eau", color: '#4A1942', image: '/Divinités/mami wata.webp', description: 'Courbes · Violet · Or nacré' },
+    { name: 'XEVIOSO', title: 'La Foudre', color: '#B8860B', image: '/Divinités/xeviosso.webp', description: 'Éclairs · Blanc · Noir' },
   ];
 
   return (
@@ -235,18 +281,40 @@ function App() {
                 <span className="section-label text-or mb-4 block">Panthéon</span>
                 <h2 className="editorial-heading text-ivoire !text-[clamp(2.5rem,8vw,5rem)]">Les Puissances</h2>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 border-l border-b border-ivoire/10">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-0 border-l border-b border-ivoire/10">
                 {divinities.map((deity, index) => (
-                  <div key={index} className="relative aspect-[3/5] overflow-hidden group cursor-pointer border-r border-t border-ivoire/10" style={{ backgroundColor: deity.color + 'CC' }}>
-                    <div className="absolute inset-0 bg-noir/40 group-hover:bg-noir/0 transition-all duration-700" />
+                  <Link key={index} to="/pantheon" className="relative aspect-[3/5] overflow-hidden group cursor-pointer border-r border-t border-ivoire/10" style={{ backgroundColor: deity.color + 'CC' }}>
+                    {/* Image */}
+                    {deity.image && (
+                      <img
+                        src={deity.image}
+                        alt={deity.name}
+                        className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110 opacity-80"
+                      />
+                    )}
+                    {/* Color tint overlay */}
+                    <div
+                      className="absolute inset-0 mix-blend-multiply opacity-50"
+                      style={{ backgroundColor: deity.color }}
+                    />
+                    {/* Light effect glow */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700"
+                      style={{
+                        background: `radial-gradient(circle at center, ${deity.color}80 0%, transparent 70%)`,
+                        boxShadow: `inset 0 0 60px ${deity.color}40`,
+                      }}
+                    />
+                    {/* Bottom gradient for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-noir via-noir/40 to-transparent" />
                     <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-8">
                       <div className="transform translate-y-4 md:translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
                         <span className="text-[0.45rem] md:text-[0.6rem] uppercase tracking-[0.2em] md:tracking-[0.3em] text-ivoire/70 block mb-1 md:mb-2">{deity.title}</span>
-                        <h3 className="text-ivoire font-playfair text-xl md:text-2xl lg:text-3xl font-black">{deity.name}</h3>
+                        <h3 className="text-ivoire font-playfair text-xl md:text-2xl lg:text-3xl font-black drop-shadow-lg">{deity.name}</h3>
                         <p className="text-ivoire/70 text-xs mt-2 md:mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700">{deity.description}</p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

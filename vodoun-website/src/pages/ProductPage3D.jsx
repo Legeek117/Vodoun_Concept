@@ -38,6 +38,19 @@ export default function ProductPage3D() {
   return (
     <>
       <Navbar currentPath="/boutique" />
+
+      {/* Bouton retour fixe — toujours visible en haut à gauche */}
+      <button
+        onClick={() => navigate(-1)}
+        className="fixed top-20 left-4 md:left-8 z-[900] flex items-center gap-2 px-4 py-2.5 bg-noir/80 backdrop-blur-md border border-ivoire/20 text-ivoire hover:border-or hover:text-or transition-all duration-300 group"
+        aria-label="Retour"
+      >
+        <svg className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+        </svg>
+        <span className="text-[0.6rem] uppercase tracking-[0.3em] font-bold hidden sm:block">Retour</span>
+      </button>
+
       <div className="relative w-full min-h-screen bg-[#1A1410] overflow-x-hidden">
         <div className="flex flex-col md:flex-row w-full min-h-screen">
 

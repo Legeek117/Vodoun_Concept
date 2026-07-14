@@ -308,7 +308,13 @@ export default function ShopPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
             {/* Logo & Brand */}
             <div className="lg:col-span-1">
-              <h2 className="font-playfair text-4xl md:text-5xl font-black text-or mb-6 tracking-tighter">VODUN</h2>
+              <a href="/accueil" aria-label="Vodoun Concept Store — Accueil">
+                <img
+                  src="/logo.jpeg"
+                  alt="Vodoun Concept Store"
+                  style={{ height: 'clamp(50px, 8vw, 80px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
+                />
+              </a>
               <p className="text-ivoire/60 text-sm leading-relaxed mb-6">Ouidah, Bénin</p>
               <p className="text-ivoire/40 text-xs uppercase tracking-[0.5em]">L'Héritage Immortel</p>
             </div>

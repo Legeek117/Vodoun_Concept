@@ -173,16 +173,16 @@ export default function B2BPage() {
             </div>
           </div>
 
-                    {/* ── SECTION 4 : PRÉSENCES (DÉCORATION) ── */}
+          {/* ── SECTION 4 : PRÉSENCES (DÉCORATION) ── */}
           <div ref={addSection(6)}>
-            <div className=""mb-10 flex items-end justify-between gap-4 border-b border-brun/10 pb-6"">
+            <div className="mb-10 flex items-end justify-between gap-4 border-b border-brun/10 pb-6">
               <div>
-                <span className=""text-[10px] uppercase tracking-[0.4em] text-or font-bold block mb-2"">Décoration</span>
-                <h2 className=""font-playfair text-3xl md:text-4xl font-black text-noir"">Présences</h2>
+                <span className="text-[10px] uppercase tracking-[0.4em] text-or font-bold block mb-2">Décoration</span>
+                <h2 className="font-playfair text-3xl md:text-4xl font-black text-noir">Présences</h2>
               </div>
-              <p className=""text-brun/40 text-xs uppercase tracking-widest text-right hidden md:block max-w-xs"">""Ces objets l'habitent.""</p>
+              <p className="text-brun/40 text-xs uppercase tracking-widest text-right hidden md:block max-w-xs">Ces objets l'habitent.</p>
             </div>
-            <div className=""grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { title: 'Masques contemporains', desc: 'Bois sculpté, métal repoussé ou techniques mixtes.', image: '/Le Sentinelle.png' },
                 { title: 'Tableaux & bas-reliefs', desc: 'Motifs vévés peints sur bois, fer ou toile.', image: '/Mobilier Résidentiel.png' },
@@ -190,12 +190,12 @@ export default function B2BPage() {
                 { title: 'Textiles muraux', desc: 'Tapisseries, tentures, macramés en fibres naturelles locales.', image: '/Le Rideau Patrimoine.png' },
                 { title: 'Miroirs encadrés', desc: 'Cadres bois sculptés ou métal avec motifs symboliques.', image: '/Mobilier Résidentiel.png' }
               ].map((s, i) => (
-                <div key={i} className=""group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500"">
-                  <div className=""aspect-video mb-5 rounded-2xl overflow-hidden"">
-                    <img src={s.image} alt={s.title} className=""w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"" />
+                <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
+                  <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
+                    <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
-                  <h3 className=""font-playfair text-xl font-bold text-noir mb-2"">{s.title}</h3>
-                  <p className=""text-brun/60 text-sm leading-relaxed"">{s.desc}</p>
+                  <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
+                  <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -203,26 +203,26 @@ export default function B2BPage() {
 
           {/* ── SECTION 5 : LUMINAIRES SACRÉS ── */}
           <div ref={addSection(7)}>
-            <div className=""mb-10 flex items-end justify-between gap-4 border-b border-brun/10 pb-6"">
+            <div className="mb-10 flex items-end justify-between gap-4 border-b border-brun/10 pb-6">
               <div>
-                <span className=""text-[10px] uppercase tracking-[0.4em] text-or font-bold block mb-2"">Lumière</span>
-                <h2 className=""font-playfair text-3xl md:text-4xl font-black text-noir"">Luminaires sacrés</h2>
+                <span className="text-[10px] uppercase tracking-[0.4em] text-or font-bold block mb-2">Lumière</span>
+                <h2 className="font-playfair text-3xl md:text-4xl font-black text-noir">Luminaires sacrés</h2>
               </div>
-              <p className=""text-brun/40 text-xs uppercase tracking-widest text-right hidden md:block max-w-xs"">Des ombres sacrées sur vos murs</p>
+              <p className="text-brun/40 text-xs uppercase tracking-widest text-right hidden md:block max-w-xs">Des ombres sacrées sur vos murs</p>
             </div>
-            <div className=""grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { title: 'Suspension métal perforé', desc: 'Projette des ombres de vévés, ambiance unique et mémorable.', image: '/Led.png' },
                 { title: 'Lampe raphia tressé', desc: 'Abat-jour en fibres naturelles, lumière tamisée chaude.', image: '/Lanternes Cérémonielles.png' },
                 { title: 'Lanterne bronze', desc: 'Motifs géométriques découpés au laser, édition artisanale.', image: '/Lanternes Cérémonielles.png' },
                 { title: 'Bougeoir sculpté bois', desc: 'Bois massif béninois, formes symboliques ciselées.', image: '/Le Sentinelle.png' }
               ].map((s, i) => (
-                <div key={i} className=""group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500"">
-                  <div className=""aspect-video mb-5 rounded-2xl overflow-hidden"">
-                    <img src={s.image} alt={s.title} className=""w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"" />
+                <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
+                  <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
+                    <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
-                  <h3 className=""font-playfair text-xl font-bold text-noir mb-2"">{s.title}</h3>
-                  <p className=""text-brun/60 text-sm leading-relaxed"">{s.desc}</p>
+                  <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
+                  <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
                 </div>
               ))}
             </div>

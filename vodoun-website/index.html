@@ -2,15 +2,313 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/jpeg" href="/logo.jpeg" />
+    <link rel="apple-touch-icon" href="/logo.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vodoun Concept Store - Là où le sacré devient désirable</title>
+    <title>Vodoun Concept Store — Là où le sacré devient désirable</title>
+    <meta property="og:title" content="Vodoun Concept Store — Là où le sacré devient désirable" />
+    <meta property="og:description" content="Là où le sacré devient désirable. Concept store inspiré de la culture Vodoun." />
+    <meta property="og:image" content="/logo.jpeg" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Vodoun Concept Store — Là où le sacré devient désirable" />
+    <meta name="twitter:description" content="Là où le sacré devient désirable. Concept store inspiré de la culture Vodoun." />
+    <meta name="twitter:image" content="/logo.jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!--
+      ─────────────────────────────────────────────────────────────────
+      INLINE SPLASH SCREEN — s'affiche instantanément, avant tout JS.
+      Supprimé proprement par React au montage (voir script ci-dessous).
+      Aucune dépendance externe : tout est inline pour un affichage < 1 ms.
+      ─────────────────────────────────────────────────────────────────
+    -->
+    <style>
+      /* Reset minimal pour que le splash couvre exactement la fenêtre */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        height: 100%;
+        overflow: hidden; /* Évite tout flash de scroll pendant le splash */
+        background: #0A0705; /* Fond quasi-noir — identique au gradient du GlobalLoader */
+      }
+
+      /* ── Conteneur splash ─────────────────────────────────── */
+      #vodoun-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(160deg, #0A0705 0%, #1A1410 55%, #0D0B08 100%);
+        /* Transition de sortie déclenchée par JS */
+        transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+                    transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: opacity, transform;
+      }
+
+      /* État "en train de sortir" ajouté par JS */
+      #vodoun-splash.splash-exit {
+        opacity: 0;
+        transform: translateY(-14px);
+        pointer-events: none;
+      }
+
+      /* ── Halo doré ────────────────────────────────────────── */
+      #vodoun-splash .splash-halo {
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(184, 134, 11, 0.08) 0%,
+          rgba(184, 134, 11, 0.025) 45%,
+          transparent 70%
+        );
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+
+      /* ── Grain de texture ─────────────────────────────────── */
+      #vodoun-splash .splash-grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.028;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 200px 200px;
+        pointer-events: none;
+      }
+
+      /* ── Contenu central ──────────────────────────────────── */
+      #vodoun-splash .splash-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* ── Vévé SVG rotatif ─────────────────────────────────── */
+      #vodoun-splash .splash-veve {
+        margin-bottom: 20px;
+        animation: splash-spin 12s linear infinite;
+        will-change: transform;
+      }
+
+      @keyframes splash-spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+
+      /* ── Logotype (image) ─────────────────────────────────── */
+      #vodoun-splash .splash-logo {
+        max-height: clamp(60px, 14vw, 110px);
+        width: auto;
+        object-fit: contain;
+        animation: splash-breathe 2s ease-in-out infinite alternate;
+        filter: drop-shadow(0 0 10px rgba(184, 134, 11, 0.2));
+      }
+
+      @keyframes splash-breathe {
+        from { filter: drop-shadow(0 0 10px rgba(184, 134, 11, 0.2)); }
+        to   { filter: drop-shadow(0 0 32px rgba(184, 134, 11, 0.55)); }
+      }
+
+      /* ── Séparateur ───────────────────────────────────────── */
+      #vodoun-splash .splash-sep {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 14px 0;
+      }
+      #vodoun-splash .splash-sep-line {
+        width: 26px;
+        height: 1px;
+        background: rgba(184, 134, 11, 0.38);
+      }
+      #vodoun-splash .splash-sep-dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #B8860B;
+        opacity: 0.65;
+      }
+
+      /* ── Slogan ───────────────────────────────────────────── */
+      #vodoun-splash .splash-slogan {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-style: italic;
+        font-size: clamp(0.6rem, 1.6vw, 0.78rem);
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: rgba(210, 185, 142, 0.5);
+      }
+
+      /* ── Barre de progression ─────────────────────────────── */
+      #vodoun-splash .splash-bar-track {
+        margin-top: 28px;
+        width: clamp(110px, 18vw, 165px);
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        position: relative;
+        overflow: hidden;
+      }
+
+      #vodoun-splash .splash-bar-fill {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, #B8860B 0%, #D2B98E 55%, #B8860B 100%);
+        transform-origin: left center;
+        box-shadow: 0 0 10px rgba(184, 134, 11, 0.45);
+        animation: splash-progress 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      }
+
+      /* Progression organique : démarre vite, ralentit, plafonne à 90% */
+      @keyframes splash-progress {
+        0%   { transform: scaleX(0); }
+        30%  { transform: scaleX(0.55); }
+        60%  { transform: scaleX(0.78); }
+        85%  { transform: scaleX(0.88); }
+        100% { transform: scaleX(0.90); }
+      }
+
+      /* Shimmer sur la barre */
+      #vodoun-splash .splash-bar-shimmer {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.45) 50%,
+          transparent 100%
+        );
+        animation: splash-shimmer 1.7s ease-in-out infinite;
+      }
+
+      @keyframes splash-shimmer {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(220%); }
+      }
+    </style>
   </head>
+
   <body>
+    <!--
+      ─── SPLASH SCREEN ────────────────────────────────────────
+      Rendu immédiatement par le navigateur, sans attendre le JS.
+      Identique visuellement au GlobalLoader React.
+    -->
+    <div id="vodoun-splash" role="status" aria-label="Chargement de Vodoun Concept Store">
+      <div class="splash-halo"></div>
+      <div class="splash-grain"></div>
+
+      <div class="splash-inner">
+        <!-- Vévé SVG rotatif -->
+        <div class="splash-veve">
+          <svg width="52" height="52" viewBox="0 0 56 56" fill="none"
+               xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="28" cy="28" r="26" stroke="#B8860B" stroke-width="0.8" stroke-opacity="0.45"/>
+            <circle cx="28" cy="28" r="18" stroke="#B8860B" stroke-width="0.6" stroke-opacity="0.28"/>
+            <line x1="28" y1="2"  x2="28" y2="54" stroke="#B8860B" stroke-width="0.7" stroke-opacity="0.35"/>
+            <line x1="2"  y1="28" x2="54" y2="28" stroke="#B8860B" stroke-width="0.7" stroke-opacity="0.35"/>
+            <line x1="9.4"  y1="9.4"  x2="46.6" y2="46.6" stroke="#B8860B" stroke-width="0.5" stroke-opacity="0.2"/>
+            <line x1="46.6" y1="9.4"  x2="9.4"  y2="46.6" stroke="#B8860B" stroke-width="0.5" stroke-opacity="0.2"/>
+            <polygon points="28,14 38,28 28,42 18,28"
+              stroke="#B8860B" stroke-width="0.9" stroke-opacity="0.55" fill="none"/>
+            <rect x="22" y="22" width="12" height="12"
+              stroke="#B8860B" stroke-width="0.8" stroke-opacity="0.45"
+              fill="rgba(184,134,11,0.05)" transform="rotate(45 28 28)"/>
+            <circle cx="28" cy="28" r="2.5" fill="#B8860B" fill-opacity="0.65"/>
+            <circle cx="28" cy="4"  r="1.2" fill="#B8860B" fill-opacity="0.45"/>
+            <circle cx="28" cy="52" r="1.2" fill="#B8860B" fill-opacity="0.45"/>
+            <circle cx="4"  cy="28" r="1.2" fill="#B8860B" fill-opacity="0.45"/>
+            <circle cx="52" cy="28" r="1.2" fill="#B8860B" fill-opacity="0.45"/>
+          </svg>
+        </div>
+
+        <!-- Logo -->
+        <img src="/logo.jpeg" alt="Vodoun Concept Store" class="splash-logo" />
+
+        <!-- Séparateur -->
+        <div class="splash-sep">
+          <span class="splash-sep-line"></span>
+          <span class="splash-sep-dot"></span>
+          <span class="splash-sep-line"></span>
+        </div>
+
+        <!-- Slogan -->
+        <span class="splash-slogan">Là où le sacré devient désirable</span>
+
+        <!-- Barre de progression -->
+        <div class="splash-bar-track">
+          <div class="splash-bar-fill"></div>
+          <div class="splash-bar-shimmer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Point de montage React -->
     <div id="root"></div>
+
+    <!--
+      ─── SCRIPT DE SUPPRESSION DU SPLASH ──────────────────────
+      Dès que React a rendu son premier arbre, on déclenche la sortie
+      du splash via CSS transition puis on le retire du DOM.
+      Utilise MutationObserver pour détecter le premier enfant de #root.
+    -->
+    <script>
+      (function () {
+        var splash = document.getElementById('vodoun-splash');
+        if (!splash) return;
+
+        function removeSplash() {
+          // Rend le body scrollable
+          document.body.style.overflow = '';
+
+          // Animation de sortie CSS
+          splash.classList.add('splash-exit');
+
+          // Retire du DOM après la transition (550 ms)
+          setTimeout(function () {
+            if (splash && splash.parentNode) {
+              splash.parentNode.removeChild(splash);
+            }
+          }, 580);
+        }
+
+        // Observe les mutations sur #root — dès qu'un enfant est ajouté,
+        // React a monté son premier composant.
+        var root = document.getElementById('root');
+        if (!root) { removeSplash(); return; }
+
+        var observer = new MutationObserver(function (mutations) {
+          for (var i = 0; i < mutations.length; i++) {
+            if (mutations[i].addedNodes.length > 0) {
+              observer.disconnect();
+              // Petit délai pour laisser React finir le premier paint
+              setTimeout(removeSplash, 120);
+              return;
+            }
+          }
+        });
+
+        observer.observe(root, { childList: true });
+
+        // Sécurité : retire le splash au bout de 8 s quoi qu'il arrive
+        setTimeout(function () {
+          observer.disconnect();
+          removeSplash();
+        }, 8000);
+      })();
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -2,6 +2,9 @@
 import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../context/LanguageContext';
+import fr from '../i18n/fr';
+import en from '../i18n/en';
 
 export default function Navbar({ currentPath }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -9,15 +12,17 @@ export default function Navbar({ currentPath }) {
   const navRef = useRef(null);
   const location = useLocation();
   const { currency, setCurrency, SYMBOLS } = useCurrency();
+  const { lang, toggleLang } = useLanguage();
+  const t = lang === 'fr' ? fr : en;
 
   const navLinks = [
-    { name: 'Accueil', path: '/accueil' },
-    { name: 'Collections', path: '/boutique' },
-    { name: 'Panthéon', path: '/pantheon' },
-    { name: 'Projets Pros', path: '/projets-pro' },
-    { name: 'La Marque', path: '/a-propos' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Suivi de Commande', path: '/compte' },
+    { name: t.nav.home, path: '/accueil' },
+    { name: t.nav.collections, path: '/boutique' },
+    { name: t.nav.pantheon, path: '/pantheon' },
+    { name: t.nav.projects, path: '/projets-pro' },
+    { name: t.nav.about, path: '/a-propos' },
+    { name: t.nav.contact, path: '/contact' },
+    { name: t.nav.tracking, path: '/compte' },
   ];
 
   useEffect(() => {
@@ -43,9 +48,14 @@ export default function Navbar({ currentPath }) {
         <div className="flex items-center justify-between">
           <a
             href="/accueil"
-            className="font-playfair text-2xl md:text-3xl font-black text-or cursor-pointer tracking-[0.2em] transform hover:scale-105 transition-transform duration-500 uppercase"
+            className="cursor-pointer transform hover:scale-105 transition-transform duration-500 flex items-center"
+            aria-label="Vodoun Concept Store — Accueil"
           >
-            VODUN
+            <img
+              src="/logo.jpeg"
+              alt="Vodoun Concept Store"
+              style={{ height: 'clamp(36px, 5vw, 52px)', width: 'auto', objectFit: 'contain' }}
+            />
           </a>
 
           {/* Desktop Liquid Glass Menu */}
@@ -73,7 +83,19 @@ export default function Navbar({ currentPath }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            {/* Language Toggle Desktop */}
+            <button
+              onClick={toggleLang}
+              className="hidden lg:flex items-center gap-1 font-black text-[0.6rem] uppercase tracking-widest border border-ivoire/20 rounded-full px-3 py-1.5 transition-all duration-300 hover:border-or hover:text-or"
+              style={{ color: '#D2B98E' }}
+              aria-label="Toggle language"
+            >
+              <span className={lang === 'fr' ? 'text-or' : 'text-ivoire/40'}>FR</span>
+              <span className="text-ivoire/20 mx-0.5">|</span>
+              <span className={lang === 'en' ? 'text-or' : 'text-ivoire/40'}>EN</span>
+            </button>
+
             {/* Currency Selector Desktop */}
             <div className="relative group hidden lg:block">
               <button className="flex items-center gap-1 font-black text-sm text-or uppercase tracking-widest">
@@ -109,8 +131,18 @@ export default function Navbar({ currentPath }) {
       {isMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-noir border-t border-ivoire/10 z-40">
           <div className="max-w-7xl mx-auto px-[5vw] py-12">
-            {/* Currency */}
-            <div className="flex gap-6 mb-8 pb-6 border-b border-ivoire/10">
+            {/* Language + Currency Row */}
+            <div className="flex items-center gap-6 mb-8 pb-6 border-b border-ivoire/10">
+              {/* Language Toggle Mobile */}
+              <button
+                onClick={toggleLang}
+                className="flex items-center gap-1 font-black text-xs uppercase tracking-widest border border-ivoire/20 rounded-full px-3 py-1.5"
+              >
+                <span className={lang === 'fr' ? 'text-or' : 'text-ivoire/40'}>FR</span>
+                <span className="text-ivoire/20 mx-0.5">|</span>
+                <span className={lang === 'en' ? 'text-or' : 'text-ivoire/40'}>EN</span>
+              </button>
+              {/* Currency Buttons */}
               {Object.keys(SYMBOLS).map((c) => (
                 <button
                   key={c}
