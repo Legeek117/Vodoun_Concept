@@ -224,7 +224,20 @@ export default function CinematicEntrance() {
     <div className="relative bg-[#1A1410]">
       {(isLoading || !isStarted) && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0A0705]">
-          <div className="mb-12 relative text-center flex flex-col items-center">
+
+          {/* Galaxie en fond de l'écran de chargement */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none">
+            <Canvas
+              camera={{ position: [0, 0, 5], fov: 75 }}
+              style={{ background: 'transparent' }}
+            >
+              <Suspense fallback={null}>
+                <EntranceGalaxy />
+              </Suspense>
+            </Canvas>
+          </div>
+
+          <div className="mb-12 relative text-center flex flex-col items-center z-10">
             <div className="px-12 py-10 bg-black/40 backdrop-blur-xl border border-white/5 rounded-none shadow-[0_0_50px_rgba(0,0,0,0.8)]">
               <span className="text-[#D2B98E] font-playfair text-[12vw] md:text-[8vw] font-black tracking-tighter uppercase leading-[0.8] block opacity-30 blur-xl absolute inset-0">
                 VODUN<br /><span className="text-[0.4em] tracking-[0.4em]">CONCEPT STORE</span>
@@ -236,7 +249,7 @@ export default function CinematicEntrance() {
           </div>
 
           {loadProgress < 10 ? (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center z-10 relative">
               <div className="w-64 md:w-80 h-[1px] bg-white/5 relative overflow-hidden mb-6">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#D2B98E] to-transparent transition-all duration-300 ease-out"
                   style={{ width: `${loadProgress * 10}%` }} />
@@ -246,7 +259,7 @@ export default function CinematicEntrance() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-6 z-10 relative">
               <button
                 onClick={() => {
                   playSound();
@@ -278,18 +291,6 @@ export default function CinematicEntrance() {
         <canvas ref={canvasRef} className="w-full h-full object-cover opacity-100"
           style={{ filter: 'contrast(1.1) brightness(0.8)' }} />
         <div className="absolute inset-0 bg-gradient-to-b from-[#1A1410]/20 via-transparent to-[#1A1410]/60" />
-      </div>
-
-      {/* Galaxie 3D - Effet subtil et élégant */}
-      <div className="fixed inset-0 w-full h-full z-[5] pointer-events-none">
-        <Canvas
-          camera={{ position: [0, 0, 5], fov: 75 }}
-          style={{ background: 'transparent' }}
-        >
-          <Suspense fallback={null}>
-            <EntranceGalaxy />
-          </Suspense>
-        </Canvas>
       </div>
 
       <div className="transition-overlay fixed inset-0 bg-[#0A0705] opacity-0 pointer-events-none z-[90]" />

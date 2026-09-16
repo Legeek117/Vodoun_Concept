@@ -2,17 +2,18 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-// Configuration légère et élégante pour CinematicEntrance
+// Configuration visuellement percutante sur fond noir #0A0705
 const GALAXY_CONFIG = {
-    count: 8000,          // Beaucoup moins de particules (vs 30000)
-    size: 0.04,           // Particules plus petites
-    radius: 10,           // Rayon de la galaxie
-    branches: 3,          // 3 branches pour fluidité
-    spin: 0.8,            // Rotation modérée
-    randomness: 0.3,      // Moins de chaos
-    randomnessPower: 2,   // Distribution plus douce
-    insideColor: '#D2B98E',  // Or Vodun
-    outsideColor: '#2A1F1A', // Marron foncé
+    count: 10000,
+    size: 0.05,
+    radius: 9,
+    branches: 3,
+    spin: 0.9,
+    randomness: 0.35,
+    randomnessPower: 2,
+    insideColor: '#D2B98E',   // Or Vodun — centre lumineux
+    midColor: '#C8973A',      // Ambre doré — milieu
+    outsideColor: '#3D2B0A',  // Brun très sombre — bords
 };
 
 export default function EntranceGalaxy() {
@@ -24,29 +25,34 @@ export default function EntranceGalaxy() {
         const colors = new Float32Array(cfg.count * 3);
 
         const colorInside = new THREE.Color(cfg.insideColor);
+        const colorMid = new THREE.Color(cfg.midColor);
         const colorOutside = new THREE.Color(cfg.outsideColor);
 
         for (let i = 0; i < cfg.count; i++) {
             const i3 = i * 3;
 
-            // Position
             const radius = Math.random() * cfg.radius;
             const spinAngle = radius * cfg.spin;
             const branchAngle = ((i % cfg.branches) / cfg.branches) * Math.PI * 2;
 
-            // Randomness douce
             const randomX = Math.pow(Math.random(), cfg.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * cfg.randomness * radius;
-            const randomY = Math.pow(Math.random(), cfg.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * cfg.randomness * radius * 0.3; // Galaxie aplatie
+            const randomY = Math.pow(Math.random(), cfg.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * cfg.randomness * radius * 0.25;
             const randomZ = Math.pow(Math.random(), cfg.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * cfg.randomness * radius;
 
-            positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+            positions[i3]     = Math.cos(branchAngle + spinAngle) * radius + randomX;
             positions[i3 + 1] = randomY;
             positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
 
-            // Couleur : transition or → marron foncé
-            const mixedColor = colorInside.clone().lerp(colorOutside, radius / cfg.radius);
+            // Gradient 3 couleurs : or → ambre → brun
+            const t = radius / cfg.radius;
+            let mixedColor;
+            if (t < 0.5) {
+                mixedColor = colorInside.clone().lerp(colorMid, t * 2);
+            } else {
+                mixedColor = colorMid.clone().lerp(colorOutside, (t - 0.5) * 2);
+            }
 
-            colors[i3] = mixedColor.r;
+            colors[i3]     = mixedColor.r;
             colors[i3 + 1] = mixedColor.g;
             colors[i3 + 2] = mixedColor.b;
         }
@@ -56,17 +62,14 @@ export default function EntranceGalaxy() {
 
     useFrame((state, delta) => {
         if (pointsRef.current) {
-            // Rotation très lente et fluide
-            pointsRef.current.rotation.y += delta * 0.03;
-            
-            // Oscillation subtile pour effet vivant
-            pointsRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.08;
-            pointsRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.2) * 0.04;
+            pointsRef.current.rotation.y += delta * 0.04;
+            pointsRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.25) * 0.1;
+            pointsRef.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.18) * 0.05;
         }
     });
 
     return (
-        <points ref={pointsRef} position={[0, 0, -8]} rotation={[0.3, 0, 0]}>
+        <points ref={pointsRef} position={[0, -1, -6]} rotation={[0.35, 0, 0]}>
             <bufferGeometry>
                 <bufferAttribute
                     attach="attributes-position"
@@ -88,7 +91,7 @@ export default function EntranceGalaxy() {
                 blending={THREE.AdditiveBlending}
                 vertexColors={true}
                 transparent={true}
-                opacity={0.5}  // Plus transparent pour rester subtil
+                opacity={0.85}
             />
         </points>
     );
