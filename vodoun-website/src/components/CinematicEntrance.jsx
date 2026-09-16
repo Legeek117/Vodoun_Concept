@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import ScrollToPlugin from 'gsap/ScrollToPlugin';
 import Lenis from '@studio-freight/lenis';
+import { Canvas } from '@react-three/fiber';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 import { useSound } from '../context/SoundContext';
 import { useLanguage } from '../context/LanguageContext';
 import usePageMeta from '../hooks/usePageMeta';
+import EntranceGalaxy from './EntranceGalaxy';
 
 const FRAME_COUNT = 193;
 const FRAME_SPEED = 2.0;
@@ -276,6 +278,18 @@ export default function CinematicEntrance() {
         <canvas ref={canvasRef} className="w-full h-full object-cover opacity-100"
           style={{ filter: 'contrast(1.1) brightness(0.8)' }} />
         <div className="absolute inset-0 bg-gradient-to-b from-[#1A1410]/20 via-transparent to-[#1A1410]/60" />
+      </div>
+
+      {/* Galaxie 3D - Effet subtil et élégant */}
+      <div className="fixed inset-0 w-full h-full z-[5] pointer-events-none">
+        <Canvas
+          camera={{ position: [0, 0, 5], fov: 75 }}
+          style={{ background: 'transparent' }}
+        >
+          <Suspense fallback={null}>
+            <EntranceGalaxy />
+          </Suspense>
+        </Canvas>
       </div>
 
       <div className="transition-overlay fixed inset-0 bg-[#0A0705] opacity-0 pointer-events-none z-[90]" />
