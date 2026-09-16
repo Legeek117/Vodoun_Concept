@@ -8,6 +8,7 @@ import Lenis from '@studio-freight/lenis';
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 import { useSound } from '../context/SoundContext';
+import { useLanguage } from '../context/LanguageContext';
 import usePageMeta from '../hooks/usePageMeta';
 
 const FRAME_COUNT = 193;
@@ -16,6 +17,7 @@ const FRAME_SPEED = 2.0;
 export default function CinematicEntrance() {
   const navigate = useNavigate();
   const { playSound } = useSound();
+  const { lang } = useLanguage();
   const canvasRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const framesRef = useRef([]);
@@ -25,9 +27,36 @@ export default function CinematicEntrance() {
   const [currentFrame, setCurrentFrame] = useState(0);
 
   usePageMeta({
-    title: 'Initiation',
-    description: 'Entrez dans l\'univers Vodun Concept Store. Une expérience cinématique vous attend : héritage ancestral, luxe contemporain et éveil du temple intérieur.',
+    title: lang === 'fr' ? 'Initiation' : 'Initiation',
+    description: lang === 'fr' 
+      ? 'Entrez dans l\'univers Vodun Concept Store. Une expérience cinématique vous attend : héritage ancestral, luxe contemporain et éveil du temple intérieur.'
+      : 'Enter the Vodun Concept Store universe. A cinematic experience awaits you: ancestral heritage, contemporary luxury and awakening of the inner temple.',
   });
+
+  const t = {
+    initiation: lang === 'fr' ? 'INITIATION' : 'INITIATION',
+    discover: lang === 'fr' ? 'DÉCOUVRIR' : 'DISCOVER',
+    skip: lang === 'fr' ? 'PASSER L\'INITIATION' : 'SKIP INITIATION',
+    welcome: lang === 'fr' ? 'Bienvenue' : 'Welcome',
+    welcomeTitle: lang === 'fr' ? 'BIENVENUE AU' : 'WELCOME TO',
+    storeTitle: 'VODUN CONCEPT STORE',
+    subtitle: lang === 'fr' ? 'Découvrez le temple du sacré' : 'Discover the temple of the sacred',
+    heritage: lang === 'fr' ? 'Héritage' : 'Heritage',
+    heritageTitle: lang === 'fr' ? 'HÉRITAGE\nANCESTRAL' : 'ANCESTRAL\nHERITAGE',
+    heritageText: lang === 'fr' 
+      ? 'Chaque objet raconte une histoire séculaire, portée par le souffle des ancêtres.'
+      : 'Each object tells a centuries-old story, carried by the breath of the ancestors.',
+    design: lang === 'fr' ? 'Design' : 'Design',
+    luxuryTitle: lang === 'fr' ? 'LUXE' : 'LUXURY',
+    contemporary: lang === 'fr' ? 'CONTEMPORAIN' : 'CONTEMPORARY',
+    luxuryText: lang === 'fr'
+      ? 'Une vision résolument moderne où le design rencontre la puissance des symboles.'
+      : 'A resolutely modern vision where design meets the power of symbols.',
+    signature: lang === 'fr' ? 'Signature' : 'Signature',
+    awakeningTitle: lang === 'fr' ? 'L\'ÉVEIL DU' : 'AWAKENING OF THE',
+    innerTemple: lang === 'fr' ? 'TEMPLE INTÉRIEUR' : 'INNER TEMPLE',
+    scrollToEnter: lang === 'fr' ? 'Scrollez pour entrer' : 'Scroll to enter',
+  };
 
   // Preload frames
   useEffect(() => {
@@ -211,7 +240,7 @@ export default function CinematicEntrance() {
                   style={{ width: `${loadProgress * 10}%` }} />
               </div>
               <div className="flex justify-center w-80 text-[10px] uppercase tracking-[0.5em] font-bold text-[#D2B98E]/60 font-playfair">
-                <span>INITIATION... {loadProgress}/10</span>
+                <span>{t.initiation}... {loadProgress}/10</span>
               </div>
             </div>
           ) : (
@@ -226,7 +255,7 @@ export default function CinematicEntrance() {
               >
                 <div className="absolute inset-x-0 inset-y-0 bg-[#D2B98E]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <span className="relative z-10 text-white text-xs md:text-sm uppercase tracking-[0.6em] font-bold transition-colors">
-                  DÉCOUVRIR
+                  {t.discover}
                 </span>
               </button>
               <button
@@ -236,7 +265,7 @@ export default function CinematicEntrance() {
                 }}
                 className="text-white/40 hover:text-white text-[10px] uppercase tracking-[0.4em] transition-colors duration-300"
               >
-                PASSER L'INITIATION
+                {t.skip}
               </button>
             </div>
           )}
@@ -252,53 +281,57 @@ export default function CinematicEntrance() {
       <div className="transition-overlay fixed inset-0 bg-[#0A0705] opacity-0 pointer-events-none z-[90]" />
 
       <div ref={scrollContainerRef} className="relative h-[900vh] z-50">
+        {/* Section 1 - Welcome - Centrée */}
         <section className="scroll-section fixed inset-0 flex items-center justify-center pointer-events-none px-6">
           <div className="text-center w-full max-w-7xl flex flex-col items-center">
             <div className="bg-[#1A1410]/60 backdrop-blur-md border border-white/10 py-12 px-8 md:px-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-              <span className="section-label mb-8">Bienvenue</span>
-              <h1 className="editorial-heading text-white">WELCOME TO<br /><span className="text-[#D2B98E]">VODUN CONCEPT STORE</span></h1>
-              <p className="font-playfair text-xl mt-10 text-white/60 tracking-[0.3em] uppercase">Découvrez le temple du sacré</p>
+              <span className="section-label mb-8">{t.welcome}</span>
+              <h1 className="editorial-heading text-white">{t.welcomeTitle}<br /><span className="text-[#D2B98E]">{t.storeTitle}</span></h1>
+              <p className="font-playfair text-xl mt-10 text-white/60 tracking-[0.3em] uppercase">{t.subtitle}</p>
             </div>
           </div>
         </section>
 
-        <section className="scroll-section fixed inset-0 flex flex-col justify-center pointer-events-none px-[5vw] lg:pl-[8vw] lg:pr-[55vw]">
-          <div className="w-full">
-            <div className="bg-[#1A1410]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-              <span className="section-label mb-6">Héritage</span>
-              <h2 className="font-playfair text-[clamp(2.5rem,6vw,8rem)] font-black leading-[0.95] text-white uppercase mb-8">
-                HÉRITAGE<br />ANCESTRAL
+        {/* Section 2 - Héritage Ancestral - Centrée */}
+        <section className="scroll-section fixed inset-0 flex items-center justify-center pointer-events-none px-6">
+          <div className="w-full max-w-5xl flex flex-col items-center">
+            <div className="bg-[#1A1410]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-full">
+              <span className="section-label mb-6 text-center block">{t.heritage}</span>
+              <h2 className="font-playfair text-[clamp(2.5rem,6vw,8rem)] font-black leading-[0.95] text-white uppercase mb-8 text-center whitespace-pre-line">
+                {t.heritageTitle}
               </h2>
-              <p className="font-playfair text-xl md:text-2xl text-white/80 leading-relaxed max-w-xl">
-                Chaque objet raconte une histoire séculaire, portée par le souffle des ancêtres.
+              <p className="font-playfair text-xl md:text-2xl text-white/80 leading-relaxed text-center mx-auto max-w-2xl">
+                {t.heritageText}
               </p>
             </div>
           </div>
         </section>
 
-        <section className="scroll-section fixed inset-0 flex flex-col justify-center items-end pointer-events-none px-[5vw] lg:pr-[8vw] lg:pl-[55vw] text-right">
-          <div className="w-full text-right flex flex-col items-end">
-            <div className="bg-[#1A1410]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] inline-block">
-              <span className="section-label mb-6">Design</span>
-              <h2 className="font-playfair text-[clamp(2.5rem,6vw,8rem)] font-black leading-[0.95] text-white uppercase mb-8">
-                LUXE<br /><span className="text-[#D2B98E]">CONTEMPORAIN</span>
+        {/* Section 3 - Luxe Contemporain - Centrée */}
+        <section className="scroll-section fixed inset-0 flex items-center justify-center pointer-events-none px-6">
+          <div className="w-full max-w-5xl flex flex-col items-center">
+            <div className="bg-[#1A1410]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-full">
+              <span className="section-label mb-6 text-center block">{t.design}</span>
+              <h2 className="font-playfair text-[clamp(2.5rem,6vw,8rem)] font-black leading-[0.95] text-white uppercase mb-8 text-center">
+                {t.luxuryTitle}<br /><span className="text-[#D2B98E]">{t.contemporary}</span>
               </h2>
-              <p className="font-playfair text-xl md:text-2xl text-white/80 leading-relaxed max-w-xl ml-auto">
-                Une vision résolument moderne où le design rencontre la puissance des symboles.
+              <p className="font-playfair text-xl md:text-2xl text-white/80 leading-relaxed text-center mx-auto max-w-2xl">
+                {t.luxuryText}
               </p>
             </div>
           </div>
         </section>
 
+        {/* Section 4 - Temple Intérieur - Centrée */}
         <section className="scroll-section fixed inset-0 flex items-center justify-center pointer-events-none px-6">
           <div className="text-center w-full max-w-5xl flex flex-col items-center">
             <div className="bg-[#1A1410]/60 backdrop-blur-md border border-white/10 py-12 px-8 md:px-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-              <span className="section-label mb-8">Signature</span>
-              <h2 className="font-playfair text-[clamp(2.5rem,5vw,7rem)] font-black leading-none text-white uppercase mb-12">
-                L'ÉVEIL DU<br /><span className="text-[#D2B98E]">TEMPLE INTÉRIEUR</span>
+              <span className="section-label mb-8">{t.signature}</span>
+              <h2 className="font-playfair text-[clamp(2.5rem,5vw,7rem)] font-black leading-none text-white uppercase mb-12 whitespace-pre-line">
+                {t.awakeningTitle}<br /><span className="text-[#D2B98E]">{t.innerTemple}</span>
               </h2>
               <div className="mt-12 flex justify-center items-center flex-col gap-4">
-                <span className="text-[10px] uppercase tracking-[0.5em] text-white/40">Scrollez pour entrer</span>
+                <span className="text-[10px] uppercase tracking-[0.5em] text-white/40">{t.scrollToEnter}</span>
                 <div className="w-px h-16 bg-gradient-to-b from-[#D2B98E] to-transparent animate-pulse" />
               </div>
             </div>
