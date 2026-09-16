@@ -16,6 +16,10 @@ import EntranceGalaxy from './EntranceGalaxy';
 const FRAME_COUNT = 193;
 const FRAME_SPEED = 2.0;
 
+// Précharge le chunk /accueil en arrière-plan dès que CinematicEntrance monte
+// → évite l'apparition du GlobalLoader après la transition
+const preloadAccueil = () => import('../App');
+
 export default function CinematicEntrance() {
   const navigate = useNavigate();
   const { playSound } = useSound();
@@ -59,6 +63,13 @@ export default function CinematicEntrance() {
     innerTemple: lang === 'fr' ? 'TEMPLE INTÉRIEUR' : 'INNER TEMPLE',
     scrollToEnter: lang === 'fr' ? 'Scrollez pour entrer' : 'Scroll to enter',
   };
+
+  // Précharge le chunk App (/accueil) pendant le chargement des frames
+  // pour qu'il soit disponible au moment de navigate('/accueil')
+  // et éviter ainsi l'apparition du GlobalLoader
+  useEffect(() => {
+    preloadAccueil();
+  }, []);
 
   // Preload frames
   useEffect(() => {
