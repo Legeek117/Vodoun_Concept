@@ -237,7 +237,7 @@ export default function CinematicEntrance() {
             </Canvas>
           </div>
 
-          <div className="mb-12 relative text-center flex flex-col items-center z-10">
+          <div className="mb-6 relative text-center flex flex-col items-center z-10">
             <div className="px-12 py-10 bg-black/40 backdrop-blur-xl border border-white/5 rounded-none shadow-[0_0_50px_rgba(0,0,0,0.8)]">
               <span className="text-[#D2B98E] font-playfair text-[12vw] md:text-[8vw] font-black tracking-tighter uppercase leading-[0.8] block opacity-30 blur-xl absolute inset-0">
                 VODUN<br /><span className="text-[0.4em] tracking-[0.4em]">CONCEPT STORE</span>
@@ -259,17 +259,17 @@ export default function CinematicEntrance() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-6 z-10 relative">
+            <div className="flex flex-col items-center gap-5 z-10 relative">
               <button
                 onClick={() => {
                   playSound();
                   setIsStarted(true);
                   setIsLoading(false);
                 }}
-                className="group relative px-12 py-6 border border-white/20 overflow-hidden transition-all duration-700 hover:border-[#D2B98E] shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-md"
+                className="group relative px-12 py-6 border border-white/30 overflow-hidden transition-all duration-700 hover:border-[#D2B98E] shadow-[0_0_40px_rgba(0,0,0,0.8)] bg-black/70 backdrop-blur-md"
               >
                 <div className="absolute inset-x-0 inset-y-0 bg-[#D2B98E]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="relative z-10 text-white text-xs md:text-sm uppercase tracking-[0.6em] font-bold transition-colors">
+                <span className="relative z-10 text-white text-xs md:text-sm uppercase tracking-[0.6em] font-bold transition-colors drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
                   {t.discover}
                 </span>
               </button>
@@ -278,9 +278,12 @@ export default function CinematicEntrance() {
                   playSound();
                   handleTransition();
                 }}
-                className="text-white/40 hover:text-white text-[10px] uppercase tracking-[0.4em] transition-colors duration-300"
+                className="relative text-white/70 hover:text-[#D2B98E] text-[11px] uppercase tracking-[0.45em] font-semibold transition-colors duration-300 px-4 py-2"
+                style={{ textShadow: '0 0 12px rgba(0,0,0,1), 0 0 24px rgba(0,0,0,1), 0 2px 4px rgba(0,0,0,1)' }}
               >
-                {t.skip}
+                <span className="relative z-10">{t.skip}</span>
+                {/* Fond sombre derrière le texte pour lisibilité garantie */}
+                <span className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-sm -z-0" />
               </button>
             </div>
           )}
