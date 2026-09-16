@@ -1,53 +1,59 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, Component } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import * as THREE from 'three';
 
-export default function MasqueScene({ visible = false, phase = 0 }) {
-  const meshRef     = useRef(null);
-  const glowRef     = useRef(null);
-  const lightRef    = useRef(null);
-  const texture     = useLoader(TextureLoader, '/masque.png');
+/* ─── ErrorBoundary pour isoler le crash texture ─── */
+export class MasqueErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { crashed: false }; }
+  static getDerivedStateFromError() { return { crashed: true }; }
+  render() {
+    if (this.state.crashed) return null; // Phase masque silencieusement skippée
+    return this.props.children;
+  }
+}
+
+/**
+ * MasqueSceneInner — chargement texture dans un sous-composant
+ * monté UNIQUEMENT quand visible=true (via condition dans MasqueScene)
+ * → useLoader ne s'exécute jamais si le masque n'est pas encore en scène
+ */
+function MasqueSceneInner() {
+  const meshRef  = useRef(null);
+  const glowRef  = useRef(null);
+  const lightRef = useRef(null);
+
+  // useLoader lance une Suspense exception si la texture n'est pas prête
+  // → le Suspense parent affiche null le temps du chargement
+  const texture = useLoader(TextureLoader, '/masque.png');
 
   useEffect(() => {
     if (texture) {
-      // Enlever l'aliasing
       texture.minFilter = THREE.LinearFilter;
       texture.magFilter = THREE.LinearFilter;
     }
   }, [texture]);
 
   useFrame((state) => {
-    if (!meshRef.current || !visible) return;
+    if (!meshRef.current) return;
     const t = state.clock.elapsedTime;
-
-    // Rotation douce — léger rocking gauche/droite
     meshRef.current.rotation.y = Math.sin(t * 0.5) * 0.25;
     meshRef.current.rotation.x = Math.sin(t * 0.3) * 0.05;
-
-    // Légère flottaison verticale
     meshRef.current.position.y = Math.sin(t * 0.7) * 0.08;
 
-    // Halo pulsant
     if (glowRef.current) {
       const pulse = 0.85 + Math.sin(t * 1.8) * 0.15;
-      glowRef.current.material.opacity = 0.18 * pulse * (phase > 0 ? 1 : 0);
+      glowRef.current.material.opacity = 0.18 * pulse;
     }
-
-    // Lumière dorée pulsante
     if (lightRef.current) {
       lightRef.current.intensity = 1.2 + Math.sin(t * 2) * 0.4;
     }
   });
 
-  if (!visible) return null;
-
   return (
     <group>
-      {/* Lumière ambiante chaude */}
       <ambientLight intensity={0.3} color="#3A2000" />
 
-      {/* Lumière dorée principale face au masque */}
       <pointLight
         ref={lightRef}
         position={[0, 0, 3]}
@@ -55,36 +61,19 @@ export default function MasqueScene({ visible = false, phase = 0 }) {
         intensity={1.5}
         distance={12}
       />
-
-      {/* Lumière de contour — arrière gauche */}
-      <pointLight
-        position={[-3, 1, -2]}
-        color="#FF6A00"
-        intensity={0.6}
-        distance={8}
-      />
-
-      {/* Lumière de contour — arrière droit */}
-      <pointLight
-        position={[3, -1, -2]}
-        color="#C8860A"
-        intensity={0.4}
-        distance={8}
-      />
+      <pointLight position={[-3, 1, -2]} color="#FF6A00" intensity={0.6} distance={8} />
+      <pointLight position={[3, -1, -2]} color="#C8860A" intensity={0.4} distance={8} />
 
       {/* Halo doré derrière le masque */}
       <mesh ref={glowRef} position={[0, 0, -0.5]}>
         <circleGeometry args={[2.2, 64]} />
         <meshBasicMaterial
-          color="#D2A84E"
-          transparent
-          opacity={0}
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
+          color="#D2A84E" transparent opacity={0}
+          depthWrite={false} blending={THREE.AdditiveBlending}
         />
       </mesh>
 
-      {/* Masque — PlaneGeometry avec texture photo */}
+      {/* Masque avec suppression fond blanc via shader */}
       <mesh ref={meshRef} position={[0, 0, 0]}>
         <planeGeometry args={[3.2, 4.0, 32, 32]} />
         <meshStandardMaterial
@@ -93,13 +82,10 @@ export default function MasqueScene({ visible = false, phase = 0 }) {
           alphaTest={0.05}
           roughness={0.7}
           metalness={0.2}
-          // mix-blend-mode equivalent : supprimer le blanc via alphaMap
-          // Le fond blanc sera masqué en comparant la luminosité
           onBeforeCompile={(shader) => {
             shader.fragmentShader = shader.fragmentShader.replace(
               '#include <alphatest_fragment>',
               `
-              // Supprimer le fond blanc : pixels très clairs → transparents
               float luminance = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
               if (luminance > 0.88) {
                 diffuseColor.a = 1.0 - smoothstep(0.85, 0.98, luminance);
@@ -111,14 +97,28 @@ export default function MasqueScene({ visible = false, phase = 0 }) {
         />
       </mesh>
 
-      {/* Particules dorées qui orbitent autour du masque */}
-      <OrbitalParticles visible={visible} />
+      <OrbitalParticles />
     </group>
   );
 }
 
-function OrbitalParticles({ visible }) {
-  const ref = useRef(null);
+/* ─── Composant principal — ne monte l'inner QUE si visible ─── */
+export default function MasqueScene({ visible = false }) {
+  // Ne rien rendre si pas visible → useLoader jamais appelé au chargement initial
+  if (!visible) return null;
+
+  return (
+    // Suspense : pendant le chargement texture → null affiché
+    // ErrorBoundary : si masque.png absent → crash silencieux, pas de whitepage
+    <MasqueErrorBoundary>
+      <MasqueSceneInner />
+    </MasqueErrorBoundary>
+  );
+}
+
+/* ─── Particules orbitales ─── */
+function OrbitalParticles() {
+  const ref   = useRef(null);
   const count = 80;
 
   const { positions, colors } = (() => {
@@ -138,8 +138,7 @@ function OrbitalParticles({ visible }) {
   })();
 
   useFrame((state) => {
-    if (!ref.current || !visible) return;
-    ref.current.rotation.z = state.clock.elapsedTime * 0.15;
+    if (ref.current) ref.current.rotation.z = state.clock.elapsedTime * 0.15;
   });
 
   return (
@@ -149,13 +148,9 @@ function OrbitalParticles({ visible }) {
         <bufferAttribute attach="attributes-color"    count={count} array={colors}    itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.04}
-        sizeAttenuation
-        vertexColors
-        transparent
-        opacity={0.7}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        size={0.04} sizeAttenuation vertexColors
+        transparent opacity={0.7}
+        depthWrite={false} blending={THREE.AdditiveBlending}
       />
     </points>
   );

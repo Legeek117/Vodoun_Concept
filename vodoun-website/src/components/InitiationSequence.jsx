@@ -200,8 +200,10 @@ export default function InitiationSequence() {
             {/* Phase 0 : galaxie de fond */}
             {phase === 0 && <GalaxyBackground />}
 
-            {/* Phase 3 : masque */}
-            <MasqueScene visible={phase === 3 || phase === 4} phase={phase} />
+            {/* Phase 3 : masque — Suspense dédié pour le chargement texture */}
+            <Suspense fallback={null}>
+              <MasqueScene visible={phase === 3 || phase === 4} phase={phase} />
+            </Suspense>
           </Suspense>
         </Canvas>
       </div>
