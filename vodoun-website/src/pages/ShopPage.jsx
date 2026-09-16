@@ -1,17 +1,24 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import { ALL_PRODUCTS, COLLECTIONS } from '../store';
 import ProductCard from '../components/ProductCard';
+import usePageMeta from '../hooks/usePageMeta';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FRAME_COUNT = 313;
+const FRAME_COUNT = 193;
+const FRAME_OFFSET = 10;
 
 export default function ShopPage() {
   const { collectionId } = useParams();
   const [selected, setSelected] = useState(collectionId || 'all');
+
+  usePageMeta({
+    title: selected === 'all' ? 'Boutique' : `Boutique · ${COLLECTIONS.find(c => c.id === selected)?.name || selected}`,
+    description: 'Explorez toutes les collections Vodun Concept Store : mobilier d\'art, bijoux, mode, décorations festives et accessoires inspirés de la culture Vodun.',
+  });
   const canvasRef = useRef(null);
   const framesRef = useRef([]);
   const [isFirstFrameLoaded, setIsFirstFrameLoaded] = useState(false);
@@ -29,12 +36,11 @@ export default function ShopPage() {
 
   // Preload frames
   useEffect(() => {
-    let loadedCount = 0;
     const frames = [];
     const loadFrame = (index) => {
       return new Promise((resolve) => {
         const img = new Image();
-        const frameIndex = (index + 1).toString().padStart(4, '0');
+        const frameIndex = (index + FRAME_OFFSET).toString().padStart(4, '0');
 
         img.onload = () => {
           frames[index] = img;
@@ -44,7 +50,7 @@ export default function ShopPage() {
           resolve();
         };
 
-        img.src = `/frames/shop/frame_${frameIndex}.jpg`;
+        img.src = `/frames/coris/frame_${frameIndex}.jpg`;
       });
     };
 
@@ -175,7 +181,7 @@ export default function ShopPage() {
             </span>
           </h1>
           <p className="text-brun/80 text-sm md:text-lg max-w-xl mb-8 font-playfair font-medium leading-relaxed animate-hero">
-            Explorez nos collections sacrées, où chaque pièce raconte une part de l'héritage ancestral.
+            Explorez nos collections identitaires, où chaque pièce raconte une part de l'héritage ancestral.
           </p>
           <div ref={filtersRef} className="relative mt-8">
             {/* Desktop: Horizontal Scroll Liquid Glass */}
@@ -211,7 +217,7 @@ export default function ShopPage() {
                   >
                     Tous
                   </button>
-                  {COLLECTIONS.map((col) => (
+                  {COLLECTIONS.filter((col) => !col.deity).map((col) => (
                     <button
                       key={col.id}
                       onClick={() => setSelected(col.id)}
@@ -252,7 +258,7 @@ export default function ShopPage() {
                 >
                   Tous
                 </button>
-                {COLLECTIONS.map((col) => (
+                {COLLECTIONS.filter((col) => !col.deity).map((col) => (
                   <button
                     key={col.id}
                     onClick={() => setSelected(col.id)}
@@ -308,10 +314,10 @@ export default function ShopPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
             {/* Logo & Brand */}
             <div className="lg:col-span-1">
-              <a href="/accueil" aria-label="Vodoun Concept Store — Accueil">
+              <a href="/accueil" aria-label="Vodun Concept Store — Accueil">
                 <img
                   src="/logo.jpeg"
-                  alt="Vodoun Concept Store"
+                  alt="Vodun Concept Store"
                   style={{ height: 'clamp(50px, 8vw, 80px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
                 />
               </a>

@@ -1,8 +1,15 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import usePageMeta from '../hooks/usePageMeta';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// SEO metadata for B2B page
+const SEO_META = {
+  title: 'Projets Professionnels B2B · Vodun Concept Store',
+  description: 'Aménagements sur mesure pour hôtels, bureaux et espaces culturels. Mobilier, luminaires monumentaux et installations artisanales inspirés de la culture Vodun. Devis personnalisé.',
+};
 
 const HOTEL_SERVICES = [
   { title: 'Mobilier de salle', desc: 'Chaises, tables avec motifs vévés intégrés.', image: '/Mobilier Résidentiel.png' },
@@ -43,6 +50,8 @@ export default function B2BPage() {
   const glowRef = useRef(null);
   const sectionsRef = useRef([]);
   const cardRef = useRef(null);
+
+  usePageMeta(SEO_META);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -121,7 +130,7 @@ export default function B2BPage() {
               {HOTEL_SERVICES.map((s, i) => (
                 <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
                   <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
                   <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
@@ -142,7 +151,7 @@ export default function B2BPage() {
               {OFFICE_SERVICES.map((s, i) => (
                 <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
                   <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
                   <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
@@ -164,7 +173,7 @@ export default function B2BPage() {
                 <div key={i} className="group relative p-8 rounded-3xl overflow-hidden border border-brun/10 bg-white/40 hover:border-or/40 hover:shadow-xl transition-all duration-700">
                   <span className="absolute top-4 right-5 text-[9px] uppercase tracking-[0.35em] text-or/50 font-bold z-10">{item.tag}</span>
                   <div className="aspect-video mb-5 rounded-2xl overflow-hidden relative z-10">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   </div>
                   <h3 className="font-playfair text-2xl font-black text-noir mb-4 relative z-10">{item.name}</h3>
                   <p className="text-brun/60 text-sm leading-relaxed relative z-10">{item.desc}</p>
@@ -192,7 +201,7 @@ export default function B2BPage() {
               ].map((s, i) => (
                 <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
                   <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
                   <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
@@ -219,7 +228,7 @@ export default function B2BPage() {
               ].map((s, i) => (
                 <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
                   <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
                   <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
@@ -256,7 +265,7 @@ export default function B2BPage() {
                 <h2 className="font-playfair text-3xl md:text-4xl font-black text-noir leading-tight">Partagez votre vision, nous la concrétisons.</h2>
               </div>
               <p className="text-brun/60 text-base leading-relaxed font-playfair italic">
-                "Seule marque ancrée à Ouidah, berceau du Vodun, nous créons des espaces habités — du mobilier à l'installation lumineuse monumentale."
+                "Meilleure marque ancrée à Ouidah, berceau du Vodun, nous créons des espaces habités — du mobilier à l'installation lumineuse monumentale."
               </p>
             </div>
 
@@ -306,6 +315,7 @@ export default function B2BPage() {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </div>

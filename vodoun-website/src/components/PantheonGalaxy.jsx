@@ -2,23 +2,25 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+// Paramètres statiques déplacés hors du composant pour éviter
+// de recréer l'objet à chaque render (stabilise useMemo)
+const GALAXY_PARAMETERS = {
+    count: 30000,
+    size: 0.05,
+    radius: 12,
+    branches: 4,
+    spin: 1,
+    randomness: 0.5,
+    randomnessPower: 3,
+    insideColor: '#ff6030',
+    outsideColor: '#1b3984',
+};
+
 export default function PantheonGalaxy() {
     const pointsRef = useRef(null);
 
-    // Galaxy Parameters
-    const parameters = {
-        count: 30000,
-        size: 0.05,
-        radius: 12,
-        branches: 4,
-        spin: 1,
-        randomness: 0.5,
-        randomnessPower: 3,
-        insideColor: '#ff6030',
-        outsideColor: '#1b3984',
-    };
-
     const { positions, colors } = useMemo(() => {
+        const parameters = GALAXY_PARAMETERS;
         const positions = new Float32Array(parameters.count * 3);
         const colors = new Float32Array(parameters.count * 3);
 
@@ -51,7 +53,7 @@ export default function PantheonGalaxy() {
         }
 
         return { positions, colors };
-    }, [parameters]);
+    }, []);
 
     useFrame((state, delta) => {
         if (pointsRef.current) {
@@ -79,7 +81,7 @@ export default function PantheonGalaxy() {
                 />
             </bufferGeometry>
             <pointsMaterial
-                size={parameters.size}
+                size={GALAXY_PARAMETERS.size}
                 sizeAttenuation={true}
                 depthWrite={false}
                 blending={THREE.AdditiveBlending}

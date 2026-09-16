@@ -1,10 +1,12 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../store';
+import { useCurrency } from '../context/CurrencyContext';
 import gsap from 'gsap';
 
 export default function CartDrawer({ isOpen, onClose }) {
   const { cart, removeFromCart, updateQuantity, totalPrice, clearCart, totalItems } = useCart();
+  const { formatPrice } = useCurrency();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const drawerRef = useRef(null);
   const overlayRef = useRef(null);
@@ -145,7 +147,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                 >
                   {/* Image with Glow */}
                   <div className="w-full sm:w-28 h-40 sm:h-28 flex-shrink-0 bg-noir rounded-xl overflow-hidden relative border border-white/10 group-hover:border-or/50 transition-colors duration-500">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-noir/40 to-transparent" />
                   </div>
 
@@ -155,9 +157,15 @@ export default function CartDrawer({ isOpen, onClose }) {
                       <div className="min-w-0">
                         <h3 className="font-playfair text-lg md:text-xl font-bold text-ivoire truncate pr-2">{item.name}</h3>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-or/60 mt-0.5">{item.category}</p>
+                        {item.options?.variant && item.options.variant !== 'Default' && (
+                          <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-or/10 border border-or/25">
+                            <span className="w-1 h-1 rounded-full bg-or flex-shrink-0" />
+                            <span className="text-[11px] font-semibold text-or/90 tracking-wide leading-none">{item.options.variant}</span>
+                          </div>
+                        )}
                       </div>
                       <p className="font-playfair font-black text-or whitespace-nowrap text-right">
-                        {(item.price * item.quantity).toLocaleString('fr-FR')} <span className="text-[10px] ml-0.5">FCFA</span>
+                        {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
 
@@ -199,7 +207,7 @@ export default function CartDrawer({ isOpen, onClose }) {
             <div className="space-y-4 mb-8">
               <div className="flex justify-between items-center opacity-60">
                 <span className="text-[10px] uppercase tracking-[0.3em] text-ivoire">Sous-total</span>
-                <span className="text-sm font-bold text-ivoire">{totalPrice.toLocaleString('fr-FR')} FCFA</span>
+                <span className="text-sm font-bold text-ivoire">{formatPrice(totalPrice)}</span>
               </div>
               <div className="flex justify-between items-center opacity-60">
                 <span className="text-[10px] uppercase tracking-[0.3em] text-ivoire">Livraison</span>
@@ -209,9 +217,8 @@ export default function CartDrawer({ isOpen, onClose }) {
                 <span className="text-xs uppercase tracking-[0.4em] font-black text-or">Total</span>
                 <div className="text-right leading-none">
                   <span className="font-playfair text-3xl md:text-4xl font-black text-or">
-                    {totalPrice.toLocaleString('fr-FR')}
+                    {formatPrice(totalPrice)}
                   </span>
-                  <span className="text-[10px] text-or font-bold ml-1 tracking-widest">FCFA</span>
                 </div>
               </div>
             </div>

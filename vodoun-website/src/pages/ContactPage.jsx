@@ -1,5 +1,12 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import usePageMeta from '../hooks/usePageMeta';
+
+// SEO metadata for Contact page
+const SEO_META = {
+  title: 'Contact · Vodun Concept Store',
+  description: 'Contactez Vodun Concept Store à Ouidah, Bénin. Demandes de devis, projets sur mesure, collaborations ou informations sur nos collections artisanales inspirées de la culture Vodun.',
+};
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
@@ -12,6 +19,8 @@ export default function ContactPage() {
   const orb1Ref = useRef(null);
   const orb2Ref = useRef(null);
   const particlesRef = useRef([]);
+
+  usePageMeta(SEO_META);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -334,7 +343,6 @@ export default function ContactPage() {
                   <>
                     <p className="text-[9px] uppercase tracking-[0.45em] text-or/50 mb-2">Message</p>
                     <h3 className="font-playfair text-2xl font-bold text-ivoire mb-8">Envoyez-nous un message</h3>
-
                     <form onSubmit={handleSubmit} className="space-y-5">
                       {/* Nom + Email row */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -381,7 +389,6 @@ export default function ContactPage() {
                           </div>
                         ))}
                       </div>
-
                       {/* Sujet */}
                       <div>
                         <label className="block text-ivoire/35 mb-2 text-[10px] uppercase tracking-[0.35em]">
@@ -419,7 +426,6 @@ export default function ContactPage() {
                           <p className="mt-1.5 text-[10px] text-rouge-rituel/80 uppercase tracking-wider">{errors.sujet}</p>
                         )}
                       </div>
-
                       {/* Message */}
                       <div>
                         <label className="block text-ivoire/35 mb-2 text-[10px] uppercase tracking-[0.35em]">
@@ -453,14 +459,12 @@ export default function ContactPage() {
                             onFocus={() => setFocused('message')}
                             onBlur={() => setFocused(null)}
                           />
-                          {/* Char-count decoration */}
                           <div className="absolute bottom-3 right-3 text-[10px] text-ivoire/15 pointer-events-none">✦</div>
                         </div>
                         {errors.message && (
                           <p className="mt-1.5 text-[10px] text-rouge-rituel/80 uppercase tracking-wider">{errors.message}</p>
                         )}
                       </div>
-
                       {/* Submit */}
                       <button
                         type="submit"
@@ -473,7 +477,6 @@ export default function ContactPage() {
                         onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 10px 40px rgba(184,134,11,0.55)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                         onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 6px 30px rgba(184,134,11,0.35)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                       >
-                        {/* Shimmer */}
                         <span
                           className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
                           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)' }}
@@ -486,7 +489,6 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

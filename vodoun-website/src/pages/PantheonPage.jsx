@@ -7,8 +7,15 @@ import { useLanguage } from '../context/LanguageContext';
 import fr from '../i18n/fr';
 import en from '../i18n/en';
 import PantheonGalaxy from '../components/PantheonGalaxy';
+import usePageMeta from '../hooks/usePageMeta';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// SEO metadata for Pantheon page
+const SEO_META = {
+  title: 'Le Panthéon Vodun · Divinités et Symboles',
+  description: 'Découvrez les six divinités du panthéon Vodun : Dan, Legba, Sakpata, Xeviosso, Mami Wata et Ogu. Symboles, couleurs et significations spirituelles de chaque Vodun.',
+};
 
 // ── Données complètes tirées du brief et des documents de la marque ─────────
 const DIVINITIES = [
@@ -173,6 +180,8 @@ function DeityCard({ deity, index, onClick, isActive }) {
           <img
             src={deity.image}
             alt={deity.name}
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110 opacity-85"
           />
         )}
@@ -233,7 +242,7 @@ function DeityModal({ deity, onClose }) {
         {/* Header image */}
         <div className="relative h-56 md:h-72 overflow-hidden" style={{ backgroundColor: deity.color }}>
           {deity.image && (
-            <img src={deity.image} alt={deity.name} className="absolute inset-0 w-full h-full object-cover object-top opacity-70" />
+            <img src={deity.image} alt={deity.name} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-top opacity-70" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0D0B08] via-noir/40 to-transparent" />
           <button onClick={onClose} className="absolute top-4 right-4 text-ivoire/60 hover:text-ivoire text-2xl font-light z-10" aria-label="Fermer">✕</button>
@@ -320,6 +329,8 @@ export default function PantheonPage() {
   const [activeDeity, setActiveDeity] = useState(null);
   const { lang } = useLanguage();
   const t = lang === 'fr' ? fr : en;
+
+  usePageMeta(SEO_META);
 
   const openDeity = (index) => setActiveDeity(DIVINITIES[index]);
   const closeDeity = () => setActiveDeity(null);
@@ -431,7 +442,7 @@ export default function PantheonPage() {
                 « Valoriser la richesse symbolique du Vodun en créations contemporaines, conçues au Bénin, pour le monde. »
               </p>
               <p className="text-ivoire/55 text-sm leading-relaxed mb-6">
-                Vodun Concept Store est la seule marque ancrée à Ouidah, berceau du Vodun. Notre showroom physique 
+                Vodun Concept Store est la meilleure marque ancrée à Ouidah, berceau du Vodun. Notre showroom physique 
                 représente l'âme de la marque ; notre boutique digitale en est le cœur — permettant à chacun, 
                 partout dans le monde, de commander, recevoir et porter l'identité Vodun.
               </p>

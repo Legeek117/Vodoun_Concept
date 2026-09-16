@@ -9,9 +9,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
  *
  * 1. Exposing `navigateTo(path)` — callers use this instead of <Link> or
  *    useNavigate() directly when they want the overlay animation.
- * 2. Emitting a custom DOM event `vodoun:navigate` that NavigationTransition
+ * 2. Emitting a custom DOM event `vodun:navigate` that NavigationTransition
  *    picks up to start its enter animation. When the animation finishes it
- *    fires `vodoun:navigate:commit` which triggers the actual React Router
+ *    fires `vodun:navigate:commit` which triggers the actual React Router
  *    navigation.
  * 3. Listening to location changes so NavigationTransition knows when the
  *    new page has mounted and it can start its exit animation.
@@ -34,8 +34,8 @@ export function usePageTransition() {
       }
     };
 
-    window.addEventListener('vodoun:navigate:commit', handleCommit);
-    return () => window.removeEventListener('vodoun:navigate:commit', handleCommit);
+    window.addEventListener('vodun:navigate:commit', handleCommit);
+    return () => window.removeEventListener('vodun:navigate:commit', handleCommit);
   }, [navigate]);
 
   /**
@@ -50,7 +50,7 @@ export function usePageTransition() {
       pendingPathRef.current = path;
 
       window.dispatchEvent(
-        new CustomEvent('vodoun:navigate', { detail: { path } })
+        new CustomEvent('vodun:navigate', { detail: { path } })
       );
     },
     [location.pathname]

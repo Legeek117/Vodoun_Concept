@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function ProductCard({ product, index, isDark = false, variant = 'default' }) {
   const containerRef = useRef(null);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     gsap.fromTo(
@@ -31,7 +33,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
             {product.video ? (
               <video src={product.video} className="w-full h-full object-cover" autoPlay muted loop playsInline />
             ) : (
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
             )}
           </div>
           <div>
@@ -41,7 +43,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
             <h3 className="font-playfair text-base md:text-lg font-black text-white group-hover:text-or transition-colors line-clamp-1">
               {product.name}
             </h3>
-            <p className="font-playfair text-xs md:text-sm font-bold text-white/60 mt-1">{product.price}</p>
+            <p className="font-playfair text-xs md:text-sm font-bold text-white/60 mt-1">{formatPrice(product.price)}</p>
           </div>
         </div>
       </Link>
@@ -64,7 +66,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
             {product.video ? (
               <video src={product.video} className="w-full h-full object-cover" autoPlay muted loop playsInline />
             ) : (
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-115" />
+              <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-115" />
             )}
           </div>
           
@@ -76,7 +78,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
               {product.name}
             </h3>
             <p className="font-playfair text-sm md:text-lg text-white/60 mt-1 md:mt-2 group-hover:text-white/80 transition-colors duration-300">
-              {product.price.toLocaleString()} FCFA
+              {formatPrice(product.price)}
             </p>
           </div>
         </div>
@@ -101,6 +103,8 @@ export default function ProductCard({ product, index, isDark = false, variant = 
           <img
             src={product.image}
             alt={product.name}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
           />
         )}
@@ -118,7 +122,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
           {product.name}
         </h3>
         <p className={`text-xs md:text-sm opacity-100 mb-3 md:mb-6 leading-relaxed ${isDark ? 'text-ivoire/80' : 'text-brun'}`}>{product.story}</p>
-        <p className={`font-playfair text-sm md:text-xl font-bold ${isDark ? 'text-ivoire' : 'text-noir'}`}>{product.price}</p>
+        <p className={`font-playfair text-sm md:text-xl font-bold ${isDark ? 'text-ivoire' : 'text-noir'}`}>{formatPrice(product.price)}</p>
       </div>
     </Link>
   );

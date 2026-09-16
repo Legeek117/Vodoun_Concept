@@ -9,8 +9,8 @@ import gsap from 'gsap';
  * l'application. Il gère deux scénarios :
  *
  * A) Navigation inter-pages via TransitionLink / navigateTo()
- *    1. Écoute 'vodoun:navigate'  → joue l'animation d'ENTRÉE (overlay visible)
- *    2. Fin d'entrée              → fire 'vodoun:navigate:commit' (React Router navigue)
+ *    1. Écoute 'vodun:navigate'  → joue l'animation d'ENTRÉE (overlay visible)
+ *    2. Fin d'entrée              → fire 'vodun:navigate:commit' (React Router navigue)
  *    3. Écoute changement de route (useLocation) → attend que la nouvelle page
  *       soit prête (rAF double + 80 ms) puis joue l'animation de SORTIE
  *
@@ -22,9 +22,9 @@ import gsap from 'gsap';
  * pour ne pas bloquer les events pointer.
  */
 
-const ENTER_DURATION = 0.55;   // secondes — overlay entre
-const HOLD_DURATION  = 0.08;   // secondes — pause avant commit (laisse le temps de peindre)
-const EXIT_DURATION  = 0.65;   // secondes — overlay sort
+const ENTER_DURATION = 0.7;    // secondes — overlay entre
+const HOLD_DURATION  = 0.1;    // secondes — pause avant commit
+const EXIT_DURATION  = 1.0;    // secondes — overlay sort (total ~1.8s)
 
 // Motif SVG vévé centré, réutilisé depuis GlobalLoader
 function VeveSVG({ size = 48 }) {
@@ -91,6 +91,17 @@ export default function NavigationTransition() {
     gsap.set([logo, vevu], { opacity: 0, y: 10 });
     gsap.set(bar,   { scaleX: 0, transformOrigin: 'left center' });
 
+    // Effet zoom out sur la page qui part
+    const mainContent = document.querySelector('main, [role="main"], body > div:not([style*="z-index: 10000"])');
+    if (mainContent) {
+      gsap.to(mainContent, {
+        scale: 0.95,
+        opacity: 0.6,
+        duration: ENTER_DURATION,
+        ease: 'power2.out',
+      });
+    }
+
     const tl = gsap.timeline({ onComplete: onDone });
 
     // Panneau descend depuis le haut (wipe-down)
@@ -116,6 +127,21 @@ export default function NavigationTransition() {
     if (!overlay || !panel) return;
 
     gsap.killTweensOf([overlay, panel, logo, vevu, bar]);
+
+    // Effet zoom in sur la nouvelle page qui arrive
+    const mainContent = document.querySelector('main, [role="main"], body > div:not([style*="z-index: 10000"])');
+    if (mainContent) {
+      gsap.fromTo(mainContent,
+        { scale: 1.05, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: EXIT_DURATION * 0.8,
+          ease: 'power2.out',
+          delay: EXIT_DURATION * 0.3, // Démarre pendant que l'overlay monte
+        }
+      );
+    }
 
     const tl = gsap.timeline({
       onComplete: () => {
@@ -149,7 +175,7 @@ export default function NavigationTransition() {
     return () => tween.kill();
   }, [visible]);
 
-  /* ─── Écoute 'vodoun:navigate' ──────────────────────────── */
+  /* ─── Écoute 'vodun:navigate' ──────────────────────────── */
   useEffect(() => {
     const handleNavigate = (e) => {
       const path = e.detail?.path;
@@ -168,15 +194,15 @@ export default function NavigationTransition() {
         setTimeout(() => {
           committedRef.current = true;
           window.dispatchEvent(
-            new CustomEvent('vodoun:navigate:commit', { detail: { path } })
+            new CustomEvent('vodun:navigate:commit', { detail: { path } })
           );
           // État → 'exiting' géré par le watcher de location ci-dessous
         }, HOLD_DURATION * 1000);
       });
     };
 
-    window.addEventListener('vodoun:navigate', handleNavigate);
-    return () => window.removeEventListener('vodoun:navigate', handleNavigate);
+    window.addEventListener('vodun:navigate', handleNavigate);
+    return () => window.removeEventListener('vodun:navigate', handleNavigate);
   }, [playEnter]);
 
   /* ─── Surveille les changements de location ─────────────── */
@@ -187,18 +213,15 @@ export default function NavigationTransition() {
     if (newPath === oldPath) return;
     lastPathnameRef.current = newPath;
 
-    // Cas A uniquement : transition commitée via vodoun:navigate
+    // Cas A uniquement : transition commitée via vodun:navigate
     // → on attend que le nouveau rendu soit peint puis on sort
     if (committedRef.current) {
       committedRef.current = false;
       stateRef.current = 'exiting';
 
+      // Simple rAF pour attendre le paint, puis sortie immédiate
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            playExit(() => { stateRef.current = 'idle'; });
-          }, 60);
-        });
+        playExit(() => { stateRef.current = 'idle'; });
       });
     }
     // Cas B supprimé : les <Link> React Router sont instantanés côté client,
@@ -270,7 +293,7 @@ export default function NavigationTransition() {
           >
             <img
               src="/logo.jpeg"
-              alt="Vodoun Concept Store"
+              alt="Vodun Concept Store"
               style={{ height: 'clamp(50px, 10vw, 90px)', width: 'auto', objectFit: 'contain' }}
             />
           </div>

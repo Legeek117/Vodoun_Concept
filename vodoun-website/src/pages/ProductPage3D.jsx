@@ -1,20 +1,96 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ALL_PRODUCTS, useCart } from '../store';
 import { useCurrency } from '../context/CurrencyContext';
 import Navbar from '../components/Navbar';
 import SoundControl from '../components/SoundControl';
 import FloatingCart from '../components/FloatingCart';
+import usePageMeta from '../hooks/usePageMeta';
 
 export default function ProductPage3D() {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency } = useCurrency();
   const product = ALL_PRODUCTS.find((p) => p.id === productId);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || 'Default');
   const [added, setAdded] = useState(false);
+
+  usePageMeta({
+    title: product ? product.name : 'Produit introuvable',
+    description: product
+      ? `${product.story.substring(0, 160)}${product.story.length > 160 ? '…' : ''}`
+      : 'Découvrez nos pièces artisanales Vodun Concept Store.',
+  });
+
+  useEffect(() => {
+    if (!product) return;
+
+    const priceCurrency = currency === 'XOF' ? 'XOF' : 'EUR';
+
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      description: product.story,
+      image: `https://www.vodun-concept.com${product.image}`,
+      sku: product.id,
+      brand: {
+        '@type': 'Brand',
+        name: 'Vodun Concept Store',
+      },
+      category: product.category,
+      offers: {
+        '@type': 'Offer',
+        priceCurrency,
+        price: product.price,
+        availability: product.available
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+        url: `https://www.vodun-concept.com/boutique/produit/${product.id}`,
+        itemCondition: 'https://schema.org/NewCondition',
+      },
+    };
+
+    if (product.variants && product.variants.length > 0) {
+      jsonLd.hasVariant = product.variants.map((v) => ({
+        '@type': 'ProductVariant',
+        name: v,
+        sku: `${product.id}-${v.replace(/\s+/g, '-').toLowerCase()}`,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency,
+          price: product.price,
+          availability: product.available
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock',
+        },
+      }));
+    }
+
+    if (product.isNumbered) {
+      jsonLd.additionalProperty = {
+        '@type': 'PropertyValue',
+        name: 'Édition',
+        value: 'Numérotée',
+      };
+    }
+
+    const existing = document.getElementById('vodun-jsonld-product');
+    if (existing) existing.remove();
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'vodun-jsonld-product';
+    script.text = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+
+    return () => {
+      const s = document.getElementById('vodun-jsonld-product');
+      if (s) s.remove();
+    };
+  }, [product, currency]);
 
   const handleAddToCart = () => {
     if (product) {

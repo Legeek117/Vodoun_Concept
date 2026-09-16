@@ -79,7 +79,7 @@ export default function Hero() {
       </div>
 
       <div className="relative z-10 text-center px-[5vw] pt-16 md:pt-24 lg:pt-32">
-        <span className="section-label mb-6 md:mb-10 text-[10px] md:text-sm">V O D O U N · C O N C E P T · S T O R E</span>
+        <span className="section-label mb-6 md:mb-10 text-[10px] md:text-sm">V O D U N · C O N C E P T · S T O R E</span>
         
         <h1 ref={titleRef} className="editorial-heading text-ivoire mb-6 md:mb-10 overflow-hidden !text-[clamp(3rem,12vw,14rem)]">
           <span className="block">Là où le</span>
@@ -89,12 +89,12 @@ export default function Hero() {
         </h1>
         
         <p ref={subtitleRef} className="editorial-body text-ivoire/80 max-w-xl mx-auto mb-10 md:mb-20 uppercase tracking-[0.2em] md:tracking-[0.4em] text-[10px] md:text-sm">
-          Expérience immersive · Artisanat de Ouidah
+          Expérience immersive · Artisanat du Bénin
         </p>
  
         <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 md:gap-8 justify-center items-center">
           <Link to="/boutique" className="btn-premium w-full sm:w-auto text-xs md:text-sm px-10 py-5">
-            Entrer dans la boutique
+            Découvrir
           </Link>
           <Link to="/#pantheon" className="btn-premium bg-transparent text-ivoire border-ivoire hover:bg-ivoire hover:text-noir w-full sm:w-auto text-xs md:text-sm px-10 py-5">
             Notre héritage

@@ -60,7 +60,7 @@ export default function AdminDashboard({ products, orders, setActiveSection }) {
             </button>
           </div>
           <div>
-            {recent.map((order, i) => (
+            {recent.map((order) => (
               <div key={order.id} className="ag-table-row" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', gap:'12px' }}>
                 <div style={{ minWidth:0 }}>
                   <p style={{ fontSize:'0.85rem', fontWeight:700, color:'#F4F0E6', margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{order.customer}</p>

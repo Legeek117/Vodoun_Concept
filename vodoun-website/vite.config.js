@@ -18,7 +18,6 @@ export default defineConfig({
           if (id.includes('node_modules/gsap')) {
             return 'gsap'
           }
-          return 'index'
         },
       },
     },

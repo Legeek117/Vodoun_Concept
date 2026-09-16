@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -46,17 +46,17 @@ export default function Navbar({ currentPath }) {
     >
       <div className="max-w-7xl mx-auto px-[5vw]">
         <div className="flex items-center justify-between">
-          <a
-            href="/accueil"
+          <Link
+            to="/accueil"
             className="cursor-pointer transform hover:scale-105 transition-transform duration-500 flex items-center"
-            aria-label="Vodoun Concept Store — Accueil"
+            aria-label="Vodun Concept Store — Accueil"
           >
             <img
               src="/logo.jpeg"
-              alt="Vodoun Concept Store"
+              alt="Vodun Concept Store"
               style={{ height: 'clamp(36px, 5vw, 52px)', width: 'auto', objectFit: 'contain' }}
             />
-          </a>
+          </Link>
 
           {/* Desktop Liquid Glass Menu */}
           <div className="hidden lg:flex items-center">
@@ -71,13 +71,13 @@ export default function Navbar({ currentPath }) {
               {navLinks.map((link) => {
                 const isActive = currentPath === link.path || (link.path === '/boutique' && currentPath?.startsWith('/boutique'));
                 return (
-                  <a
+                  <Link
                     key={link.name}
-                    href={link.path}
+                    to={link.path}
                     className={`relative px-6 py-3 rounded-full transition-all duration-500 font-black uppercase tracking-[0.25em] text-[0.55rem] ${isActive ? 'text-noir bg-or shadow-[0_4px_20px_rgba(184,134,11,0.4)]' : 'text-ivoire/80 hover:text-ivoire hover:bg-white/5'}`}
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -158,13 +158,13 @@ export default function Navbar({ currentPath }) {
               {navLinks.map((link) => {
                 const isActive = currentPath === link.path || (link.path === '/boutique' && currentPath?.startsWith('/boutique'));
                 return (
-                  <a
+                  <Link
                     key={link.name}
-                    href={link.path}
+                    to={link.path}
                     className={`text-base font-black uppercase tracking-[0.2em] transition-colors ${isActive ? 'text-or' : 'text-ivoire/80 hover:text-or'}`}
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 );
               })}
             </div>

@@ -6,7 +6,7 @@ import gsap from 'gsap';
  * Affiché lors du chargement initial des chunks lazy et lors des navigations
  * vers des pages dont le bundle n'est pas encore chargé.
  *
- * Design : fond noir Vodoun, logotype animé, barre de progression organique,
+ * Design : fond noir Vodun, logotype animé, barre de progression organique,
  * vévé SVG rotatif, slogan en fade. Animation d'entrée séquencée + sortie fluide.
  */
 export default function GlobalLoader({ isExiting = false, onExitComplete }) {
@@ -72,15 +72,17 @@ export default function GlobalLoader({ isExiting = false, onExitComplete }) {
       repeat: -1,
     });
 
+    // Copier les refs dans des variables locales pour le cleanup
+    // (évite le warning react-hooks/exhaustive-deps sur les .current dans cleanup)
+    const logoEl = logoRef.current;
+    const vevuEl = vevuRef.current;
+    const barEl = barRef.current;
+    const sloganEl = sloganRef.current;
+    const separatorEl = separatorRef.current;
+
     return () => {
       tl.kill();
-      gsap.killTweensOf([
-        logoRef.current,
-        vevuRef.current,
-        barRef.current,
-        sloganRef.current,
-        separatorRef.current,
-      ]);
+      gsap.killTweensOf([logoEl, vevuEl, barEl, sloganEl, separatorEl]);
     };
   }, []);
 
@@ -108,6 +110,9 @@ export default function GlobalLoader({ isExiting = false, onExitComplete }) {
       );
 
     return () => tl.kill();
+  // onExitComplete est une prop stable côté parent — ne pas l'ajouter aux deps évite
+  // une ré-exécution de l'animation à chaque render du parent.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExiting]);
 
   return (
@@ -159,7 +164,7 @@ export default function GlobalLoader({ isExiting = false, onExitComplete }) {
         >
           <img
             src="/logo.jpeg"
-            alt="Vodoun Concept Store"
+            alt="Vodun Concept Store"
             style={{ height: 'clamp(60px, 12vw, 100px)', width: 'auto', objectFit: 'contain' }}
           />
         </div>

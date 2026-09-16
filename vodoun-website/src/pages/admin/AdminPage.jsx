@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../../store';
@@ -47,7 +48,7 @@ export default function AdminPage() {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
-    if (window.lenis) { try { window.lenis.destroy(); } catch(e){} delete window.lenis; }
+    if (window.lenis) { try { window.lenis.destroy(); } catch { /* ignore */ } delete window.lenis; }
     return () => { document.body.style.overflow = ''; document.documentElement.style.overflow = ''; };
   }, []);
 
@@ -96,7 +97,7 @@ export default function AdminPage() {
         <div style={{ padding:'28px 20px 20px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div>
-              <img src="/logo.jpeg" alt="Vodoun Concept Store" style={{ height:'40px', width:'auto', objectFit:'contain', display:'block' }} />
+              <img src="/logo.jpeg" alt="Vodun Concept Store" style={{ height:'40px', width:'auto', objectFit:'contain', display:'block' }} />
               <span style={{ fontSize:'0.5rem', textTransform:'uppercase', letterSpacing:'0.4em', color:'rgba(244,240,230,0.25)', display:'block', marginTop:'5px' }}>Admin Panel</span>
             </div>
             {/* Dot décoratif */}
@@ -151,7 +152,7 @@ export default function AdminPage() {
           position:'sticky', top:0, zIndex:20,
         }} className="ag-topbar-mobile">
           <button onClick={() => setSidebarOpen(true)} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(244,240,230,0.6)', padding:0 }}>{Icon.menu}</button>
-          <img src="/logo.jpeg" alt="Vodoun Concept Store" style={{ height:'32px', width:'auto', objectFit:'contain' }} />
+          <img src="/logo.jpeg" alt="Vodun Concept Store" style={{ height:'32px', width:'auto', objectFit:'contain' }} />
           <div style={{ width:'22px' }} />
         </header>
 

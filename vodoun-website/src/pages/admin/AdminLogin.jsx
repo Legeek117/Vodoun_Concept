@@ -53,7 +53,7 @@ export default function AdminLogin({ onLogin }) {
         <div style={{ textAlign:'center', marginBottom:'32px' }}>
           <img
             src="/logo.jpeg"
-            alt="Vodoun Concept Store"
+            alt="Vodun Concept Store"
             style={{ height:'80px', width:'auto', objectFit:'contain', margin:'0 auto', display:'block' }}
           />
           <p style={{ fontSize:'0.6rem', textTransform:'uppercase', letterSpacing:'0.5em', color:'rgba(244,240,230,0.25)', marginTop:'8px' }}>

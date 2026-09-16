@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import usePageMeta from '../hooks/usePageMeta';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// SEO metadata for About page
+const SEO_META = {
+  title: 'À propos · Vodun Concept Store',
+  description: 'Découvrez Vodun Concept Store, la première marque créée à Ouidah qui transforme la spiritualité Vodun en design contemporain. Artisanat béninois d\'excellence.',
+};
 
 const PILLARS = [
   { label: 'Création', text: 'Pièces et collections inspirées de la cosmologie Vodun avec exigence artisanale.' },
@@ -30,11 +37,13 @@ const EVENTS = [
   { month: 'Janvier', name: 'Vodun Days', lieu: 'Ouidah', desc: 'Toutes gammes · Vitrine d\'excellence' },
   { month: 'Fév / Mars', name: 'FInAB + Fashion Week', lieu: 'Cotonou', desc: 'Mode & Accessoires' },
   { month: '25–26 Juil.', name: 'Festival des Masques', lieu: 'Porto-Novo', desc: 'Décoration & Mobilier' },
-  { month: 'Décembre', name: 'WeLovEya Festival', lieu: 'Cotonou', desc: 'Mode & Lifestyle' },
+  { month: 'Avril', name: 'Le MASA', lieu: 'Abidjan', desc: 'Spectacle & Exposition' },
 ];
 
 export default function AboutPage() {
   const sectionsRef = useRef([]);
+
+  usePageMeta(SEO_META);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,7 +68,13 @@ export default function AboutPage() {
       {/* ── HERO ── */}
       <section ref={addSection(0)} className="pt-32 pb-20 border-b border-brun/10">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label reveal block mb-3">La Marque</span>
+          <div className="reveal mb-8">
+            <img
+              src="/logo.jpeg"
+              alt="Vodun Concept Store"
+              style={{ height: 'clamp(48px, 7vw, 80px)', width: 'auto', objectFit: 'contain' }}
+            />
+          </div>
           <h1 className="editorial-heading text-noir !text-[clamp(2.5rem,8vw,5.5rem)] max-w-5xl reveal leading-none mb-10">
             Là où le sacré devient désirable.
           </h1>
@@ -72,7 +87,6 @@ export default function AboutPage() {
       {/* ── VISION FONDATRICE (4 PILIERS) ── */}
       <section ref={addSection(1)} className="py-24 bg-noir text-ivoire">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label text-or reveal block mb-3">Vision</span>
           <h2 className="editorial-heading text-ivoire !text-[clamp(2rem,6vw,4rem)] mb-16 reveal">Vision Fondatrice</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {PILLARS.map((p, i) => (
@@ -85,10 +99,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── VALEURS (5 officielles) ── */}
+      {/* ── VALEURS ── */}
       <section ref={addSection(2)} className="py-24 border-b border-brun/10">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label reveal block mb-3">Identité</span>
           <h2 className="editorial-heading text-noir !text-[clamp(2rem,6vw,4rem)] mb-16 reveal">Nos Valeurs</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {VALUES.map((v, i) => (
@@ -105,18 +118,16 @@ export default function AboutPage() {
       {/* ── POSITIONNEMENT STRATÉGIQUE ── */}
       <section ref={addSection(3)} className="py-24 bg-noir text-ivoire border-b border-white/5">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label text-or reveal block mb-3">Marché</span>
           <h2 className="editorial-heading text-ivoire !text-[clamp(2rem,6vw,4rem)] mb-4 reveal">Positionnement</h2>
           <p className="text-or/70 font-playfair text-xl italic mb-16 reveal">« Premium accessible · Artisanal contemporain · Livré partout »</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'Légitimité unique', desc: 'Seule marque ancrée à Ouidah, berceau du Vodun.' },
+              { title: 'Légitimité unique', desc: 'Meilleure marque ancrée à Ouidah, berceau du Vodun.' },
               { title: 'Modèle intégré', desc: 'Création · Exposition · Stock · E-commerce · Événements.' },
               { title: 'Gamme complète', desc: 'De 1 500 FCFA (accessoires) à 2,5 M FCFA (mobilier d\'exception).' },
               { title: 'Accessibilité mondiale', desc: 'Livraison Bénin, Afrique de l\'Ouest et diaspora internationale.' },
             ].map((item, i) => (
               <div key={i} className="reveal p-7 rounded-3xl border border-white/8 bg-white/[0.04] hover:border-or/30 hover:bg-white/[0.07] transition-all duration-500">
-                <div className="text-or text-2xl mb-4">◆</div>
                 <h3 className="font-playfair text-xl font-bold text-ivoire mb-3">{item.title}</h3>
                 <p className="text-ivoire/50 text-sm leading-relaxed">{item.desc}</p>
               </div>
@@ -128,23 +139,22 @@ export default function AboutPage() {
       {/* ── BOUTIQUE DIGITALE ── */}
       <section ref={addSection(7)} className="py-24 bg-white/20 border-b border-brun/10">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label reveal block mb-3">E-commerce</span>
           <h2 className="editorial-heading text-noir !text-[clamp(2rem,6vw,4rem)] mb-4 reveal">Boutique Digitale</h2>
           <p className="text-or font-playfair text-xl italic mb-12 reveal">« Le Vodun accessible partout dans le monde »</p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="reveal space-y-6">
               <p className="text-brun/80 text-lg md:text-xl leading-relaxed font-playfair">
-                Vodun Concept Store est avant tout une plateforme digitale pensée pour faire rayonner l’esthétique et l’artisanat inspiré de la spiritualité Vodun au-delà des frontières du Bénin.
+                Vodun Concept Store est avant tout une plateforme digitale pensée pour faire rayonner l'esthétique et l'artisanat inspiré de la spiritualité Vodun au-delà des frontières du Bénin.
               </p>
               <p className="text-brun/70 leading-relaxed text-sm">
-                Notre showroom physique à Ouidah représente l’âme de la marque, mais le cœur du modèle repose sur une expérience e-commerce. Grâce à notre boutique en ligne, chaque client peut commander en toute sérénité.
+                Notre showroom physique à Ouidah représente l'âme de la marque, mais le cœur du modèle repose sur une expérience e-commerce. Grâce à notre boutique en ligne, chaque client peut commander en toute sérénité.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 reveal">
               {[
                 { title: "Univers multiples", desc: "Découvrir les collections mobilier, mode, décoration et accessoires." },
                 { title: "Personnalisation", desc: "Personnaliser certains produits selon la symbolique des divinités." },
-                { title: "Livraison globale", desc: "Commander depuis n’importe quel pays, avec suivi en temps réel." },
+                { title: "Livraison globale", desc: "Commander depuis n'importe quel pays, avec suivi en temps réel." },
                 { title: "Paiement flexible", desc: "Paiement via Mobile Money ou carte internationale. Prix affichés en FCFA, USD ou EUR." }
               ].map((item, i) => (
                 <div key={i} className="p-6 rounded-2xl border border-brun/10 bg-white/40 hover:border-or/40 transition-colors">
@@ -160,7 +170,6 @@ export default function AboutPage() {
       {/* ── ARCHITECTURE 4 PÔLES ── */}
       <section ref={addSection(4)} className="py-24 border-b border-brun/10">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label reveal block mb-3">Géographie</span>
           <h2 className="editorial-heading text-noir !text-[clamp(2rem,6vw,4rem)] mb-4 reveal">Architecture à 4 Pôles</h2>
           <p className="text-brun/50 text-sm uppercase tracking-widest mb-16 reveal">Du showroom d'Ouidah à la livraison mondiale</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -179,7 +188,6 @@ export default function AboutPage() {
       {/* ── CALENDRIER ÉVÉNEMENTIEL ── */}
       <section ref={addSection(5)} className="py-24 bg-noir text-ivoire">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label text-or reveal block mb-3">Événementiel</span>
           <h2 className="editorial-heading text-ivoire !text-[clamp(2rem,6vw,4rem)] mb-16 reveal">Nos Rendez-vous</h2>
           <div className="space-y-0 border-t border-white/5">
             {EVENTS.map((event, i) => (
@@ -190,31 +198,6 @@ export default function AboutPage() {
                   <p className="text-ivoire/40 text-xs uppercase tracking-widest mt-1">{event.lieu} · {event.desc}</p>
                 </div>
                 <span className="text-or/30 group-hover:text-or transition-colors duration-300 text-2xl">✦</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── ARTISANS ── */}
-      <section ref={addSection(6)} className="py-24 border-b border-brun/10">
-        <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label reveal block mb-3">Équipe</span>
-          <h2 className="editorial-heading text-noir !text-[clamp(2rem,6vw,4rem)] mb-16 reveal">Nos Artisans</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {[
-              { name: 'Kossi A.', role: 'Sculpteur Bois', desc: '25 ans d\'expérience dans la sculpture traditionnelle béninoise. Bois massif, pyrogravure et incrustations métal.' },
-              { name: 'Akouvi M.', role: 'Tisserande', desc: 'Maître tisserande spécialisée dans les motifs géométriques Vodun. Textiles muraux, tapisseries et tentures en fibres naturelles.' },
-              { name: 'Mensah T.', role: 'Forgeron', desc: 'Expert dans le travail du métal et la création de pièces lumineuses. Lanternes, luminaires perforés et sculptures Bocio.' },
-            ].map((a, i) => (
-              <div key={i} className="reveal group">
-                <div className="aspect-square rounded-3xl overflow-hidden mb-6 border border-brun/10 group-hover:border-or/30 transition-colors duration-500"
-                  style={{ background: 'linear-gradient(135deg, rgba(184,134,11,0.08), rgba(74,49,32,0.05))' }}>
-                  <div className="w-full h-full flex items-center justify-center text-or/20 text-7xl group-hover:scale-110 transition-transform duration-700">✦</div>
-                </div>
-                <h3 className="font-playfair text-2xl font-bold text-noir mb-1">{a.name}</h3>
-                <p className="text-or text-[10px] uppercase tracking-[0.35em] font-bold mb-4">{a.role}</p>
-                <p className="text-brun/60 text-sm leading-relaxed">{a.desc}</p>
               </div>
             ))}
           </div>

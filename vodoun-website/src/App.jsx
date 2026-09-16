@@ -5,11 +5,14 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 import Lenis from '@studio-freight/lenis';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
-import { ALL_PRODUCTS, COLLECTIONS } from './store';
+import { ALL_PRODUCTS } from './store';
+import usePageMeta from './hooks/usePageMeta';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FRAME_COUNT = 470;
+// Le dossier /frames/coris contient frame_0010.jpg → frame_0470.jpg (461 fichiers)
+const FRAME_COUNT = 461;
+const FRAME_OFFSET = 10;
 
 function App() {
   const containerRef = useRef(null);
@@ -25,7 +28,7 @@ function App() {
       return new Promise((resolve) => {
         if (frames[index]) { resolve(); return; }
         const img = new Image();
-        const frameIndex = (index + 1).toString().padStart(4, '0');
+        const frameIndex = (index + FRAME_OFFSET).toString().padStart(4, '0');
         img.onload = () => {
           frames[index] = img;
           framesRef.current = frames;
@@ -184,6 +187,11 @@ function App() {
     mobilier: ALL_PRODUCTS.filter(p => p.category === 'Mobilier').slice(0, 2),
   };
 
+  usePageMeta({
+    title: 'Accueil',
+    description: 'Vodoun Concept Store — mobilier d\'art, bijoux, décorations festives et mode inspirés de la culture Vodoun. Artisanat béninois d\'exception à Ouidah, Bénin.',
+  });
+
   const divinities = [
     { name: 'DAN', title: 'Le Serpent', color: '#1C4A66', image: '/Divinités/DAN (1).webp', description: 'Spirales · Indigo · Turquoise' },
     { name: 'LEGBA', title: 'Le Gardien', color: '#8E2420', image: '/Divinités/LEGBA.webp', description: 'Croisements · Rouge · Noir' },
@@ -219,7 +227,7 @@ function App() {
               {[...Array(2)].map((_, groupIndex) => (
                 <div key={groupIndex} className="flex">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <span key={i} className="text-noir font-playfair text-[6vw] md:text-[5vw] font-black mx-12 uppercase tracking-tighter">
+                    <span key={i} className="text-ivoire font-playfair text-[6vw] md:text-[5vw] font-black mx-12 uppercase tracking-tighter">
                       LÀ OÙ LE SACRÉ DEVIENT DÉSIRABLE ✦
                     </span>
                   ))}
@@ -289,6 +297,8 @@ function App() {
                       <img
                         src={deity.image}
                         alt={deity.name}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110 opacity-80"
                       />
                     )}

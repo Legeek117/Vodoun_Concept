@@ -20,6 +20,7 @@ const B2BPage        = lazy(() => import('./pages/B2BPage'));
 const PantheonPage   = lazy(() => import('./pages/PantheonPage'));
 const ComptePage     = lazy(() => import('./pages/ComptePage'));
 const AdminPage      = lazy(() => import('./pages/admin/AdminPage'));
+const NotFoundPage   = lazy(() => import('./pages/NotFoundPage'));
 
 /**
  * Layout partagé — évite de répéter Navbar/Footer/SoundControl/FloatingCart
@@ -148,6 +149,16 @@ function AppRoutes() {
 
           {/* Admin — layout indépendant sans Navbar/Footer */}
           <Route path="/admin" element={<AdminPage />} />
+
+          {/* 404 — catch-all */}
+          <Route
+            path="*"
+            element={
+              <PageLayout currentPath="">
+                <NotFoundPage />
+              </PageLayout>
+            }
+          />
         </Routes>
       </Suspense>
     </>

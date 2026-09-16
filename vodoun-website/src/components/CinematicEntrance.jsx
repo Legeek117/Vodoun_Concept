@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
@@ -8,6 +8,7 @@ import Lenis from '@studio-freight/lenis';
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 import { useSound } from '../context/SoundContext';
+import usePageMeta from '../hooks/usePageMeta';
 
 const FRAME_COUNT = 193;
 const FRAME_SPEED = 2.0;
@@ -23,6 +24,11 @@ export default function CinematicEntrance() {
   const [isStarted, setIsStarted] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
 
+  usePageMeta({
+    title: 'Initiation',
+    description: 'Entrez dans l\'univers Vodun Concept Store. Une expérience cinématique vous attend : héritage ancestral, luxe contemporain et éveil du temple intérieur.',
+  });
+
   // Preload frames
   useEffect(() => {
     let loadedCount = 0;
@@ -35,7 +41,7 @@ export default function CinematicEntrance() {
         img.onload = () => {
           frames[index] = img;
           loadedCount++;
-          setLoadProgress(Math.floor((loadedCount / FRAME_COUNT) * 100));
+          setLoadProgress(Math.floor((loadedCount / FRAME_COUNT) * 10));
           resolve();
         };
       });
@@ -177,6 +183,10 @@ export default function CinematicEntrance() {
         ScrollTrigger.getAll().forEach(st => st.kill());
       };
     }
+  // currentFrame et handleTransition sont intentionnellement exclus des deps :
+  // les inclure re-créerait tous les ScrollTriggers à chaque frame scrollée,
+  // causant un jank visuel. handleTransition est stable dans ce contexte.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, isStarted, navigate]);
 
   return (
@@ -194,14 +204,14 @@ export default function CinematicEntrance() {
             </div>
           </div>
 
-          {loadProgress < 100 ? (
+          {loadProgress < 10 ? (
             <div className="flex flex-col items-center">
               <div className="w-64 md:w-80 h-[1px] bg-white/5 relative overflow-hidden mb-6">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#D2B98E] to-transparent transition-all duration-300 ease-out"
-                  style={{ width: `${loadProgress}%` }} />
+                  style={{ width: `${loadProgress * 10}%` }} />
               </div>
               <div className="flex justify-center w-80 text-[10px] uppercase tracking-[0.5em] font-bold text-[#D2B98E]/60 font-playfair">
-                <span>INITIATION... {loadProgress}%</span>
+                <span>INITIATION... {loadProgress}/10</span>
               </div>
             </div>
           ) : (
@@ -216,7 +226,7 @@ export default function CinematicEntrance() {
               >
                 <div className="absolute inset-x-0 inset-y-0 bg-[#D2B98E]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <span className="relative z-10 text-white text-xs md:text-sm uppercase tracking-[0.6em] font-bold transition-colors">
-                  ENTRER DANS LA BOUTIQUE
+                  DÉCOUVRIR
                 </span>
               </button>
               <button
