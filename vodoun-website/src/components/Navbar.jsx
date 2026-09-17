@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useCurrency } from '../context/CurrencyContext';

@@ -1,157 +1,163 @@
 import { useRef, useEffect, Component } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
-/* ─── ErrorBoundary pour isoler le crash texture ─── */
+/* ─── ErrorBoundary silencieux ─── */
 export class MasqueErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { crashed: false }; }
   static getDerivedStateFromError() { return { crashed: true }; }
   render() {
-    if (this.state.crashed) return null; // Phase masque silencieusement skippée
+    if (this.state.crashed) return null;
     return this.props.children;
   }
 }
 
-/**
- * MasqueSceneInner — chargement texture dans un sous-composant
- * monté UNIQUEMENT quand visible=true (via condition dans MasqueScene)
- * → useLoader ne s'exécute jamais si le masque n'est pas encore en scène
- */
-function MasqueSceneInner() {
-  const meshRef  = useRef(null);
-  const glowRef  = useRef(null);
-  const lightRef = useRef(null);
-
-  // useLoader lance une Suspense exception si la texture n'est pas prête
-  // → le Suspense parent affiche null le temps du chargement
-  const texture = useLoader(TextureLoader, '/masque.png');
-
+/* ─── Caméra auto-fit — tient compte du ratio portrait/paysage ─── */
+function AutoCamera({ targetRef }) {
+  const { camera, size } = useThree();
   useEffect(() => {
-    if (texture) {
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-    }
-  }, [texture]);
+    const tryFit = () => {
+      if (!targetRef.current || targetRef.current.children.length === 0) {
+        setTimeout(tryFit, 80);
+        return;
+      }
+      const box = new THREE.Box3().setFromObject(targetRef.current);
+      if (box.isEmpty()) { setTimeout(tryFit, 80); return; }
 
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    const t = state.clock.elapsedTime;
-    meshRef.current.rotation.y = Math.sin(t * 0.5) * 0.25;
-    meshRef.current.rotation.x = Math.sin(t * 0.3) * 0.05;
-    meshRef.current.position.y = Math.sin(t * 0.7) * 0.08;
+      const sphere = new THREE.Sphere();
+      box.getBoundingSphere(sphere);
 
-    if (glowRef.current) {
-      const pulse = 0.85 + Math.sin(t * 1.8) * 0.15;
-      glowRef.current.material.opacity = 0.18 * pulse;
-    }
-    if (lightRef.current) {
-      lightRef.current.intensity = 1.2 + Math.sin(t * 2) * 0.4;
-    }
-  });
+      const fovRad = (camera.fov * Math.PI) / 180;
+      const aspect = size.width / size.height;
 
-  return (
-    <group>
-      <ambientLight intensity={0.3} color="#3A2000" />
+      // Sur mobile portrait (aspect < 1) utiliser le fov vertical
+      // Sur desktop (aspect > 1) utiliser le fov horizontal
+      const fovH   = 2 * Math.atan(Math.tan(fovRad / 2) * aspect);
+      const minFov = aspect < 1 ? fovRad : Math.min(fovRad, fovH);
 
-      <pointLight
-        ref={lightRef}
-        position={[0, 0, 3]}
-        color="#D2A84E"
-        intensity={1.5}
-        distance={12}
-      />
-      <pointLight position={[-3, 1, -2]} color="#FF6A00" intensity={0.6} distance={8} />
-      <pointLight position={[3, -1, -2]} color="#C8860A" intensity={0.4} distance={8} />
+      // Facteur 0.82 → masque remplit ~85% de l'écran
+      const dist = (sphere.radius / Math.sin(minFov / 2)) * 0.82;
 
-      {/* Halo doré derrière le masque */}
-      <mesh ref={glowRef} position={[0, 0, -0.5]}>
-        <circleGeometry args={[2.2, 64]} />
-        <meshBasicMaterial
-          color="#D2A84E" transparent opacity={0}
-          depthWrite={false} blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      {/* Masque avec suppression fond blanc via shader */}
-      <mesh ref={meshRef} position={[0, 0, 0]}>
-        <planeGeometry args={[3.2, 4.0, 32, 32]} />
-        <meshStandardMaterial
-          map={texture}
-          transparent
-          alphaTest={0.05}
-          roughness={0.7}
-          metalness={0.2}
-          onBeforeCompile={(shader) => {
-            shader.fragmentShader = shader.fragmentShader.replace(
-              '#include <alphatest_fragment>',
-              `
-              float luminance = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
-              if (luminance > 0.88) {
-                diffuseColor.a = 1.0 - smoothstep(0.85, 0.98, luminance);
-              }
-              #include <alphatest_fragment>
-              `
-            );
-          }}
-        />
-      </mesh>
-
-      <OrbitalParticles />
-    </group>
-  );
+      // Légèrement au-dessus du centre pour laisser place aux textes
+      const offsetY = sphere.radius * (aspect < 1 ? 0.18 : 0.12);
+      camera.position.set(sphere.center.x, sphere.center.y + offsetY, sphere.center.z + dist);
+      camera.lookAt(sphere.center.x, sphere.center.y + offsetY, sphere.center.z);
+      camera.near = dist * 0.01;
+      camera.far  = dist * 10;
+      camera.updateProjectionMatrix();
+    };
+    tryFit();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
 }
 
-/* ─── Composant principal — ne monte l'inner QUE si visible ─── */
-export default function MasqueScene({ visible = false }) {
-  // Ne rien rendre si pas visible → useLoader jamais appelé au chargement initial
-  if (!visible) return null;
+/* ─── Modèle GLB ─── */
+function MasqueModel({ spinRef, targetRef }) {
+  const gltf = useLoader(GLTFLoader, '/masque.glb');
 
+  useEffect(() => {
+    if (!gltf?.scene || !spinRef.current) return;
+    const scene = gltf.scene.clone(true);
+    scene.updateMatrixWorld(true);
+
+    const box0 = new THREE.Box3().setFromObject(scene);
+    const s0   = new THREE.Vector3();
+    box0.getSize(s0);
+    const maxDim = Math.max(s0.x, s0.y, s0.z);
+    if (maxDim === 0) return;
+
+    scene.scale.setScalar(2.8 / maxDim);
+    scene.updateMatrixWorld(true);
+
+    const box1   = new THREE.Box3().setFromObject(scene);
+    const center = new THREE.Vector3();
+    box1.getCenter(center);
+    scene.position.sub(center);
+    scene.quaternion.identity();
+
+    spinRef.current.clear();
+    spinRef.current.add(scene);
+    spinRef.current.rotation.set(0, Math.PI, 0, 'YXZ');
+    if (targetRef) targetRef.current = spinRef.current;
+  }, [gltf, spinRef, targetRef]);
+
+  useFrame((state) => {
+    if (!spinRef.current) return;
+    const t = state.clock.elapsedTime;
+    // Pendule gauche/droite doux — amplitude ~31°
+    const pendulum = Math.sin(t * 0.42) * 0.55;
+    spinRef.current.rotation.set(
+      Math.sin(t * 0.28) * 0.03,
+      Math.PI + pendulum,
+      0,
+      'YXZ'
+    );
+    spinRef.current.position.y = Math.sin(t * 0.6) * 0.06;
+  });
+
+  return <group ref={spinRef} />;
+}
+
+/* ─── Lumières neutres ─── */
+function MasqueLights() {
+  const frontRef = useRef(null);
+  useFrame((s) => {
+    if (frontRef.current)
+      frontRef.current.intensity = 1.6 + Math.sin(s.clock.elapsedTime * 1.4) * 0.15;
+  });
   return (
-    // Suspense : pendant le chargement texture → null affiché
-    // ErrorBoundary : si masque.png absent → crash silencieux, pas de whitepage
-    <MasqueErrorBoundary>
-      <MasqueSceneInner />
-    </MasqueErrorBoundary>
+    <>
+      <ambientLight intensity={1.4} color="#ffffff" />
+      <directionalLight ref={frontRef} position={[0, 2, 5]} color="#ffffff" intensity={1.6} castShadow />
+      <directionalLight position={[-4, 1, 3]} color="#fff5e8" intensity={0.5} />
+      <directionalLight position={[4, -1, 3]} color="#eef2ff" intensity={0.35} />
+      <directionalLight position={[0, 0, -5]} color="#ffd8a0" intensity={0.25} />
+    </>
   );
 }
 
 /* ─── Particules orbitales ─── */
 function OrbitalParticles() {
-  const ref   = useRef(null);
-  const count = 80;
-
+  const ref = useRef(null);
+  const count = 100;
   const { positions, colors } = (() => {
     const pos = new Float32Array(count * 3);
     const col = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const r = 2 + Math.random() * 1.5;
-      pos[i * 3]     = Math.cos(angle) * r;
-      pos[i * 3 + 1] = Math.sin(angle) * r;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
-      col[i * 3]     = 0.82 + Math.random() * 0.18;
-      col[i * 3 + 1] = 0.72 + Math.random() * 0.15;
-      col[i * 3 + 2] = 0.25 + Math.random() * 0.2;
+      const a = (i / count) * Math.PI * 2;
+      const r = 1.8 + Math.random() * 1.4;
+      const h = (Math.random() - 0.5) * 2.5;
+      pos[i*3]=Math.cos(a)*r; pos[i*3+1]=h; pos[i*3+2]=Math.sin(a)*r;
+      const t = Math.random();
+      col[i*3]=0.82+t*0.18; col[i*3+1]=0.55+t*0.25; col[i*3+2]=0.08+t*0.12;
     }
     return { positions: pos, colors: col };
   })();
-
-  useFrame((state) => {
-    if (ref.current) ref.current.rotation.z = state.clock.elapsedTime * 0.15;
-  });
-
+  useFrame((s) => { if (ref.current) ref.current.rotation.y = s.clock.elapsedTime * 0.12; });
   return (
     <points ref={ref}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
         <bufferAttribute attach="attributes-color"    count={count} array={colors}    itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial
-        size={0.04} sizeAttenuation vertexColors
-        transparent opacity={0.7}
-        depthWrite={false} blending={THREE.AdditiveBlending}
-      />
+      <pointsMaterial size={0.04} sizeAttenuation vertexColors transparent
+        opacity={0.6} depthWrite={false} blending={THREE.AdditiveBlending} />
     </points>
+  );
+}
+
+export default function MasqueScene({ visible = false }) {
+  const spinRef   = useRef(null);
+  const targetRef = useRef(null);
+  if (!visible) return null;
+  return (
+    <MasqueErrorBoundary>
+      <AutoCamera targetRef={targetRef} />
+      <MasqueLights />
+      <OrbitalParticles />
+      <MasqueModel spinRef={spinRef} targetRef={targetRef} />
+    </MasqueErrorBoundary>
   );
 }
