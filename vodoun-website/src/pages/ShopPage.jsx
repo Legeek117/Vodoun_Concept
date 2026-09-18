@@ -4,12 +4,10 @@ import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import { ALL_PRODUCTS, COLLECTIONS } from '../store';
 import ProductCard from '../components/ProductCard';
+import ProceduralCanvas from '../components/ProceduralCanvas';
 import usePageMeta from '../hooks/usePageMeta';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const FRAME_COUNT = 193;
-const FRAME_OFFSET = 10;
 
 export default function ShopPage() {
   const { collectionId } = useParams();
@@ -19,9 +17,7 @@ export default function ShopPage() {
     title: selected === 'all' ? 'Boutique' : `Boutique · ${COLLECTIONS.find(c => c.id === selected)?.name || selected}`,
     description: 'Explorez toutes les collections Vodun Concept Store : mobilier d\'art, bijoux, mode, décorations festives et accessoires inspirés de la culture Vodun.',
   });
-  const canvasRef = useRef(null);
-  const framesRef = useRef([]);
-  const [isFirstFrameLoaded, setIsFirstFrameLoaded] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const heroRef = useRef(null);
   const filtersRef = useRef(null);
 
@@ -34,96 +30,16 @@ export default function ShopPage() {
       })
       : ALL_PRODUCTS.filter(p => p.category.toLowerCase().includes(selected.toLowerCase().replace('-', ' ')));
 
-  // Preload frames
+  // ScrollProgress pour ProceduralCanvas
   useEffect(() => {
-    const frames = [];
-    const loadFrame = (index) => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        const frameIndex = (index + FRAME_OFFSET).toString().padStart(4, '0');
-
-        img.onload = () => {
-          frames[index] = img;
-          resolve();
-        };
-        img.onerror = () => {
-          resolve();
-        };
-
-        img.src = `/frames/coris/frame_${frameIndex}.jpg`;
-      });
-    };
-
-    // Load first frame ASAP to unblock FCP
-    loadFrame(0).then(() => {
-      framesRef.current = frames;
-      setIsFirstFrameLoaded(true); // Unblock the drawFrame effect
-
-      const loadRestSequence = async () => {
-        for (let i = 1; i < FRAME_COUNT; i += 20) {
-          const chunk = [];
-          for (let j = i; j < Math.min(i + 20, FRAME_COUNT); j++) {
-            chunk.push(loadFrame(j));
-          }
-          await Promise.all(chunk);
-        }
-      };
-      loadRestSequence();
-    });
-  }, []);
-
-  const drawFrame = (index) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !framesRef.current[index]) return;
-
-    const ctx = canvas.getContext('2d');
-    const img = framesRef.current[index];
-
-    const cw = window.innerWidth * window.devicePixelRatio;
-    const ch = window.innerHeight * window.devicePixelRatio;
-
-    if (canvas.width !== cw || canvas.height !== ch) {
-      canvas.width = cw;
-      canvas.height = ch;
-    }
-
-    const iw = img.naturalWidth;
-    const ih = img.naturalHeight;
-    const scale = Math.max(cw / iw, ch / ih);
-    const dw = iw * scale;
-    const dh = ih * scale;
-    const dx = (cw - dw) / 2;
-    const dy = (ch - dh) / 2;
-
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.drawImage(img, dx, dy, dw, dh);
-  };
-
-  useEffect(() => {
-    if (!isFirstFrameLoaded) return;
-    drawFrame(0);
-    ScrollTrigger.refresh();
-
     const handleScroll = () => {
-      const scrollPos = window.scrollY;
       const loopDistance = 3000;
-      const progress = (scrollPos % loopDistance) / loopDistance;
-      const targetIndex = Math.min(Math.floor(progress * (FRAME_COUNT - 1)), FRAME_COUNT - 1);
-
-      let i = targetIndex;
-      while (i >= 0 && !framesRef.current[i]) i--;
-
-      if (i >= 0) {
-        requestAnimationFrame(() => drawFrame(i));
-      }
+      const progress = Math.min((window.scrollY % loopDistance) / loopDistance, 1);
+      setScrollProgress(progress);
     };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      ScrollTrigger.refresh();
-    };
-  }, [isFirstFrameLoaded]);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Hero animations
   useEffect(() => {
@@ -280,10 +196,10 @@ export default function ShopPage() {
       {/* 2. Products Section with Background Video */}
       <div className="relative min-h-screen overflow-hidden">
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full object-cover opacity-85"
-            style={{ filter: 'brightness(1.1) contrast(1.1) saturate(0.9)' }}
+          <ProceduralCanvas
+            scrollProgress={scrollProgress}
+            className="w-full h-full"
+            style={{ filter: 'brightness(1.1) contrast(1.1) saturate(0.9)', opacity: 0.85 }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-noir/70 via-transparent to-noir" />
         </div>

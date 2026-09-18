@@ -1,0 +1,12 @@
+# Netlify configuration for Vodun Concept Store SPA
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA redirect — toutes les routes → index.html
+# Indispensable pour React Router (BrowserRouter)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

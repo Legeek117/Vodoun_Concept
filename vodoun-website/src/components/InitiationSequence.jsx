@@ -560,6 +560,7 @@ export default function InitiationSequence() {
   const galaxySpeedRef   = useRef(1);
   const galaxyOpacityRef = useRef(1);
 
+  const blackOverlayRef = useRef(null);
   const logoRef = useRef(null);
   const btnRef  = useRef(null);
   const bgRef   = useRef(null);
@@ -665,8 +666,14 @@ export default function InitiationSequence() {
 
   const skipAll = useCallback(() => {
     playSound();
-    setPhase(3);
-  }, [playSound]);
+    // Overlay noir qui monte puis navigate
+    gsap.to(blackOverlayRef.current, {
+      opacity: 1,
+      duration: 0.45,
+      ease: 'power2.in',
+      onComplete: () => navigate('/accueil'),
+    });
+  }, [playSound, navigate]);
 
   return (
     <div ref={bgRef} className="fixed inset-0 overflow-hidden"
@@ -808,6 +815,18 @@ export default function InitiationSequence() {
           </button>
         </div>
       </div>
+
+      {/* Overlay noir pour transitions skip */}
+      <div
+        ref={blackOverlayRef}
+        style={{
+          position: 'fixed', inset: 0,
+          background: '#000',
+          opacity: 0,
+          zIndex: 200,
+          pointerEvents: 'none',
+        }}
+      />
 
       <style>{`
         @keyframes fadeInUp {
