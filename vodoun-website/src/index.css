@@ -28,6 +28,8 @@
     background-color: var(--ivoire);
     color: var(--brun);
     overflow-x: hidden;
+    /* Forcer le scroll vertical — Lenis ne doit pas bloquer le body sur Netlify */
+    overflow-y: auto !important;
     -webkit-font-smoothing: antialiased;
   }
 

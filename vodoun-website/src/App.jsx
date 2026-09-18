@@ -104,6 +104,9 @@ function App() {
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
+      // Empêche Lenis de mettre overflow:hidden sur le html/body
+      // ce qui bloque le scroll natif sur Netlify
+      normalizeWheel: false,
     });
 
     window.lenis = lenis;
