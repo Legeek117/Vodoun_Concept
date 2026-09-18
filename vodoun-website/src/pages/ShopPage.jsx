@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
 import { ALL_PRODUCTS, COLLECTIONS } from '../store';
 import ProductCard from '../components/ProductCard';
 import ProceduralCanvas from '../components/ProceduralCanvas';
 import usePageMeta from '../hooks/usePageMeta';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function ShopPage() {
   const { collectionId } = useParams();
