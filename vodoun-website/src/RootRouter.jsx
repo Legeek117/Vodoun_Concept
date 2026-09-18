@@ -12,7 +12,6 @@ import { LanguageProvider } from './context/LanguageContext';
 
 const App               = lazy(() => import('./App'));
 const InitiationSequence = lazy(() => import('./components/InitiationSequence'));
-// CinematicEntrance conservé mais remplacé par InitiationSequence sur la route "/"
 const ShopPage       = lazy(() => import('./pages/ShopPage'));
 const ProductPage3D  = lazy(() => import('./pages/ProductPage3D'));
 const ContactPage    = lazy(() => import('./pages/ContactPage'));
