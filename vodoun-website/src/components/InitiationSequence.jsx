@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, Suspense, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -28,28 +28,29 @@ const PHASE_BG = {
 
 /* ─────────────────────────────────────────────────────
    Galaxie de fond — phase 0
-   - 15 000 particules petites (size 0.018) sur 3 branches
-   - Couleurs : or chaud centre → bleu-violet bords
-   - speedRef : accélération externe au clic DÉCOUVRIR
-   - opacityRef : fondu progressif pendant transition braises
+   - 18 000 particules fines (size 0.022) sur 3 branches
+   - Couleurs : or chaud centre → argent → or sombre bords
+   - speedRef : accélération au clic DÉCOUVRIR
+   - opacityRef : fondu pendant transition braises
 ───────────────────────────────────────────────────── */
 function GalaxyBackground({ speedRef, opacityRef }) {
   const ref = useRef(null);
 
   const { positions, colors } = useMemo(() => {
-    const COUNT     = 15000;
-    const RADIUS    = 12;
-    const BRANCHES  = 3;
-    const SPIN      = 1.2;
-    const RAND_PWR  = 3;
-    const RAND      = 0.45;
+    const COUNT    = 18000;
+    const RADIUS   = 8;    // rayon réduit pour rester dans le champ fov=65 z=7
+    const BRANCHES = 3;
+    const SPIN     = 1.0;
+    const RAND_PWR = 3;
+    const RAND     = 0.4;
 
     const pos = new Float32Array(COUNT * 3);
     const col = new Float32Array(COUNT * 3);
 
-    const cInner = new THREE.Color('#D2A84E'); // or chaud
-    const cMid   = new THREE.Color('#9B6FD4'); // violet
-    const cOuter = new THREE.Color('#1A1060'); // bleu nuit
+    // Couleurs 100% dorées — dégradé or vif → or Vodun → or sombre
+    const cCore  = new THREE.Color('#FFD060'); // or vif au centre
+    const cMid   = new THREE.Color('#D2B98E'); // or Vodun signature
+    const cOuter = new THREE.Color('#8B6020'); // or sombre aux bords
 
     for (let i = 0; i < COUNT; i++) {
       const i3  = i * 3;
@@ -59,14 +60,14 @@ function GalaxyBackground({ speedRef, opacityRef }) {
       const rnd = (x) => Math.pow(Math.random(), RAND_PWR) * (Math.random() < 0.5 ? 1 : -1) * RAND * x;
 
       pos[i3]     = Math.cos(br + sp) * r + rnd(r);
-      pos[i3 + 1] = rnd(r) * 0.3; // galaxie aplatie
+      pos[i3 + 1] = rnd(r) * 0.25; // aplatie
       pos[i3 + 2] = Math.sin(br + sp) * r + rnd(r);
 
-      // Gradient 3 couleurs : or → violet → bleu nuit
+      // Gradient : or vif → or Vodun → argent
       const t = r / RADIUS;
       let mc;
       if (t < 0.5) {
-        mc = cInner.clone().lerp(cMid, t * 2);
+        mc = cCore.clone().lerp(cMid, t * 2);
       } else {
         mc = cMid.clone().lerp(cOuter, (t - 0.5) * 2);
       }
@@ -80,33 +81,32 @@ function GalaxyBackground({ speedRef, opacityRef }) {
     const speed   = speedRef?.current   ?? 1;
     const opacity = opacityRef?.current ?? 1;
 
-    // Rotation accélérée au clic
-    ref.current.rotation.y += delta * 0.028 * speed;
-    ref.current.rotation.x  = Math.sin(state.clock.elapsedTime * 0.18) * 0.08;
+    // Rotation Y uniquement — pas d'oscillation X pour éviter les trous
+    ref.current.rotation.y += delta * 0.03 * speed;
 
     // Zoom in pendant l'accélération
     if (speed > 1) {
-      ref.current.position.z = Math.min(ref.current.position.z + delta * (speed - 1) * 0.8, 5);
+      ref.current.position.z = Math.min(ref.current.position.z + delta * (speed - 1) * 0.8, 4);
     }
 
-    // Fondu progressif
     if (ref.current.material) {
-      ref.current.material.opacity = opacity * 0.88;
+      ref.current.material.opacity = Math.max(0, opacity * 0.92);
     }
   });
 
   return (
-    <points ref={ref} position={[0, 0, 0]} rotation={[0.25, 0, 0]}>
+    // Inclinaison fixe légère — pas d'oscillation, pas de trous
+    <points ref={ref} position={[0, 0, 0]} rotation={[0.15, 0, 0]}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
         <bufferAttribute attach="attributes-color"    count={colors.length / 3}    array={colors}    itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.018}
+        size={0.022}
         sizeAttenuation
         vertexColors
         transparent
-        opacity={0.88}
+        opacity={0.92}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />
@@ -115,7 +115,8 @@ function GalaxyBackground({ speedRef, opacityRef }) {
 }
 
 /* ─────────────────────────────────────────────────────
-   PhaseText — texte dont la position et le style varient par phase
+   PhaseText — position et style adaptatifs par phase
+   Tous en position fixe pour éviter tout chevauchement
 ───────────────────────────────────────────────────── */
 function PhaseText({ text, visible, phaseKey }) {
   const ref = useRef(null);
@@ -124,156 +125,135 @@ function PhaseText({ text, visible, phaseKey }) {
     if (!ref.current) return;
     if (visible) {
       gsap.fromTo(ref.current,
-        { opacity: 0, scale: 0.9, y: phaseKey === 'heritage' ? -20 : 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: 'power3.out' }
+        { opacity: 0, y: phaseKey === 'heritage' ? -16 : 16 },
+        { opacity: 1, y: 0, duration: 1.0, ease: 'power3.out' }
       );
     } else {
-      gsap.to(ref.current, { opacity: 0, duration: 0.5, ease: 'power2.in' });
+      gsap.to(ref.current, { opacity: 0, duration: 0.4, ease: 'power2.in' });
     }
   }, [visible, phaseKey]);
 
-  // Style et position différents par phase
-  const styles = {
+  // Configs par phase
+  const cfg = {
     heritage: {
-      // En haut, centré, grand, dramatique
-      position: 'absolute',
-      top: 'clamp(40px, 8vh, 80px)',
+      // Haut de l'écran — texte dramatique feu
+      top: 'clamp(32px, 6vh, 64px)',
+      bottom: 'auto',
       left: '50%',
-      transform: 'translateX(-50%)',
-      textAlign: 'center',
-      width: '90vw',
-      maxWidth: '700px',
-      spanStyle: {
-        fontFamily: "'Playfair Display', serif",
-        fontSize: 'clamp(1.1rem, 4vw, 2rem)',
-        letterSpacing: 'clamp(0.15em, 0.8vw, 0.35em)',
-        color: '#FFFFFF',
-        textTransform: 'uppercase',
-        fontWeight: 900,
-        textShadow: '0 0 30px rgba(255,120,20,0.8), 0 0 60px rgba(255,80,0,0.4)',
-        display: 'block',
-        lineHeight: 1.3,
-      },
-      boxStyle: {
-        background: 'rgba(0,0,0,0.0)',
-        backdropFilter: 'none',
-        border: 'none',
-        padding: '0',
-        display: 'inline-block',
-        width: '100%',
-      },
+      xform: 'translateX(-50%)',
+      bg: 'transparent',
+      border: 'none',
+      blur: 'none',
+      pad: '0',
+      fontSize: 'clamp(1rem, 5vw, 2rem)',
+      weight: 900,
+      color: '#FFFFFF',
+      shadow: '0 0 28px rgba(255,110,10,0.9), 0 0 55px rgba(255,60,0,0.4)',
+      tracking: 'clamp(0.12em, 1vw, 0.3em)',
+      upper: true,
+      maxW: '92vw',
     },
     veve: {
-      // Bas-gauche, style plus petit et italique
-      position: 'absolute',
-      bottom: 'clamp(50px, 12vh, 100px)',
-      left: 'clamp(24px, 5vw, 60px)',
-      textAlign: 'left',
-      width: 'auto',
-      maxWidth: '380px',
-      spanStyle: {
-        fontFamily: 'serif',
-        fontSize: 'clamp(0.75rem, 2vw, 1rem)',
-        letterSpacing: '0.12em',
-        color: '#D2B98E',
-        textTransform: 'none',
-        fontWeight: 400,
-        fontStyle: 'italic',
-        textShadow: '0 0 20px rgba(210,185,142,0.5)',
-        display: 'block',
-        lineHeight: 1.6,
-      },
-      boxStyle: {
-        background: 'rgba(0,0,0,0.55)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(210,185,142,0.15)',
-        borderLeft: '3px solid rgba(210,185,142,0.6)',
-        padding: 'clamp(10px, 2vw, 14px) clamp(16px, 3vw, 24px)',
-        display: 'inline-block',
-      },
+      // Bas de l'écran, centré (pas gauche — risque de coupure mobile)
+      top: 'auto',
+      bottom: 'clamp(80px, 14vh, 120px)',
+      left: '50%',
+      xform: 'translateX(-50%)',
+      bg: 'rgba(0,0,0,0.6)',
+      border: '1px solid rgba(210,185,142,0.15)',
+      blur: 'blur(12px)',
+      pad: 'clamp(8px,1.5vh,12px) clamp(14px,4vw,24px)',
+      fontSize: 'clamp(0.7rem, 2.5vw, 0.95rem)',
+      weight: 400,
+      color: '#D2B98E',
+      shadow: '0 0 18px rgba(210,185,142,0.4)',
+      tracking: '0.1em',
+      upper: false,
+      maxW: '88vw',
+      italic: true,
     },
     tunnel: {
-      // Centré, style intermédiaire
-      position: 'absolute',
-      top: '50%',
+      // Bas centré
+      top: 'auto',
+      bottom: 'clamp(60px, 10vh, 100px)',
       left: '50%',
-      transform: 'translateX(-50%)',
-      marginTop: 'clamp(120px, 20vh, 200px)',
-      textAlign: 'center',
-      width: '90vw',
-      maxWidth: '600px',
-      spanStyle: {
-        fontFamily: "'Playfair Display', serif",
-        fontSize: 'clamp(0.75rem, 2.5vw, 1.1rem)',
-        letterSpacing: 'clamp(0.25em, 1.2vw, 0.55em)',
-        color: '#D2B98E',
-        textTransform: 'uppercase',
-        fontWeight: 600,
-        textShadow: '0 0 20px rgba(210,185,142,0.6)',
-        display: 'block',
-      },
-      boxStyle: {
-        background: 'rgba(0,0,0,0.65)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(210,185,142,0.2)',
-        padding: 'clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 40px)',
-        display: 'inline-block',
-        width: '100%',
-      },
+      xform: 'translateX(-50%)',
+      bg: 'rgba(0,0,0,0.65)',
+      border: '1px solid rgba(210,185,142,0.2)',
+      blur: 'blur(16px)',
+      pad: 'clamp(8px,1.5vh,14px) clamp(18px,5vw,40px)',
+      fontSize: 'clamp(0.65rem, 2.5vw, 1rem)',
+      weight: 600,
+      color: '#D2B98E',
+      shadow: '0 0 18px rgba(210,185,142,0.5)',
+      tracking: 'clamp(0.2em, 1.2vw, 0.5em)',
+      upper: true,
+      maxW: '88vw',
     },
     masque: {
-      // En bas centré pour ne pas cacher le masque
-      position: 'absolute',
-      bottom: 'clamp(30px, 6vh, 60px)',
+      // Bas centré — assez grand pour être visible sur mobile
+      top: 'auto',
+      bottom: 'clamp(10px, 2vh, 24px)',
       left: '50%',
-      transform: 'translateX(-50%)',
-      textAlign: 'center',
-      width: '90vw',
-      maxWidth: '500px',
-      spanStyle: {
-        fontFamily: "'Playfair Display', serif",
-        fontSize: 'clamp(0.65rem, 2vw, 0.9rem)',
-        letterSpacing: 'clamp(0.3em, 1.5vw, 0.6em)',
-        color: '#D2B98E',
-        textTransform: 'uppercase',
-        fontWeight: 600,
-        textShadow: '0 0 16px rgba(210,185,142,0.5)',
-        display: 'block',
-      },
-      boxStyle: {
-        background: 'rgba(0,0,0,0.6)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(210,185,142,0.18)',
-        padding: 'clamp(8px, 2vw, 12px) clamp(18px, 4vw, 36px)',
-        display: 'inline-block',
-        width: '100%',
-      },
+      xform: 'translateX(-50%)',
+      bg: 'rgba(0,0,0,0.65)',
+      border: '1px solid rgba(210,185,142,0.2)',
+      blur: 'blur(14px)',
+      pad: 'clamp(8px,1.5vh,14px) clamp(20px,5vw,40px)',
+      fontSize: 'clamp(0.65rem, 2.2vw, 0.9rem)',
+      weight: 600,
+      color: '#D2B98E',
+      shadow: '0 0 16px rgba(210,185,142,0.5)',
+      tracking: 'clamp(0.2em, 1.2vw, 0.5em)',
+      upper: true,
+      maxW: '90vw',
     },
   };
 
-  const s = styles[phaseKey] || styles.tunnel;
+  const c = cfg[phaseKey] || cfg.tunnel;
 
   return (
     <div
       ref={ref}
       style={{
-        position: s.position,
-        top: s.top,
-        bottom: s.bottom,
-        left: s.left,
-        right: s.right,
-        transform: s.transform,
-        marginTop: s.marginTop,
+        position: 'absolute',
+        top: c.top,
+        bottom: c.bottom,
+        left: c.left,
+        transform: c.xform,
         zIndex: 20,
         pointerEvents: 'none',
         opacity: 0,
-        textAlign: s.textAlign,
-        width: s.width,
-        maxWidth: s.maxWidth,
+        textAlign: 'center',
+        maxWidth: c.maxW,
+        width: c.maxW,
       }}
     >
-      <div style={s.boxStyle}>
-        <span style={s.spanStyle}>{text}</span>
+      <div style={{
+        display: 'inline-block',
+        background: c.bg,
+        backdropFilter: c.blur,
+        WebkitBackdropFilter: c.blur,
+        border: c.border,
+        padding: c.pad,
+        maxWidth: '100%',
+      }}>
+        <span style={{
+          display: 'block',
+          fontFamily: c.italic ? 'serif' : "'Playfair Display', serif",
+          fontSize: c.fontSize,
+          fontWeight: c.weight,
+          fontStyle: c.italic ? 'italic' : 'normal',
+          letterSpacing: c.tracking,
+          color: c.color,
+          textTransform: c.upper ? 'uppercase' : 'none',
+          textShadow: c.shadow,
+          lineHeight: 1.35,
+          wordBreak: 'break-word',
+          whiteSpace: 'normal',
+        }}>
+          {text}
+        </span>
       </div>
     </div>
   );
@@ -341,6 +321,19 @@ function PhaseProgress({ phase }) {
 }
 
 /* ─────────────────────────────────────────────────────
+   CameraCenter — force la caméra à regarder exactement
+   vers (0, offsetY, 0) pour un centrage parfait du masque
+───────────────────────────────────────────────────── */
+function CameraCenter({ offsetY = 0, offsetX = 0 }) {
+  const { camera } = useThree();
+  useEffect(() => {
+    camera.lookAt(offsetX, offsetY, 0);
+    camera.updateProjectionMatrix();
+  }, [camera, offsetY, offsetX]);
+  return null;
+}
+
+/* ─────────────────────────────────────────────────────
    MasqueReveal — GLB 3D + textes séquentiels + 10s + zoom
 ───────────────────────────────────────────────────── */
 const MASQUE_STEPS = [
@@ -390,36 +383,33 @@ function MasqueReveal({ visible, onZoomComplete, lang }) {
 
   if (!visible) return null;
 
-  const currentStep = stepIdx >= 0 ? MASQUE_STEPS[stepIdx] : null;
-  const stepText = currentStep ? (lang === 'fr' ? currentStep.fr : currentStep.en) : '';
-
   return (
     <div className="absolute inset-0" style={{ zIndex: 20 }}>
 
-      {/* Halo doré — centré mais décalé vers le haut */}
+      {/* Halo doré — centré sur la zone masque (haut 78% de l'écran) */}
       <div ref={glowRef} style={{
         position: 'absolute',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, calc(-50% - 8vh))',
-        width: 'min(70vw, 60vh, 750px)', height: 'min(70vw, 60vh, 750px)',
+        top: '39%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'min(70vw, 55vh, 700px)', height: 'min(70vw, 55vh, 700px)',
         borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(210,185,142,0.28) 0%, rgba(255,140,20,0.07) 45%, transparent 70%)',
         opacity: 0, pointerEvents: 'none',
       }} />
 
-      {/* Canvas GLB — occupe le haut de l'écran, laisse 22% en bas pour les textes */}
+      {/* Canvas GLB — PLEIN ÉCRAN, caméra pointée pour centrer dans les 78% hauts */}
       <div ref={wrapRef} style={{
         position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: '76%',          // 76% pour laisser 24% au texte en bas
+        inset: 0,
         opacity: 0,
       }}>
         <Canvas
-          camera={{ position: [0, 0, 6], fov: 55 }}
+          camera={{ position: [0, 1.4, 6.8], fov: 42 }}
           style={{ background: 'transparent', width: '100%', height: '100%' }}
           gl={{ alpha: true, antialias: true }}
         >
           <Suspense fallback={null}>
+            <CameraCenter offsetY={0} offsetX={0} />
             <MasqueErrorBoundary>
               <MasqueScene visible={true} />
             </MasqueErrorBoundary>
@@ -427,54 +417,116 @@ function MasqueReveal({ visible, onZoomComplete, lang }) {
         </Canvas>
       </div>
 
-      {/* Zone texte — bas de l'écran, jamais chevauchée par le canvas */}
+      {/* Panneau latéral droit — textes à côté du masque */}
+      <div style={{
+        position: 'absolute',
+        top: 0, right: 0,
+        width: 'clamp(140px, 32vw, 280px)',
+        height: '78%',  // même hauteur que la zone masque
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        padding: 'clamp(16px, 4vw, 40px) clamp(16px, 3vw, 32px)',
+        zIndex: 25,
+        pointerEvents: 'none',
+        gap: '24px',
+      }}>
+        {/* Ligne décorative verticale */}
+        <div style={{
+          position: 'absolute',
+          left: 0, top: '15%', bottom: '15%',
+          width: '1px',
+          background: 'linear-gradient(to bottom, transparent, rgba(210,185,142,0.4) 30%, rgba(210,185,142,0.4) 70%, transparent)',
+        }} />
+
+        {/* Toutes les étapes affichées — s'illuminent une à une */}
+        {MASQUE_STEPS.map((step, i) => {
+          const isActive   = stepIdx >= i;
+          const isCurrent  = stepIdx === i;
+          const label = lang === 'fr' ? step.fr : step.en;
+          return (
+            <div key={i} style={{
+              opacity: isActive ? 1 : 0.18,
+              transition: 'opacity 0.8s ease',
+              paddingLeft: 'clamp(12px, 2vw, 20px)',
+            }}>
+              {/* Numéro */}
+              <span style={{
+                display: 'block',
+                fontSize: 'clamp(0.45rem, 1vw, 0.55rem)',
+                letterSpacing: '0.4em',
+                color: isActive ? '#D2B98E' : 'rgba(210,185,142,0.4)',
+                textTransform: 'uppercase',
+                marginBottom: '4px',
+                fontFamily: 'monospace',
+              }}>
+                0{i + 1}
+              </span>
+              {/* Texte */}
+              <span style={{
+                display: 'block',
+                fontFamily: isCurrent ? 'serif' : "'Playfair Display', serif",
+                fontStyle: isCurrent ? 'italic' : 'normal',
+                fontSize: isCurrent
+                  ? 'clamp(0.75rem, 1.8vw, 1rem)'
+                  : 'clamp(0.6rem, 1.4vw, 0.8rem)',
+                fontWeight: isCurrent ? 400 : 300,
+                color: isCurrent ? '#FFFFFF' : 'rgba(210,185,142,0.65)',
+                textShadow: isCurrent
+                  ? '0 0 20px rgba(210,185,142,0.5), 0 2px 8px rgba(0,0,0,1)'
+                  : 'none',
+                lineHeight: 1.4,
+                transition: 'all 0.6s ease',
+                wordBreak: 'break-word',
+              }}>
+                {label}
+              </span>
+              {/* Petite barre sous l'étape active */}
+              {isCurrent && (
+                <div style={{
+                  width: 'clamp(20px, 3vw, 32px)',
+                  height: '1px',
+                  background: '#D2B98E',
+                  marginTop: '6px',
+                  animation: 'fadeInUp 0.5s ease forwards',
+                }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bas de l'écran — juste le label "LE GARDIEN SE RÉVÈLE" */}
       <div style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
-        height: '24%',
+        height: '22%',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 'clamp(8px, 2vh, 20px) clamp(16px, 4vw, 32px)',
         zIndex: 25,
         pointerEvents: 'none',
+        borderTop: '1px solid rgba(210,185,142,0.08)',
       }}>
-        {currentStep ? (
-          <div
-            key={stepIdx}
-            style={{
-              width: '100%', maxWidth: 'min(560px, 90vw)',
-              textAlign: 'center',
-              animation: 'masqueStepIn 0.9s cubic-bezier(0.22,1,0.36,1) forwards',
-            }}
-          >
-            <div style={{
-              background: 'rgba(0,0,0,0.75)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(210,185,142,0.2)',
-              borderBottom: '2px solid rgba(210,185,142,0.5)',
-              padding: 'clamp(8px, 1.8vh, 14px) clamp(16px, 4vw, 36px)',
-            }}>
-              {/* Compteur */}
-              <span style={{
-                display: 'block',
-                fontSize: 'clamp(0.5rem, 1.2vw, 0.65rem)',
-                letterSpacing: '0.5em',
-                color: 'rgba(210,185,142,0.45)',
-                textTransform: 'uppercase',
-                marginBottom: 'clamp(4px, 0.8vh, 8px)',
-              }}>
-                {stepIdx + 1} / {MASQUE_STEPS.length}
-              </span>
-              {/* Texte TypeWriter */}
-              <TypeWriter text={stepText} visible={!!currentStep} delay={0} />
-            </div>
-          </div>
-        ) : (
-          /* Placeholder invisible pour maintenir la hauteur */
-          <div style={{ height: 'clamp(50px, 8vh, 80px)' }} />
-        )}
+        <div style={{
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(210,185,142,0.15)',
+          padding: 'clamp(8px,1.5vh,12px) clamp(20px,5vw,48px)',
+        }}>
+          <span style={{
+            fontSize: 'clamp(0.55rem, 1.6vw, 0.75rem)',
+            letterSpacing: 'clamp(0.25em, 1.2vw, 0.5em)',
+            color: '#D2B98E',
+            textTransform: 'uppercase',
+            fontFamily: "'Playfair Display', serif",
+            fontWeight: 600,
+            textShadow: '0 0 16px rgba(210,185,142,0.4)',
+          }}>
+            {lang === 'fr' ? 'Le Gardien se Révèle' : 'The Guardian is Revealed'}
+          </span>
+        </div>
       </div>
 
       {/* Fade noir final */}
@@ -583,13 +635,18 @@ export default function InitiationSequence() {
     setVortex(0);
     setShowGalaxy(true); // galaxie reste visible
 
-    // 3. Galaxie commence à s'effacer après 0.4s (fondu croisé)
+    // 3. Galaxie s'efface progressivement après 0.4s — fondu long et doux
     setTimeout(() => {
       const opacityObj = { v: 1 };
       gsap.to(opacityObj, {
-        v: 0, duration: 1.4, ease: 'power2.inOut',
+        v: 0,
+        duration: 2.5,   // 2.5s de fondu doux (vs 1.4s avant)
+        ease: 'power1.inOut',  // ease linéaire pour éviter la coupure brusque
         onUpdate: () => { galaxyOpacityRef.current = opacityObj.v; },
-        onComplete: () => setShowGalaxy(false), // retire du DOM quand invisible
+        onComplete: () => {
+          // Attendre 300ms supplémentaires pour que le dernier frame soit rendu
+          setTimeout(() => setShowGalaxy(false), 300);
+        },
       });
     }, 400);
 
@@ -758,9 +815,9 @@ export default function InitiationSequence() {
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes masqueStepIn {
-          0%   { opacity: 0; transform: translateX(-50%) translateY(20px); }
-          60%  { opacity: 1; transform: translateX(-50%) translateY(-3px); }
-          100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+          0%   { opacity: 0; transform: translateY(20px); }
+          60%  { opacity: 1; transform: translateY(-3px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes blink {
           0%, 100% { opacity: 0; }

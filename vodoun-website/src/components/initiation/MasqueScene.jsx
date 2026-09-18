@@ -1,5 +1,5 @@
 import { useRef, useEffect, Component } from 'react';
-import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
@@ -13,47 +13,11 @@ export class MasqueErrorBoundary extends Component {
   }
 }
 
-/* ─── Caméra auto-fit — tient compte du ratio portrait/paysage ─── */
-function AutoCamera({ targetRef }) {
-  const { camera, size } = useThree();
-  useEffect(() => {
-    const tryFit = () => {
-      if (!targetRef.current || targetRef.current.children.length === 0) {
-        setTimeout(tryFit, 80);
-        return;
-      }
-      const box = new THREE.Box3().setFromObject(targetRef.current);
-      if (box.isEmpty()) { setTimeout(tryFit, 80); return; }
-
-      const sphere = new THREE.Sphere();
-      box.getBoundingSphere(sphere);
-
-      const fovRad = (camera.fov * Math.PI) / 180;
-      const aspect = size.width / size.height;
-
-      // Sur mobile portrait (aspect < 1) utiliser le fov vertical
-      // Sur desktop (aspect > 1) utiliser le fov horizontal
-      const fovH   = 2 * Math.atan(Math.tan(fovRad / 2) * aspect);
-      const minFov = aspect < 1 ? fovRad : Math.min(fovRad, fovH);
-
-      // Facteur 0.82 → masque remplit ~85% de l'écran
-      const dist = (sphere.radius / Math.sin(minFov / 2)) * 0.82;
-
-      // Légèrement au-dessus du centre pour laisser place aux textes
-      const offsetY = sphere.radius * (aspect < 1 ? 0.18 : 0.12);
-      camera.position.set(sphere.center.x, sphere.center.y + offsetY, sphere.center.z + dist);
-      camera.lookAt(sphere.center.x, sphere.center.y + offsetY, sphere.center.z);
-      camera.near = dist * 0.01;
-      camera.far  = dist * 10;
-      camera.updateProjectionMatrix();
-    };
-    tryFit();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return null;
-}
-
-/* ─── Modèle GLB ─── */
+/*
+ * MasqueModel — charge, normalise, centre le GLB sur (0,0,0)
+ * La caméra est positionnée statiquement via Canvas camera prop
+ * → centrage garanti sans AutoCamera qui dérive
+ */
 function MasqueModel({ spinRef, targetRef }) {
   const gltf = useLoader(GLTFLoader, '/masque.glb');
 
@@ -62,15 +26,16 @@ function MasqueModel({ spinRef, targetRef }) {
     const scene = gltf.scene.clone(true);
     scene.updateMatrixWorld(true);
 
+    // Normaliser à 2.8 unités
     const box0 = new THREE.Box3().setFromObject(scene);
     const s0   = new THREE.Vector3();
     box0.getSize(s0);
     const maxDim = Math.max(s0.x, s0.y, s0.z);
     if (maxDim === 0) return;
-
     scene.scale.setScalar(2.8 / maxDim);
     scene.updateMatrixWorld(true);
 
+    // Centrer exactement sur (0, 0, 0)
     const box1   = new THREE.Box3().setFromObject(scene);
     const center = new THREE.Vector3();
     box1.getCenter(center);
@@ -86,15 +51,10 @@ function MasqueModel({ spinRef, targetRef }) {
   useFrame((state) => {
     if (!spinRef.current) return;
     const t = state.clock.elapsedTime;
-    // Pendule gauche/droite doux — amplitude ~31°
-    const pendulum = Math.sin(t * 0.42) * 0.55;
-    spinRef.current.rotation.set(
-      Math.sin(t * 0.28) * 0.03,
-      Math.PI + pendulum,
-      0,
-      'YXZ'
-    );
-    spinRef.current.position.y = Math.sin(t * 0.6) * 0.06;
+    // Rotation fixe — face caméra, aucun balancement
+    spinRef.current.rotation.set(0, Math.PI, 0, 'YXZ');
+    // Flottaison Y pure uniquement
+    spinRef.current.position.set(0, Math.sin(t * 0.5) * 0.12, 0);
   });
 
   return <group ref={spinRef} />;
@@ -154,7 +114,6 @@ export default function MasqueScene({ visible = false }) {
   if (!visible) return null;
   return (
     <MasqueErrorBoundary>
-      <AutoCamera targetRef={targetRef} />
       <MasqueLights />
       <OrbitalParticles />
       <MasqueModel spinRef={spinRef} targetRef={targetRef} />
