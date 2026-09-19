@@ -20,9 +20,16 @@ function App() {
     description: 'Vodoun Concept Store — mobilier d\'art, bijoux, décorations festives et mode inspirés de la culture Vodoun. Artisanat béninois d\'exception à Ouidah, Bénin.',
   });
 
-  // Lenis smooth scroll
+  // Lenis smooth scroll — using GSAP ticker for sync with ScrollTrigger
   useEffect(() => {
+    // Assurez-vous que le scroll est possible
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.body.style.height = '';
+    document.documentElement.style.height = '';
+    
     window.scrollTo(0, 0);
+    
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -30,22 +37,34 @@ function App() {
       normalizeWheel: false,
     });
     window.lenis = lenis;
-    function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-    requestAnimationFrame(raf);
+    
+    // Synchronize Lenis with GSAP ticker for proper ScrollTrigger integration
+    lenis.on('scroll', ScrollTrigger.update);
+    
+    const tick = (time) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
 
     const handleResize = () => ScrollTrigger.refresh();
     window.addEventListener('resize', handleResize);
 
+    // Refresh after Lenis is ready
     setTimeout(() => {
       ScrollTrigger.refresh();
       lenis.scrollTo(0, { immediate: true });
-    }, 500);
+    }, 200);
 
     return () => {
-      lenis.destroy();
+      gsap.ticker.remove(tick);
+      try {
+        lenis.destroy();
+      } catch (e) {
+        // Lenis peut être déjà détruit
+      }
       delete window.lenis;
       window.removeEventListener('resize', handleResize);
-      ScrollTrigger.getAll().forEach(st => st.kill());
     };
   }, []);
 

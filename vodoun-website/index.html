@@ -284,20 +284,20 @@
     <!-- Point de montage React -->
     <div id="root"></div>
 
-    <!--
-      ─── SCRIPT DE SUPPRESSION DU SPLASH ──────────────────────
-      Dès que React a rendu son premier arbre, on déclenche la sortie
-      du splash via CSS transition puis on le retire du DOM.
-      Utilise MutationObserver pour détecter le premier enfant de #root.
-    -->
     <script>
       (function () {
         var splash = document.getElementById('vodoun-splash');
         if (!splash) return;
 
         function removeSplash() {
-          // Rend le body scrollable
+          // Débloquer complètement le scroll AVANT de retirer le splash
+          document.documentElement.style.height = '';
+          document.documentElement.style.overflow = '';
+          document.documentElement.style.overflowY = '';
+          document.body.style.height = '';
           document.body.style.overflow = '';
+          document.body.style.overflowY = '';
+          document.documentElement.classList.remove('vodoun-loading');
 
           // Animation de sortie CSS
           splash.classList.add('splash-exit');
