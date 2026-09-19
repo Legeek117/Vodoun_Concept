@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
@@ -12,8 +12,8 @@ import usePageMeta from './hooks/usePageMeta';
 gsap.registerPlugin(ScrollTrigger);
 
 function App() {
-  const containerRef    = useRef(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const containerRef = useRef(null);
+  const scrollRef    = useRef(0);
 
   usePageMeta({
     title: 'Accueil',
@@ -49,17 +49,23 @@ function App() {
     };
   }, []);
 
-  // ScrollTrigger → scrollProgress 0→1 pour ProceduralCanvas
+  // ScrollTrigger → scrollRef 0→1 sur immersive-zone
   useEffect(() => {
-    const st = ScrollTrigger.create({
-      trigger: '#immersive-zone',
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: true,
-      onUpdate: (self) => setScrollProgress(self.progress),
-    });
-    ScrollTrigger.refresh();
-    return () => st.kill();
+    const update = () => {
+      const zone = document.getElementById('immersive-zone');
+      if (!zone) return;
+      const zoneTop    = zone.getBoundingClientRect().top + window.scrollY;
+      const zoneHeight = zone.offsetHeight - window.innerHeight;
+      if (zoneHeight <= 0) return;
+      scrollRef.current = Math.min(1, Math.max(0, (window.scrollY - zoneTop) / zoneHeight));
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
   }, []);
 
   const universProducts = {
@@ -84,18 +90,18 @@ function App() {
       {/* Zone immersive scrollable */}
       <div id="immersive-zone" className="relative">
 
-        {/* Canvas procédural en fond sticky */}
-        <div className="sticky top-0 h-screen w-full overflow-hidden z-0 pointer-events-none">
+        {/* Canvas absolu — couvre toute la hauteur d'immersive-zone, s'arrête avant le Footer */}
+        <div className="absolute inset-0 w-full overflow-hidden z-0 pointer-events-none">
           <ProceduralCanvas
-            scrollProgress={scrollProgress}
+            scrollRef={scrollRef}
             className="w-full h-full"
             style={{ filter: 'brightness(1.1) contrast(1.05)' }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-noir/40 via-transparent to-noir/60 opacity-80" />
         </div>
 
-        {/* Contenu par-dessus */}
-        <div className="relative z-10 -mt-[100vh]">
+        {/* Contenu par-dessus le canvas */}
+        <div className="relative z-10">
 
           {/* Marquee */}
           <div className="bg-or/90 backdrop-blur-md py-8 md:py-12 overflow-hidden border-y border-noir/20 flex relative z-20">
