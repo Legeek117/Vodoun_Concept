@@ -65,10 +65,10 @@ export default function Navbar({ currentPath }) {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-[100] transition-[background-color,border-color] duration-700 ${isScrolled || location.pathname !== '/' ? 'bg-noir py-4 border-b border-ivoire/10' : 'bg-transparent py-8'}`}
+      className={`fixed top-0 left-0 right-0 z-[100] transition-[background-color,border-color] duration-700 ${isScrolled || location.pathname !== '/' ? 'bg-noir py-3 md:py-4 border-b border-ivoire/10' : 'bg-transparent py-5 md:py-8'}`}
     >
       <div className="max-w-7xl mx-auto px-[5vw]">
-        <div className="flex items-center justify-between gap-6 lg:gap-12">
+        <div className="flex items-center justify-between gap-4 lg:gap-12">
           <Link
             to="/accueil"
             className="cursor-pointer transform hover:scale-105 transition-transform duration-500 flex items-center shrink-0"
@@ -78,7 +78,7 @@ export default function Navbar({ currentPath }) {
               src="/logo_vodoun.png"
               alt="Vodun Concept Store"
               className="logo-glow"
-              style={{ height: 'clamp(64px, 10vw, 78px)', width: 'auto', objectFit: 'contain' }}
+              style={{ height: 'clamp(42px, 7.5vw, 78px)', width: 'auto', objectFit: 'contain' }}
             />
           </Link>
 
