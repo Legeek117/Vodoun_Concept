@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import SoundControl from './components/SoundControl';
 import FloatingCart from './components/FloatingCart';
 import ScrollToTop from './components/ScrollToTop';
+import SmoothScroll from './components/SmoothScroll';
 import GlobalLoader from './components/GlobalLoader';
 import NavigationTransition from './components/NavigationTransition';
 import Footer from './components/Footer';
@@ -47,6 +48,9 @@ function AppRoutes() {
     <>
       {/* Reset scroll + kill ScrollTriggers à chaque changement de route */}
       <ScrollToTop />
+
+      {/* Scroll lissé global (Lenis) — une seule instance pour tout le site */}
+      <SmoothScroll />
 
       {/*
         Overlay de transition inter-pages.

@@ -2,71 +2,27 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import Lenis from '@studio-freight/lenis';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import ProceduralCanvas from './components/ProceduralCanvas';
 import { ALL_PRODUCTS } from './store';
 import usePageMeta from './hooks/usePageMeta';
+import { useLanguage } from './context/LanguageContext';
+import fr from './i18n/fr';
+import en from './i18n/en';
 
 gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const containerRef = useRef(null);
   const scrollRef    = useRef(0);
+  const { lang }     = useLanguage();
+  const t            = lang === 'fr' ? fr : en;
 
   usePageMeta({
     title: 'Accueil',
     description: 'Vodoun Concept Store — mobilier d\'art, bijoux, décorations festives et mode inspirés de la culture Vodoun. Artisanat béninois d\'exception à Ouidah, Bénin.',
   });
-
-  // Lenis smooth scroll — using GSAP ticker for sync with ScrollTrigger
-  useEffect(() => {
-    // Assurez-vous que le scroll est possible
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-    document.body.style.height = '';
-    document.documentElement.style.height = '';
-    
-    window.scrollTo(0, 0);
-    
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      normalizeWheel: false,
-    });
-    window.lenis = lenis;
-    
-    // Synchronize Lenis with GSAP ticker for proper ScrollTrigger integration
-    lenis.on('scroll', ScrollTrigger.update);
-    
-    const tick = (time) => {
-      lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
-
-    const handleResize = () => ScrollTrigger.refresh();
-    window.addEventListener('resize', handleResize);
-
-    // Refresh after Lenis is ready
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-      lenis.scrollTo(0, { immediate: true });
-    }, 200);
-
-    return () => {
-      gsap.ticker.remove(tick);
-      try {
-        lenis.destroy();
-      } catch (e) {
-        // Lenis peut être déjà détruit
-      }
-      delete window.lenis;
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   // ScrollTrigger → scrollRef 0→1 sur immersive-zone
   useEffect(() => {
@@ -211,6 +167,28 @@ function App() {
               </div>
             </div>
           </div>
+
+          {/* Section finale : revivre l'initiation (bouton optionnel) */}
+          <section className="py-24 md:py-40 px-[5vw]">
+            <div className="max-w-4xl mx-auto text-center">
+              <span className="section-label text-or mb-6 block">{t.home.welcome}</span>
+              <h2 className="font-playfair text-ivoire text-3xl md:text-5xl font-black mb-6">{t.home.kudo} — {t.home.replay}</h2>
+              <p className="text-ivoire/70 font-playfair italic text-lg md:text-xl mb-12 leading-relaxed">
+                {t.home.replayIntro}
+              </p>
+              <Link
+                to="/"
+                className="btn-premium inline-flex items-center gap-3 group"
+                aria-label={t.home.replay}
+              >
+                <svg className="w-4 h-4 transition-transform duration-700 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                  <polyline points="21 3 21 9 15 9" />
+                </svg>
+                {t.home.replay}
+              </Link>
+            </div>
+          </section>
 
         </div>
       </div>

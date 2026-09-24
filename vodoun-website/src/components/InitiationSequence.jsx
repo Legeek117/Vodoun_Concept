@@ -191,7 +191,8 @@ function PhaseText({ text, visible, phaseKey }) {
       maxW: '88vw',
     },
     masque: {
-      // Bas centré — assez grand pour être visible sur mobile
+      // (config conservée en secours — l'affichage du titre du Gardien est géré
+      //  par la barre du MasqueReveal, la config masque n'est plus rendue)
       top: 'auto',
       bottom: 'clamp(10px, 2vh, 24px)',
       left: '50%',
@@ -584,12 +585,13 @@ export default function InitiationSequence() {
   }, [phase]);
 
   const t = {
+    kudo     : lang === 'fr' ? 'Kudo' : 'Kudo',
+    welcome  : lang === 'fr' ? 'Bienvenue à Vodun Concept Store' : 'Welcome to Vodun Concept Store',
     discover : lang === 'fr' ? 'DÉCOUVRIR'            : 'DISCOVER',
     skip     : lang === 'fr' ? 'PASSER L\'INITIATION' : 'SKIP INITIATION',
     heritage : lang === 'fr' ? 'LE FEU ANCESTRAL S\'ÉVEILLE' : 'THE ANCESTRAL FIRE AWAKENS',
     veve     : lang === 'fr' ? 'LE SYMBOLE SE TRACE'         : 'THE SYMBOL IS DRAWN',
     tunnel   : lang === 'fr' ? 'ENTREZ DANS LE TEMPLE'       : 'ENTER THE TEMPLE',
-    masque   : lang === 'fr' ? 'LE GARDIEN SE RÉVÈLE'        : 'THE GUARDIAN IS REVEALED',
     citation : lang === 'fr'
       ? '"Là où le sacré devient désirable..."'
       : '"Where the sacred becomes desirable..."',
@@ -712,7 +714,8 @@ export default function InitiationSequence() {
       <PhaseText text={t.heritage} visible={phase === 1}   phaseKey="heritage" />
       <PhaseText text={t.veve}     visible={phase === 2}   phaseKey="veve" />
       <PhaseText text={t.tunnel}   visible={phase === 3.5} phaseKey="tunnel" />
-      <PhaseText text={t.masque}   visible={phase === 4}   phaseKey="masque" />
+      {/* NB : pas de PhaseText "masque" — le MasqueReveal affiche déjà
+          « Le Gardien se Révèle » dans sa barre inférieure (pas de doublon). */}
 
       {/* ═══ CITATION — phase 2, sous le vévé ═══ */}
       {phase === 2 && (
@@ -745,39 +748,54 @@ export default function InitiationSequence() {
       <div className="absolute inset-0 flex flex-col items-center justify-center px-4"
         style={{ zIndex: 10, pointerEvents: phase === 0 ? 'auto' : 'none' }}>
         <div ref={logoRef} className="mb-6 text-center w-full">
-          <div className="relative inline-block"
+          {/* Salutation — mot en Fon + bienvenue, HORS de la case (texte seul) */}
+          <span className="block relative text-center"
             style={{
-              padding: 'clamp(20px, 5vw, 32px) clamp(24px, 7vw, 40px)',
-              background: 'rgba(0,0,0,0.45)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(210,185,142,0.08)',
-              maxWidth: '90vw',
+              fontSize: 'clamp(0.55rem, 2.4vw, 0.8rem)',
+              letterSpacing: 'clamp(0.22em, 1.3vw, 0.45em)',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              color: '#D2B98E',
+              opacity: 0.9,
+              textShadow: '0 0 18px rgba(210,185,142,0.5)',
+              marginBottom: 'clamp(12px, 2.2vw, 20px)',
+              lineHeight: 1.5,
+              whiteSpace: 'normal',
             }}>
-            <span aria-hidden="true" className="font-playfair font-black uppercase leading-[0.85] block absolute inset-x-0 top-0"
-              style={{ fontSize: 'clamp(2.2rem, 12vw, 7rem)', letterSpacing: '-0.04em',
-                color: '#D2B98E', opacity: 0.22, filter: 'blur(20px)', pointerEvents: 'none',
-                top: 'clamp(20px, 5vw, 32px)' }}>
-              VODUN
-            </span>
-            <span className="font-playfair font-black uppercase leading-[0.85] block relative"
-              style={{ fontSize: 'clamp(2.2rem, 12vw, 7rem)', letterSpacing: '-0.04em', color: 'white',
-                textShadow: '0 0 50px rgba(210,185,142,0.35), 0 4px 15px rgba(0,0,0,1)' }}>
-              VODUN
-            </span>
-            <span className="font-playfair font-bold uppercase block relative"
+            {t.kudo} · {t.welcome}
+          </span>
+          {/* Séparateur fin — hors de la case aussi */}
+          <span aria-hidden="true" className="block relative mx-auto"
+            style={{
+              width: 'clamp(36px, 6vw, 60px)',
+              height: '1px',
+              background: 'linear-gradient(to right, transparent, rgba(210,185,142,0.7), transparent)',
+              marginBottom: 'clamp(16px, 3vw, 26px)',
+            }} />
+          {/* Case = uniquement le logo, aux dimensions de l'image (padding vertical minimal) */}
+          <div className="relative inline-block text-center"
+            style={{
+              padding: '6px clamp(16px, 3vw, 28px)',
+              background: 'rgba(0,0,0,0.4)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(210,185,142,0.08)',
+              maxWidth: '94vw',
+            }}>
+            <img
+              src="/logo_vodoun_blanc_crop.png"
+              alt="Vodun Concept Store"
+              className="block relative"
               style={{
-                fontSize: 'clamp(0.55rem, 2.5vw, 1rem)',
-                letterSpacing: 'clamp(0.2em, 1.5vw, 0.45em)',
-                color: '#D2B98E',
-                textShadow: '0 0 25px rgba(210,185,142,0.7)',
-                marginTop: '4px',
-              }}>
-              CONCEPT STORE
-            </span>
+                width: 'clamp(200px, 54vw, 400px)',
+                height: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 0 28px rgba(210,185,142,0.25))',
+              }}
+            />
           </div>
         </div>
 
-        <div ref={btnRef} className="flex flex-col items-center gap-4 w-full" style={{ maxWidth: '320px' }}>
+        <div ref={btnRef} className="flex flex-col items-center gap-4 w-full" style={{ width: 'min(460px, 88vw)' }}>
           {/* DÉCOUVRIR */}
           <button onClick={startSequence} style={{
             width: '100%',

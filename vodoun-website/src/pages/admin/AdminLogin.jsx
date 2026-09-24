@@ -52,7 +52,7 @@ export default function AdminLogin({ onLogin }) {
         {/* Logo */}
         <div style={{ textAlign:'center', marginBottom:'32px' }}>
           <img
-            src="/logo.jpeg"
+            src="/logo_vodoun.png"
             alt="Vodun Concept Store"
             style={{ height:'80px', width:'auto', objectFit:'contain', margin:'0 auto', display:'block' }}
           />

@@ -10,6 +10,10 @@ const en = {
     },
     home: {
         welcome: 'Welcome',
+        kudo: 'Kudo',
+        welcomeFull: 'Welcome to Vodun Concept Store',
+        replay: 'Replay the initiation',
+        replayIntro: 'The Vodun entry experience, relive it anytime.',
         subtitle: 'Discover the temple of the sacred',
         heritage: 'Heritage',
         heritageTitle: 'ANCESTRAL\nHERITAGE',

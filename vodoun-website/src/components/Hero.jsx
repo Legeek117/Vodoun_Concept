@@ -7,6 +7,7 @@ export default function Hero() {
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
+  const replayRef = useRef(null);
   const gridRef = useRef(null);
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export default function Hero() {
     gsap.set([titleRef.current.children], { y: '100%', opacity: 0 });
     gsap.set(subtitleRef.current, { opacity: 0, y: 20 });
     gsap.set(ctaRef.current, { opacity: 0, scale: 0.9 });
+    gsap.set(replayRef.current, { opacity: 0, y: 12 });
     gsap.set(gridRef.current, { opacity: 0 });
 
     tl.to(gridRef.current, { opacity: 0.15, duration: 2, ease: 'power2.inOut' })
@@ -49,6 +51,16 @@ export default function Hero() {
           ease: 'back.out(1.7)',
         },
         '-=0.5'
+      )
+      .to(
+        replayRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+        },
+        '-=0.4'
       );
 
     return () => tl.kill();
@@ -94,10 +106,26 @@ export default function Hero() {
  
         <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 md:gap-8 justify-center items-center">
           <Link to="/boutique" className="btn-premium w-full sm:w-auto text-xs md:text-sm px-10 py-5">
-            Découvrir
+            Collection
           </Link>
-          <Link to="/#pantheon" className="btn-premium bg-transparent text-ivoire border-ivoire hover:bg-ivoire hover:text-noir w-full sm:w-auto text-xs md:text-sm px-10 py-5">
-            Notre héritage
+          <Link to="/projets-pro" className="btn-premium bg-transparent text-ivoire border-ivoire hover:bg-ivoire hover:text-noir w-full sm:w-auto text-xs md:text-sm px-10 py-5">
+            Lancer un projet
+          </Link>
+        </div>
+
+        {/* Lien discret — revivre l'initiation dès le premier écran */}
+        <div ref={replayRef} className="mt-8 flex justify-center">
+          <Link
+            to="/"
+            className="group inline-flex items-center gap-2.5 text-[0.6rem] md:text-[0.65rem] uppercase tracking-[0.35em] text-ivoire/45 hover:text-or transition-colors duration-500 font-bold"
+            aria-label="Revivre l'initiation"
+          >
+            <svg className="w-3.5 h-3.5 transition-transform duration-700 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+              <polyline points="21 3 21 9 15 9" />
+            </svg>
+            Revivre l'initiation
+            <span className="w-0 group-hover:w-6 h-px bg-or transition-all duration-500" />
           </Link>
         </div>
       </div>

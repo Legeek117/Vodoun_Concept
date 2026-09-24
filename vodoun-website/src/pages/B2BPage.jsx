@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import usePageMeta from '../hooks/usePageMeta';
+import ProjectModal from '../components/ProjectModal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,30 +13,96 @@ const SEO_META = {
 };
 
 const HOTEL_SERVICES = [
-  { title: 'Mobilier de salle', desc: 'Chaises, tables avec motifs vévés intégrés.', image: '/Mobilier Résidentiel.png' },
-  { title: 'Luminaires sur mesure', desc: 'Pour salles et lobbies premium.', image: '/Led.png' },
-  { title: 'Masques et sculptures', desc: 'Pour espaces de réception.', image: '/Mobilier Résidentiel.png' },
-  { title: 'Textiles muraux et tentures', desc: 'Pour ambiance identitaire.', image: '/Mobilier Résidentiel.png' },
-  { title: 'Vaisselle artisanale', desc: 'Dressage de table premium pour restaurants d\'exception.', image: '/Mobilier Résidentiel.png' }
+  {
+    title: 'Mobilier de salle', desc: 'Chaises, tables avec motifs vévés intégrés.',
+    domain: 'Hôtel / Restaurant',
+    image: '/Mobilier Résidentiel.png',
+    details: 'Chaises, tables, consoles et paravents en bois massif sculpté, avec motifs vévés intégrés et finitions laque noire & or.',
+    highlights: ['Bois massif sélectionné sur place à Ouidah', 'Motifs vévés gravés dans la masse', 'Capacité 20 à 200 couverts', 'Délais synchronisés sur vos ouvertures'],
+    timeline: 'Délai indicatif : 6 à 10 semaines',
+  },
+  {
+    title: 'Luminaires sur mesure', desc: 'Pour salles et lobbies premium.',
+    domain: 'Hôtel / Restaurant',
+    image: '/Led.png',
+    details: 'Suspensions, lustres et appliques conçus autour de vos volumes : métal perforé, cauris, raphia et micro-LED.',
+    highlights: ['Étude lumière offerte avec chaque devis', 'Projections d\'ombres vévés au sol et aux murs', 'IP adaptée aux zones humides (cuisines, spas)', 'Variateur et scénarios d\'éclairage'],
+    timeline: 'Délai indicatif : 8 à 12 semaines',
+  },
+  {
+    title: 'Masques et sculptures', desc: 'Pour espaces de réception.',
+    domain: 'Hôtel / Restaurant',
+    image: '/Mobilier Résidentiel.png',
+    details: 'Pièces monumentales ou séries décoratives en bois, métal repoussé et techniques mixtes, pour vos halls, salons et suites.',
+    highlights: ['Pièces uniques signées par nos ateliers', 'Adaptation aux dimensions du lieu', 'Accroche et mise en scène fournies'],
+    timeline: 'Délai indicatif : 4 à 8 semaines',
+  },
+  {
+    title: 'Textiles muraux et tentures', desc: 'Pour ambiance identitaire.',
+    domain: 'Hôtel / Restaurant',
+    image: '/Mobilier Résidentiel.png',
+    details: 'Tapisseries, tentures et panneaux textiles en fibres naturelles locales, aux motifs vévés sur mesure dans votre palette.',
+    highlights: ['Fibres naturelles du Bénin : coton, raphia, sisal', 'Isolement phonique et thermique naturel', 'Traitement ignifuge sur demande', 'Nuancier personnalisé'],
+    timeline: 'Délai indicatif : 5 à 9 semaines',
+  },
+  {
+    title: 'Vaisselle artisanale', desc: 'Dressage de table premium pour restaurants d\'exception.',
+    domain: 'Hôtel / Restaurant',
+    image: '/Mobilier Résidentiel.png',
+    details: 'Vaisselle en terre cuite, céramique émaillée et cauris, façonnée à la main pour un dressage unique et racontable.',
+    highlights: ['Fabrication 100 % artisanale', 'Émaux aux teintes signature (or, ivoire, brun)', 'Séries de 12 à 500 pièces', 'Assiettes, plats, coupelles, sets'],
+    timeline: 'Délai indicatif : 6 à 10 semaines',
+  },
 ];
 
 const OFFICE_SERVICES = [
-  { title: 'Bureau de direction', desc: 'Bois massif sculpté, laque noire & incrustations or, bibliothèques rétroéclairées — pièce unique signée.', image: '/Le trône de direction.png' },
-  { title: 'Salle d\'attente', desc: 'Sièges design identitaire en bois et cuir, textiles muraux vévés et éclairage raphia ambiancé.', image: '/La Voute céleste.png' },
-  { title: 'Espace d\'accueil', desc: 'Comptoir sur mesure avec vévé incrusté, signalétique gravée et sculptures de bienvenue.', image: '/Le Rideau Patrimoine.png' },
+  {
+    title: 'Bureau de direction', desc: 'Bois massif sculpté, laque noire & incrustations or, bibliothèques rétroéclairées — pièce unique signée.',
+    domain: 'Bureaux / Siège social',
+    image: '/Le trône de direction.png',
+    details: 'Un poste de commandement à votre image : plateau massif sculpté, rangements intégrés, signalétique discrète et éclairage d\'accent sur les pièces maîtresses.',
+    highlights: ['Étude d\'implantation et plans 3D offerts', 'Incrustations or et laque noire', 'Rangements et câblage intégrés', 'Finition patinée main'],
+    timeline: 'Délai indicatif : 8 à 12 semaines',
+  },
+  {
+    title: 'Salle d\'attente', desc: 'Sièges design identitaire en bois et cuir, textiles muraux vévés et éclairage raphia ambiancé.',
+    domain: 'Bureaux / Siège social',
+    image: '/La Voute céleste.png',
+    details: 'Concevez la première impression de vos visiteurs : assises signature, cloison textile acoustique et lumière chaude sur motif.',
+    highlights: ['Acoustique travaillée (panneaux textiles)', 'Assises bois & cuir sur mesure', 'Ambiance lumière douce', 'Livraison et installation incluses'],
+    timeline: 'Délai indicatif : 6 à 10 semaines',
+  },
+  {
+    title: 'Espace d\'accueil', desc: 'Comptoir sur mesure avec vévé incrusté, signalétique gravée et sculptures de bienvenue.',
+    domain: 'Bureaux / Siège social',
+    image: '/Le Rideau Patrimoine.png',
+    details: 'Un comptoir qui incarne votre marque dès le seuil : bois sculpté, vévé incrusté et mise en lumière du logo.',
+    highlights: ['Comptoir aux cotes exactes de votre hall', 'Vévé ou logo incrusté', 'Signalétique gravée incluse', 'Éclairage LED intégré'],
+    timeline: 'Délai indicatif : 7 à 11 semaines',
+  },
 ];
 
 const MONUMENTAL = [
-  { name: 'Le Sentinelle', desc: 'Lanternes festives multicolores inspirées des masques traditionnels.', tag: 'Déco Festive', image: '/Le Sentinelle.png' },
-  { name: 'La Voûte céleste', desc: 'Installations lumineuses grand format en cauris.', tag: 'Installation', image: '/La Voute céleste.png' },
-  { name: 'Le Nuage de cauris', desc: 'Suspensions sculpturales en cauris, en forme de nuages de lumière.', tag: 'Suspension', image: '/Le nuage de cauris.png' },
-  { name: 'Le Veilleur', desc: 'Totems de lumière en métal perforé et raphia naturel, H 1m à 3m.', tag: 'Totem', image: '/Le veilleur.png' },
-  { name: 'Les Perles de l\'Océan', desc: 'Boules lumineuses de cauris, suspendues ou sur socle.', tag: 'Déco', image: '/Les perles de l\'océan.png' },
-  { name: 'Cristal de la Prospérité', desc: 'Sphère décorative en verre et cauris, symbole d\'abondance.', tag: 'Déco', image: '/Cristal de la prospérité.png' },
-  { name: 'La Couronne de l\'oracle', desc: 'Couronne de cauris : l\'accueil festif du seuil.', tag: 'Accueil', image: '/La courone de l\'oracle.png' },
-  { name: 'La Pluie de cauris', desc: 'Cloisons de lumière en cauris, fils d\'or et micro-LED.', tag: 'Installation', image: '/La pluie de cauris.png' },
-  { name: 'Lanternes Cérémonielles', desc: 'Lanternes festives multicolores inspirées des masques traditionnels.', tag: 'Déco Festive', image: '/Lanternes Cérémonielles.png' },
-  { name: 'Le Rideau Patrimoine', desc: 'Installations sur mesure, symboles Vodun illuminés, grand format.', tag: 'Sur Mesure', image: '/Le Rideau Patrimoine.png' },
+  { title: 'Le Sentinelle', desc: 'Lanternes festives multicolores inspirées des masques traditionnels.', tag: 'Déco Festive', domain: 'Installation monumentale', image: '/Le Sentinelle.png',
+    details: 'Un gardien de lumière pour vos entrées et événements : lanterne monumentale aux couleurs des masques traditionnels, durable et mobile.', highlights: ['Jusqu\'à 3 m de haut', 'Structure aluminium, éclairage LED', 'Montage / démontage en 2h', 'Intérieur comme extérieur'], timeline: 'Délai indicatif : 4 à 7 semaines' },
+  { title: 'La Voûte céleste', desc: 'Installations lumineuses grand format en cauris.', tag: 'Installation', domain: 'Installation monumentale', image: '/La Voute céleste.png',
+    details: 'Un ciel de cauris suspendu au-dessus de vos espaces : installation grand format, modulable, sculptée dans la matière symbole du Bénin.', highlights: ['Grand format sur mesure', 'Mille cauris assemblés à la main', 'Accrochage aérien sécurisé', 'Entretien simplifié'], timeline: 'Délai indicatif : 10 à 16 semaines' },
+  { title: 'Le Nuage de cauris', desc: 'Suspensions sculpturales en cauris, en forme de nuages de lumière.', tag: 'Suspension', domain: 'Installation monumentale', image: '/Le nuage de cauris.png',
+    details: 'Des nuages lumineux suspendus : raffinement et légèreté pour atrium, hall ou salle de réception.', highlights: ['Formes organiques sur mesure', 'Cauris naturels ou dorés', 'Hauteur d\'accroche adaptée', 'Effet « ciel au crépuscule »'], timeline: 'Délai indicatif : 8 à 12 semaines' },
+  { title: 'Le Veilleur', desc: 'Totems de lumière en métal perforé et raphia naturel, H 1m à 3m.', tag: 'Totem', domain: 'Installation monumentale', image: '/Le veilleur.png',
+    details: 'Totem de lumière signé, du hall d\'entreprise à l\'esplanade : métal perforé, raphia naturel et jeu d\'ombres vévés.', highlights: ['Hauteur 1 à 3 m', 'Métal perforé inoxydable', 'Éclairage LED intérieur', 'Socle scellé ou mobile'], timeline: 'Délai indicatif : 6 à 10 semaines' },
+  { title: 'Les Perles de l\'Océan', desc: 'Boules lumineuses de cauris, suspendues ou sur socle.', tag: 'Déco', domain: 'Installation monumentale', image: '/Les perles de l\'océan.png',
+    details: 'Sphères de cauris brillantes, posées ou suspendues, qui évoquent les perles de l\'océan et habillent réceptions et lieux de passage.', highlights: ['Sphères Ø 30 à 120 cm', 'Suspendues ou sur socle', 'Éclairage intérieur doux', 'Léger et facile à installer'], timeline: 'Délai indicatif : 5 à 8 semaines' },
+  { title: 'Cristal de la Prospérité', desc: 'Sphère décorative en verre et cauris, symbole d\'abondance.', tag: 'Déco', domain: 'Installation monumentale', image: '/Cristal de la prospérité.png',
+    details: 'Une sphère précieuse, verre soufflé et cauris, symbole d\'abondance : l\'objet signature de votre espace de réception.', highlights: ['Verre soufflé artisanal', 'Cauris intégrés sous verre', 'Présentoir bois sculpté', 'Édition numérotée'], timeline: 'Délai indicatif : 6 à 9 semaines' },
+  { title: 'La Couronne de l\'oracle', desc: 'Couronne de cauris : l\'accueil festif du seuil.', tag: 'Accueil', domain: 'Installation monumentale', image: '/La courone de l\'oracle.png',
+    details: 'Signez l\'entrée de vos lieux avec une couronne de cauris festive, suspendue ou murale.', highlights: ['Æ 80 à 200 cm', 'Cauris et raphia assemblés main', 'Aimantée ou fixe', 'Intérieur / extérieur couvert'], timeline: 'Délai indicatif : 3 à 6 semaines' },
+  { title: 'La Pluie de cauris', desc: 'Cloisons de lumière en cauris, fils d\'or et micro-LED.', tag: 'Installation', domain: 'Installation monumentale', image: '/La pluie de cauris.png',
+    details: 'Cloison semi-transparente en pluie de cauris et fils d\'or : séparez et éclairez vos espaces avec élégance.', highlights: ['Cloison de séparation lumineuse', 'Fils d\'or et micro-LED', 'Semi-transparence préservée', 'Dimensions sur plan'], timeline: 'Délai indicatif : 9 à 14 semaines' },
+  { title: 'Lanternes Cérémonielles', desc: 'Lanternes festives multicolores inspirées des masques traditionnels.', tag: 'Déco Festive', domain: 'Installation monumentale', image: '/Lanternes Cérémonielles.png',
+    details: 'Série de lanternes festives aux couleurs des cérémonies : éclairez vos allées, terrasses et salles de réception.', highlights: ['Collections coordonnées', 'Format 50 cm à 2 m', 'Résistantes aux intempéries', 'Prise ou batterie'], timeline: 'Délai indicatif : 4 à 7 semaines' },
+  { title: 'Le Rideau Patrimoine', desc: 'Installations sur mesure, symboles Vodun illuminés, grand format.', tag: 'Sur Mesure', domain: 'Installation monumentale', image: '/Le Rideau Patrimoine.png',
+    details: 'Le grand format de vos murs : rideau textile suspendu avec symboles Vodun illuminés, tissé à vos dimensions.', highlights: ['Grand format jusqu\'à 12 m', 'Tissage artisanal sur métier', 'Symboles illuminés en LED', 'Flammable traité'], timeline: 'Délai indicatif : 10 à 14 semaines' },
 ];
 
 const POLES = [
@@ -45,8 +112,112 @@ const POLES = [
   { name: 'Événementiel', sub: 'Présence', desc: 'Vodun Days · FInAB · Festival des Masques · MASA', icon: '✦' },
 ];
 
+const PRESENCE_ITEMS = [
+  {
+    title: 'Masques contemporains', desc: 'Bois sculpté, métal repoussé ou techniques mixtes.',
+    domain: 'Décoration & Objets', image: '/Le Sentinelle.png',
+    details: 'Masques d\'apparat et pièces murales contemporaines : bois sculpté, métal repoussé, techniques mixtes, déclinés dans votre palette.',
+    highlights: ['Pièces uniques ou séries limitées', 'Accroche & éclairage fournis', 'Certificat d\'authenticité'],
+    timeline: 'Délai indicatif : 4 à 7 semaines',
+  },
+  {
+    title: 'Tableaux & bas-reliefs', desc: 'Motifs vévés peints sur bois, fer ou toile.',
+    domain: 'Décoration & Objets', image: '/Mobilier Résidentiel.png',
+    details: 'Œuvres murales aux motifs vévés, peintes ou gravées sur bois, fer et toile tendue : la signature Vodun de vos murs.',
+    highlights: ['Toile tendue ou panneau bois', 'Relief et dorure main', 'Formats jusqu\'à 4 m'],
+    timeline: 'Délai indicatif : 3 à 6 semaines',
+  },
+  {
+    title: 'Sculptures Bocio', desc: 'Figurines contemporaines — œuvre de création originale.',
+    domain: 'Décoration & Objets', image: '/Mobilier Résidentiel.png',
+    details: 'La tradition Bocio réinterprétée en sculptures contemporaines : des pièces de caractère pour vos espaces d\'autorité et de réception.',
+    highlights: ['Création originale signée', 'Bois, métal et assemblages mixtes', 'Pièces de collection'],
+    timeline: 'Délai indicatif : 5 à 9 semaines',
+  },
+  {
+    title: 'Textiles muraux', desc: 'Tapisseries, tentures, macramés en fibres naturelles locales.',
+    domain: 'Décoration & Objets', image: '/Le Rideau Patrimoine.png',
+    details: 'Tapisseries, tentures et macramés tissés en fibres naturelles locales, avec motifs vévés et cotes exactes de vos murs.',
+    highlights: ['Tissage artisanal local', 'Nuancier personnalisé', 'Acoustique améliorée'],
+    timeline: 'Délai indicatif : 5 à 8 semaines',
+  },
+  {
+    title: 'Miroirs encadrés', desc: 'Cadres bois sculptés ou métal avec motifs symboliques.',
+    domain: 'Décoration & Objets', image: '/Mobilier Résidentiel.png',
+    details: 'Miroirs d\'exception aux cadres sculptés bois ou métal, motifs symboliques : agrandissez et signez vos espaces.',
+    highlights: ['Bois massif ou métal découpé', 'Formats ronds, arcs ou libres', 'Suspension dissimulée'],
+    timeline: 'Délai indicatif : 3 à 6 semaines',
+  },
+];
+
+const LUMINAIRE_ITEMS = [
+  {
+    title: 'Suspension métal perforé', desc: 'Projette des ombres de vévés, ambiance unique et mémorable.',
+    domain: 'Luminaires', image: '/Led.png',
+    details: 'Suspension en métal perforé à motifs vévés : la lumière projette des ombres sacrées sur vos murs, pour une ambiance unique.',
+    highlights: ['Patrons vévés découpés au laser', 'LED intégrée, variateur', 'Chute personnalisable'],
+    timeline: 'Délai indicatif : 5 à 8 semaines',
+  },
+  {
+    title: 'Lampe raphia tressé', desc: 'Abat-jour en fibres naturelles, lumière tamisée chaude.',
+    domain: 'Luminaires', image: '/Lanternes Cérémonielles.png',
+    details: 'Abat-jour tressé à la main en raphia et fibres naturelles : une lumière chaude et feutrée, artisanalement béninoise.',
+    highlights: ['Tressage main, pièce unique', 'Douille standard E27', 'Intérieur comme extérieur couvert'],
+    timeline: 'Délai indicatif : 3 à 5 semaines',
+  },
+  {
+    title: 'Lanterne bronze', desc: 'Motifs géométriques découpés au laser, édition artisanale.',
+    domain: 'Luminaires', image: '/Lanternes Cérémonielles.png',
+    details: 'Lanternes en laiton / bronze aux motifs géométriques découpés au laser : l\'édition artisanale pour terrasses et réceptions.',
+    highlights: ['Découpe laser de précision', 'Finitions patinées', 'Format table, mur ou suspendu'],
+    timeline: 'Délai indicatif : 4 à 6 semaines',
+  },
+  {
+    title: 'Bougeoir sculpté bois', desc: 'Bois massif béninois, formes symboliques ciselées.',
+    domain: 'Luminaires', image: '/Le Sentinelle.png',
+    details: 'Bougeoirs et photophores en bois massif béninois, formes symboliques ciselées : une flamme posée sur l\'artisanat local.',
+    highlights: ['Bois massif local', 'Ciselures symboliques', 'Ensembles coordonnés'],
+    timeline: 'Délai indicatif : 2 à 4 semaines',
+  },
+];
+
+/**
+ * ProjectCard — carte de projet cliquable → ouvre la modal de détail + devis.
+ */
+function ProjectCard({ item, variant = 'default', onClick }) {
+  const monumental = variant === 'monumental';
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Voir le projet ${item.title}`}
+      className={`group relative text-left rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/40 hover:shadow-xl transition-all duration-500 w-full overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 ring-or/50 ${monumental ? 'p-8' : 'p-7'}`}
+    >
+      {monumental && item.tag && (
+        <span className="absolute top-4 right-5 text-[9px] uppercase tracking-[0.35em] text-or/50 font-bold z-10">{item.tag}</span>
+      )}
+      <div className="aspect-video mb-5 rounded-2xl overflow-hidden relative">
+        <img src={item.image} alt={item.title} loading="lazy" decoding="async"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        {/* Hover overlay "Voir le projet" */}
+        <div className="absolute inset-0 bg-noir/0 group-hover:bg-noir/25 transition-colors duration-500 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-ivoire font-bold bg-noir/60 backdrop-blur px-4 py-2 rounded-full">
+            Voir le projet
+          </span>
+        </div>
+      </div>
+      <h3 className={`font-playfair ${monumental ? 'text-2xl font-black' : 'text-xl font-bold'} text-noir mb-2`}>{item.title}</h3>
+      <p className="text-brun/60 text-sm leading-relaxed">{item.desc}</p>
+      <span className="inline-flex items-center gap-2 mt-4 text-[10px] uppercase tracking-[0.3em] text-or font-bold group-hover:gap-3 transition-all duration-300">
+        Demander un devis <span aria-hidden="true">→</span>
+      </span>
+    </button>
+  );
+}
+
 export default function B2BPage() {
   const [sent, setSent] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   const glowRef = useRef(null);
   const sectionsRef = useRef([]);
   const cardRef = useRef(null);
@@ -128,13 +299,7 @@ export default function B2BPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {HOTEL_SERVICES.map((s, i) => (
-                <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
-                  <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
-                  <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
-                </div>
+                <ProjectCard key={i} item={s} onClick={() => setSelectedProject(s)} />
               ))}
             </div>
           </div>
@@ -149,13 +314,7 @@ export default function B2BPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {OFFICE_SERVICES.map((s, i) => (
-                <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
-                  <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
-                  <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
-                </div>
+                <ProjectCard key={i} item={s} onClick={() => setSelectedProject(s)} />
               ))}
             </div>
           </div>
@@ -170,14 +329,7 @@ export default function B2BPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {MONUMENTAL.map((item, i) => (
-                <div key={i} className="group relative p-8 rounded-3xl overflow-hidden border border-brun/10 bg-white/40 hover:border-or/40 hover:shadow-xl transition-all duration-700">
-                  <span className="absolute top-4 right-5 text-[9px] uppercase tracking-[0.35em] text-or/50 font-bold z-10">{item.tag}</span>
-                  <div className="aspect-video mb-5 rounded-2xl overflow-hidden relative z-10">
-                    <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  </div>
-                  <h3 className="font-playfair text-2xl font-black text-noir mb-4 relative z-10">{item.name}</h3>
-                  <p className="text-brun/60 text-sm leading-relaxed relative z-10">{item.desc}</p>
-                </div>
+                <ProjectCard key={i} item={item} variant="monumental" onClick={() => setSelectedProject(item)} />
               ))}
             </div>
           </div>
@@ -192,20 +344,8 @@ export default function B2BPage() {
               <p className="text-brun/40 text-xs uppercase tracking-widest text-right hidden md:block max-w-xs">Ces objets l'habitent.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { title: 'Masques contemporains', desc: 'Bois sculpté, métal repoussé ou techniques mixtes.', image: '/Le Sentinelle.png' },
-                { title: 'Tableaux & bas-reliefs', desc: 'Motifs vévés peints sur bois, fer ou toile.', image: '/Mobilier Résidentiel.png' },
-                { title: 'Sculptures Bocio', desc: 'Figurines contemporaines — œuvre de création originale.', image: '/Mobilier Résidentiel.png' },
-                { title: 'Textiles muraux', desc: 'Tapisseries, tentures, macramés en fibres naturelles locales.', image: '/Le Rideau Patrimoine.png' },
-                { title: 'Miroirs encadrés', desc: 'Cadres bois sculptés ou métal avec motifs symboliques.', image: '/Mobilier Résidentiel.png' }
-              ].map((s, i) => (
-                <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
-                  <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
-                  <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
-                </div>
+              {PRESENCE_ITEMS.map((s, i) => (
+                <ProjectCard key={i} item={s} onClick={() => setSelectedProject(s)} />
               ))}
             </div>
           </div>
@@ -220,19 +360,8 @@ export default function B2BPage() {
               <p className="text-brun/40 text-xs uppercase tracking-widest text-right hidden md:block max-w-xs">Des ombres sacrées sur vos murs</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { title: 'Suspension métal perforé', desc: 'Projette des ombres de vévés, ambiance unique et mémorable.', image: '/Led.png' },
-                { title: 'Lampe raphia tressé', desc: 'Abat-jour en fibres naturelles, lumière tamisée chaude.', image: '/Lanternes Cérémonielles.png' },
-                { title: 'Lanterne bronze', desc: 'Motifs géométriques découpés au laser, édition artisanale.', image: '/Lanternes Cérémonielles.png' },
-                { title: 'Bougeoir sculpté bois', desc: 'Bois massif béninois, formes symboliques ciselées.', image: '/Le Sentinelle.png' }
-              ].map((s, i) => (
-                <div key={i} className="group p-7 rounded-3xl border border-brun/10 bg-white/40 hover:bg-white/60 hover:border-or/30 hover:shadow-lg transition-all duration-500">
-                  <div className="aspect-video mb-5 rounded-2xl overflow-hidden">
-                    <img src={s.image} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <h3 className="font-playfair text-xl font-bold text-noir mb-2">{s.title}</h3>
-                  <p className="text-brun/60 text-sm leading-relaxed">{s.desc}</p>
-                </div>
+              {LUMINAIRE_ITEMS.map((s, i) => (
+                <ProjectCard key={i} item={s} onClick={() => setSelectedProject(s)} />
               ))}
             </div>
           </div>
@@ -318,6 +447,11 @@ export default function B2BPage() {
 
         </div>
       </div>
+
+      {/* ── MODAL DÉTAIL PROJET + DEVIS ── */}
+      {selectedProject && (
+        <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+      )}
     </div>
   );
 }

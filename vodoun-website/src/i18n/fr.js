@@ -10,6 +10,10 @@ const fr = {
     },
     home: {
         welcome: 'Bienvenue',
+        kudo: 'Kudo',
+        welcomeFull: 'Bienvenue à Vodun Concept Store',
+        replay: 'Revivre l\'initiation',
+        replayIntro: "L'expérience d'entrée Vodun, à revivre à tout moment.",
         subtitle: 'Découvrez le temple du sacré',
         heritage: 'Héritage',
         heritageTitle: 'HÉRITAGE\nANCESTRAL',

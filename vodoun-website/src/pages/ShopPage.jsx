@@ -227,7 +227,7 @@ export default function ShopPage() {
             <div className="lg:col-span-1">
               <a href="/accueil" aria-label="Vodun Concept Store â€” Accueil">
                 <img
-                  src="/logo.jpeg"
+                  src="/logo_vodoun.png"
                   alt="Vodun Concept Store"
                   style={{ height: 'clamp(50px, 8vw, 80px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
                 />

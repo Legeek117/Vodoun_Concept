@@ -70,7 +70,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-[5vw]">
           <div className="reveal mb-8">
             <img
-              src="/logo.jpeg"
+              src="/logo_vodoun.png"
               alt="Vodun Concept Store"
               style={{ height: 'clamp(48px, 7vw, 80px)', width: 'auto', objectFit: 'contain' }}
             />

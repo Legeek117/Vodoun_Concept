@@ -8,8 +8,10 @@ import en from '../i18n/en';
 
 export default function Navbar({ currentPath }) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navRef = useRef(null);
+  const lastScrollY = useRef(0);
   const location = useLocation();
   const { currency, setCurrency, SYMBOLS } = useCurrency();
   const { lang, toggleLang } = useLanguage();
@@ -26,10 +28,31 @@ export default function Navbar({ currentPath }) {
   ];
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      const y = window.scrollY;
+      setIsScrolled(y > 50);
+      // Masquer le header quand on scrolle vers le bas (au-delà du seuil),
+      // le réafficher dès qu'on scrolle vers le haut (ou menu ouvert).
+      if (y > 120 && y > lastScrollY.current && !isMenuOpen) {
+        setIsHidden(true);
+      } else if (y < lastScrollY.current || isMenuOpen) {
+        setIsHidden(false);
+      }
+      lastScrollY.current = y;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMenuOpen]);
+
+  // Slide du header géré par GSAP pour éviter tout conflit avec l'animation d'entrée
+  useEffect(() => {
+    if (!navRef.current) return;
+    gsap.to(navRef.current, {
+      y: isHidden ? -140 : 0,
+      duration: 0.55,
+      ease: 'power3.out',
+    });
+  }, [isHidden]);
 
   useEffect(() => {
     gsap.fromTo(navRef.current, { y: -100, opacity: 0 }, { y: 0, opacity: 1, duration: 1.5, ease: 'expo.out', delay: 1 });
@@ -42,19 +65,20 @@ export default function Navbar({ currentPath }) {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${isScrolled || location.pathname !== '/' ? 'bg-noir py-4 border-b border-ivoire/10' : 'bg-transparent py-8'}`}
+      className={`fixed top-0 left-0 right-0 z-[100] transition-[background-color,border-color] duration-700 ${isScrolled || location.pathname !== '/' ? 'bg-noir py-4 border-b border-ivoire/10' : 'bg-transparent py-8'}`}
     >
       <div className="max-w-7xl mx-auto px-[5vw]">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-6 lg:gap-12">
           <Link
             to="/accueil"
-            className="cursor-pointer transform hover:scale-105 transition-transform duration-500 flex items-center"
+            className="cursor-pointer transform hover:scale-105 transition-transform duration-500 flex items-center shrink-0"
             aria-label="Vodun Concept Store — Accueil"
           >
             <img
-              src="/logo.jpeg"
+              src="/logo_vodoun.png"
               alt="Vodun Concept Store"
-              style={{ height: 'clamp(36px, 5vw, 52px)', width: 'auto', objectFit: 'contain' }}
+              className="logo-glow"
+              style={{ height: 'clamp(64px, 10vw, 78px)', width: 'auto', objectFit: 'contain' }}
             />
           </Link>
 
@@ -74,7 +98,7 @@ export default function Navbar({ currentPath }) {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className={`relative px-6 py-3 rounded-full transition-all duration-500 font-black uppercase tracking-[0.25em] text-[0.55rem] ${isActive ? 'text-noir bg-or shadow-[0_4px_20px_rgba(184,134,11,0.4)]' : 'text-ivoire/80 hover:text-ivoire hover:bg-white/5'}`}
+                    className={`relative px-5 lg:px-6 py-3 rounded-full transition-all duration-500 font-black uppercase tracking-[0.25em] text-[0.55rem] ${isActive ? 'text-noir bg-or shadow-[0_4px_20px_rgba(184,134,11,0.4)]' : 'text-ivoire/80 hover:text-ivoire hover:bg-white/5'}`}
                   >
                     {link.name}
                   </Link>

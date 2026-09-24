@@ -56,11 +56,10 @@
       /* Reset minimal pour que le splash couvre exactement la fenêtre */
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      html, body {
-        height: 100%;
-        overflow: hidden; /* Évite tout flash de scroll pendant le splash */
-        background: #0A0705; /* Fond quasi-noir — identique au gradient du GlobalLoader */
-      }
+      /* Fond foncé sur html UNIQUEMENT (évite le flash blanc), sans jamais
+         bloquer le scroll : html/body doivent rester scrollables à tout moment,
+         sinon la page est figée (visible sur mobile iOS/Android). */
+      html { background: #0A0705; }
 
       /* ── Conteneur splash ─────────────────────────────────── */
       #vodoun-splash {

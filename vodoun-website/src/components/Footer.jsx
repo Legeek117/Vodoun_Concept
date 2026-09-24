@@ -15,9 +15,10 @@ export default function Footer() {
                     <div className="lg:col-span-1">
                         <Link to="/accueil" aria-label="Vodun Concept Store — Accueil">
                             <img
-                                src="/logo.jpeg"
+                                src="/logo_vodoun.png"
                                 alt="Vodun Concept Store"
-                                style={{ height: 'clamp(50px, 8vw, 80px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
+                                className="logo-glow"
+                                style={{ height: 'clamp(72px, 14vw, 100px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
                             />
                         </Link>
                         <p className="text-ivoire/60 text-sm leading-relaxed mb-6">Ouidah, Bénin</p>

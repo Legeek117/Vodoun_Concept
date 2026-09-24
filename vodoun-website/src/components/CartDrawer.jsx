@@ -61,7 +61,10 @@ export default function CartDrawer({ isOpen, onClose }) {
       // Animate out
       const tl = gsap.timeline({
         onComplete: () => {
-          document.body.style.overflow = 'auto';
+          // Restaure le scroll du document (retour au CSS de base).
+          // NE PAS mettre 'auto' : ça créerait un scroll container interne
+          // qui peut geler le scroll de la page (idem body overflow-y).
+          document.body.style.overflow = '';
         }
       });
 
@@ -105,7 +108,14 @@ export default function CartDrawer({ isOpen, onClose }) {
           <div>
             <span className="text-[9px] uppercase tracking-[0.4em] text-or/50 mb-1 block">Votre Sélection</span>
             <h2 className="font-playfair text-2xl md:text-3xl font-bold text-ivoire flex items-center gap-3">
-              <span className="text-or">✦</span> Panier <span className="text-or/40">({totalItems})</span>
+              <img
+                src="/icone.png"
+                alt=""
+                className="icon-glow-form h-8 md:h-9 w-auto translate-y-[3px] flex-shrink-0"
+                loading="lazy"
+                decoding="async"
+              />
+              Panier <span className="text-or/40">({totalItems})</span>
             </h2>
           </div>
           <button
@@ -122,8 +132,14 @@ export default function CartDrawer({ isOpen, onClose }) {
         <div className="flex-grow overflow-y-auto px-4 md:px-8 py-6 scrollbar-hide" ref={itemsContainerRef}>
           {cart.length === 0 ? (
             <div className="text-center flex flex-col items-center justify-center h-full py-12">
-              <div className="w-24 h-24 rounded-full bg-or/5 flex items-center justify-center mb-6 border border-or/10">
-                <span className="text-4xl text-or/30">✦</span>
+              <div className="w-24 h-24 rounded-full bg-or/5 flex items-center justify-center mb-6 border border-or/15 overflow-hidden icon-glow">
+                <img
+                  src="/icone.png"
+                  alt=""
+                  className="w-full h-full object-contain p-2"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               <h3 className="font-playfair text-2xl text-ivoire mb-3">Votre panier est vide</h3>
               <p className="text-ivoire/40 text-sm uppercase tracking-widest mb-8 max-w-[200px] leading-relaxed italic">
