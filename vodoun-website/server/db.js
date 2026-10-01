@@ -1,6 +1,7 @@
-// Connexion PostgreSQL + schéma + seed initial
-// Compatible PostgreSQL 9.2+ : pas de JSONB, pas de gen_random_uuid() (uuid générés côté Node)
-import { Pool } from 'pg';
+// Connexion MariaDB/MySQL + schéma + seed initial
+// Compatible MariaDB 10.x : AUTO_INCREMENT, pas de RETURNING (avant 10.5), pas d'ON CONFLICT.
+// UUID/refs générés côté Node (crypto), JSON stocké en LONGTEXT.
+import mysql from 'mysql2/promise';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -8,85 +9,95 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || process.env.PGDATABASE_URL,
-  host: process.env.PGHOST || 'localhost',
-  port: Number(process.env.PGPORT || 5432),
-  database: process.env.PGDATABASE || 'voduncon_bdd',
-  user: process.env.PGUSER || 'voduncon_admin',
-  password: process.env.PGPASSWORD || '',
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-});
+// Options de connexion — DATABASE_URL (mysql://...) ou variables DB_* séparées
+const dbOptions = process.env.DATABASE_URL
+  ? { uri: process.env.DATABASE_URL, ...{ charset: 'utf8mb4', connectionLimit: 10, namedPlaceholders: false } }
+  : {
+      host: process.env.DB_HOST || 'localhost',
+      port: Number(process.env.DB_PORT || 3306),
+      user: process.env.DB_USER || 'voduncon_admin',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'voduncon_bdd',
+      charset: 'utf8mb4',
+      connectionLimit: 10,
+    };
+
+export const pool = mysql.createPool(dbOptions);
+
+// Helper : une requête = un appel `query()`, résultat promisifié par mysql2/promise
+// SELECT → rows ; INSERT/UPDATE/DELETE → ResultSetHeader { affectedRows, insertId }
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS products (
-  id                TEXT PRIMARY KEY,
-  name              TEXT NOT NULL,
-  category          TEXT,
-  collection        TEXT,
-  deity             TEXT,
+  id                VARCHAR(128) NOT NULL PRIMARY KEY,
+  name              VARCHAR(255) NOT NULL,
+  category          VARCHAR(128),
+  collection        VARCHAR(128),
+  deity             VARCHAR(128),
   story             TEXT,
   description       TEXT,
-  price             NUMERIC NOT NULL DEFAULT 0,
-  image             TEXT,
-  video             TEXT,
-  delay             TEXT,
-  available         BOOLEAN NOT NULL DEFAULT true,
-  is_custom_order   BOOLEAN NOT NULL DEFAULT false,
-  is_numbered       BOOLEAN NOT NULL DEFAULT false,
-  has_certificate   BOOLEAN NOT NULL DEFAULT false,
-  variants          TEXT NOT NULL DEFAULT '[]',
-  created_at        TIMESTAMP DEFAULT now(),
-  updated_at        TIMESTAMP DEFAULT now()
-);
+  price             DECIMAL(12,2) NOT NULL DEFAULT 0,
+  image             VARCHAR(512),
+  video             VARCHAR(512),
+  delay             VARCHAR(64),
+  available         TINYINT(1) NOT NULL DEFAULT 1,
+  is_custom_order   TINYINT(1) NOT NULL DEFAULT 0,
+  is_numbered       TINYINT(1) NOT NULL DEFAULT 0,
+  has_certificate   TINYINT(1) NOT NULL DEFAULT 0,
+  variants          LONGTEXT NOT NULL,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_category (category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS orders (
-  id            SERIAL PRIMARY KEY,
-  ref           TEXT UNIQUE,
-  customer_name TEXT NOT NULL,
-  customer_email TEXT,
-  customer_phone TEXT,
-  address       TEXT,
-  city          TEXT,
-  country       TEXT,
-  currency      TEXT NOT NULL DEFAULT 'XOF',
-  total         NUMERIC DEFAULT 0,
-  items         TEXT NOT NULL DEFAULT '[]',
-  status        TEXT NOT NULL DEFAULT 'nouvelle',
-  payment_method TEXT,
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  ref           VARCHAR(32) UNIQUE,
+  customer_name VARCHAR(255) NOT NULL,
+  customer_email VARCHAR(255),
+  customer_phone VARCHAR(64),
+  address       VARCHAR(512),
+  city          VARCHAR(128),
+  country       VARCHAR(128),
+  currency      VARCHAR(16) NOT NULL DEFAULT 'XOF',
+  total         DECIMAL(12,2) DEFAULT 0,
+  items         LONGTEXT NOT NULL,
+  status        VARCHAR(32) NOT NULL DEFAULT 'nouvelle',
+  payment_method VARCHAR(64),
   note          TEXT,
-  created_at    TIMESTAMP DEFAULT now()
-);
+  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS quotes (
-  id            SERIAL PRIMARY KEY,
-  ref           TEXT UNIQUE,
-  client_name   TEXT NOT NULL,
-  email         TEXT,
-  phone         TEXT,
-  domain        TEXT,
-  project_title TEXT,
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  ref           VARCHAR(32) UNIQUE,
+  client_name   VARCHAR(255) NOT NULL,
+  email         VARCHAR(255),
+  phone         VARCHAR(64),
+  domain        VARCHAR(128),
+  project_title VARCHAR(255),
   message       TEXT,
-  details       TEXT NOT NULL DEFAULT '{}',
-  status        TEXT NOT NULL DEFAULT 'nouvelle',
-  created_at    TIMESTAMP DEFAULT now()
-);
+  details       LONGTEXT NOT NULL,
+  status        VARCHAR(32) NOT NULL DEFAULT 'nouvelle',
+  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS settings (
-  key   TEXT PRIMARY KEY,
-  value TEXT
-);
+  \`key\`   VARCHAR(128) NOT NULL PRIMARY KEY,
+  \`value\` TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS admins (
-  id            SERIAL PRIMARY KEY,
-  username      TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  token         TEXT,
-  created_at    TIMESTAMP DEFAULT now()
-);
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  username      VARCHAR(128) NOT NULL UNIQUE,
+  password_hash VARCHAR(128) NOT NULL,
+  token         VARCHAR(128),
+  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
+
+// Découpe en requêtes individuelles (pas de multipleStatements : surface d'attaque minimale)
+const SCHEMA_STATEMENTS = SCHEMA.split(';').map((s) => s.trim()).filter(Boolean);
 
 // Génération de références type "CMD-20261002-4F2A"
 export function makeRef(prefix) {
@@ -98,7 +109,9 @@ export function makeRef(prefix) {
 }
 
 export async function init() {
-  await pool.query(SCHEMA);
+  for (const stmt of SCHEMA_STATEMENTS) {
+    await pool.query(stmt);
+  }
   await seedProducts();
   await seedAdmin();
 }
@@ -118,33 +131,34 @@ export function rowToProduct(r) {
     image: r.image,
     video: r.video,
     delay: r.delay,
-    available: r.available,
-    isCustomOrder: r.is_custom_order,
-    isNumbered: r.is_numbered,
-    hasCertificate: r.has_certificate,
+    available: r.available === 1 || r.available === true,
+    isCustomOrder: r.is_custom_order === 1,
+    isNumbered: r.is_numbered === 1,
+    hasCertificate: r.has_certificate === 1,
     variants,
     createdAt: r.created_at,
   };
 }
 
 async function seedProducts() {
-  const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM products');
+  const [rows] = await pool.query('SELECT COUNT(*) AS n FROM products');
   if (rows[0].n > 0) return;
   const file = path.join(__dirname, 'seed-products.json');
   if (!fs.existsSync(file)) return;
   const products = JSON.parse(fs.readFileSync(file, 'utf8'));
   for (const p of products) {
-    // Compatible PostgreSQL 9.2 : pas d'ON CONFLICT (dispo depuis 9.5)
+    // MariaDB < 10.5 : pas d'ON CONFLICT → INSERT ... SELECT ... WHERE NOT EXISTS
     await pool.query(
       `INSERT INTO products
         (id, name, category, collection, deity, story, description, price, image, video, delay, available, is_custom_order, is_numbered, has_certificate, variants)
-       SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16
-       WHERE NOT EXISTS (SELECT 1 FROM products WHERE id = $1)`,
+       SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+       WHERE NOT EXISTS (SELECT 1 FROM products WHERE id = ?)`,
       [
         p.id, p.name, p.category || null, p.collection || null, p.deity || null,
         p.story || null, p.description || null, p.price ?? 0, p.image || null, p.video || null,
-        p.delay || null, p.available !== false, !!p.isCustomOrder, !!p.isNumbered,
-        !!p.hasCertificate, JSON.stringify(p.variants || []),
+        p.delay || null, p.available !== false ? 1 : 0, p.isCustomOrder ? 1 : 0,
+        p.isNumbered ? 1 : 0, p.hasCertificate ? 1 : 0, JSON.stringify(p.variants || []),
+        p.id, // 17e paramètre : WHERE NOT EXISTS (id = ?)
       ]
     );
   }
@@ -152,14 +166,14 @@ async function seedProducts() {
 }
 
 async function seedAdmin() {
-  const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM admins');
+  const [rows] = await pool.query('SELECT COUNT(*) AS n FROM admins');
   if (rows[0].n > 0) return;
   const username = process.env.ADMIN_USER || 'admin';
   const password = process.env.ADMIN_PASSWORD || crypto.randomBytes(6).toString('hex');
   const token = crypto.randomBytes(24).toString('hex');
   const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
   await pool.query(
-    'INSERT INTO admins (username, password_hash, token) VALUES ($1, $2, $3)',
+    'INSERT INTO admins (username, password_hash, token) VALUES (?, ?, ?)',
     [username, sha(password), token]
   );
   console.log(`[db] Admin créé : ${username}`);
