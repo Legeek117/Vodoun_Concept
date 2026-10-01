@@ -26,7 +26,7 @@ export default function AdminDashboard({ products, orders, setActiveSection }) {
   const totalRevenue  = orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0);
   const pending       = orders.filter(o => o.status === 'pending').length;
   const delivered     = orders.filter(o => o.status === 'delivered').length;
-  const recent        = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  const recent        = [...orders].sort((a, b) => new Date(b._ts || b.date) - new Date(a._ts || a.date)).slice(0, 5);
   const categoryCounts = products.reduce((acc, p) => { acc[p.category] = (acc[p.category] || 0) + 1; return acc; }, {});
 
   return (

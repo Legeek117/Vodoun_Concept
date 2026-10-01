@@ -1,5 +1,6 @@
 ﻿/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from "react";
+import { apiGetProducts } from "./api";
 
 const CartContext = createContext();
 
@@ -8,6 +9,17 @@ export const CartProvider = ({ children }) => {
     const saved = localStorage.getItem("VODUN-cart");
     return saved ? JSON.parse(saved) : [];
   });
+
+  // Catalogue : chargé depuis la BDD (API), fallback sur les données locales
+  const [products, setProducts] = useState(ALL_PRODUCTS);
+
+  useEffect(() => {
+    let active = true;
+    apiGetProducts()
+      .then((list) => { if (active && Array.isArray(list) && list.length) setProducts(list); })
+      .catch(() => { /* hors-ligne : on garde le fallback local */ });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("VODUN-cart", JSON.stringify(cart));
@@ -60,6 +72,7 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider
       value={{
         cart,
+        products,
         addToCart,
         removeFromCart,
         updateQuantity,
@@ -74,6 +87,7 @@ export const CartProvider = ({ children }) => {
 };
 
 export const useCart = () => useContext(CartContext);
+export const useProducts = () => useContext(CartContext).products;
 
 export const ALL_PRODUCTS = [
   {
@@ -84,7 +98,7 @@ export const ALL_PRODUCTS = [
     story: `Le Veilleur se tient à l'entrée comme une présence bienveillante. Sa partie haute, en métal perforé au laser, projette des vévés de lumière ; sa base de raphia tressé diffuse une lueur chaude et vivante. Aligné le long d'une allée ou posté à un seuil, il accueille, oriente et protège.`,
     description: `Totems de lumière en métal perforé et raphia naturel. H 1m à 3m, personnalisable.`,
     price: 150000,
-    image: "/Le veilleur.png",
+    image: "/Le veilleur.webp",
     deity: "Legba",
     available: true,
     variants: [
@@ -106,7 +120,7 @@ export const ALL_PRODUCTS = [
     story: `Ni mur, ni vide : un voile. La Pluie de cauris tombe du plafond en rideaux scintillants qui séparent sans cloisonner. Modulaire, elle s'étire en ligne ou tourne à l'angle pour dessiner des espaces : un salon dans un hall, une scène dans une salle, une vitrine dans la ville.`,
     description: `Cloisons de lumière en cauris, fils d'or et micro- LED.Modulaire et sur mesure.`,
     price: 250000,
-    image: "/La pluie de cauris.png",
+    image: "/La pluie de cauris.webp",
     deity: "Mami Wata",
     available: true,
     variants: [
@@ -128,7 +142,7 @@ export const ALL_PRODUCTS = [
     story: `Chaque perle est un océan condensé : des cauris sertis d'or autour d'un cœur de lumière. Déclinées du diamètre d'un fruit à celui d'une lune, Les Perles de l'Océan se suspendent en grappes ou se posent en majesté sur socle, pour signer halls, vitrines et salons d'une élégance rituelle.`,
     description: `Boules lumineuses de cauris, suspendues ou sur socle.`,
     price: 35000,
-    image: "/Les perles de l'océan.png",
+    image: "/Les perles de l'océan.webp",
     deity: "Dan",
     available: true,
     variants: [
@@ -149,7 +163,7 @@ export const ALL_PRODUCTS = [
     story: `Petite par la taille, grande par le sens. Le Cristal de la Prospérité enferme de vrais cauris et des vévés dorés dans une sphère de verre transparent : un vœu d'abondance que l'on suspend au sapin, à une vitrine, ou que l'on offre. Le cadeau d'entreprise qui porte une intention.`,
     description: `Sphère décorative en verre et cauris : symbole d'abondance.`,
     price: 18000,
-    image: "/Cristal de la prospérité.png",
+    image: "/Cristal de la prospérité.webp",
     deity: "Sakpata",
     available: true,
     variants: ["S", "L"],
@@ -164,7 +178,7 @@ export const ALL_PRODUCTS = [
     story: `Sur une porte, une vitrine ou un mur, la Couronne de l'Oracle annonce la fête tout en racontant une histoire. Cercle de cauris serrés, symbole de prospérité et de protection, elle remplace la couronne de houx par un emblème né du golfe de Guinée. Un cercle qui dit : ici, l'abondance est bienvenue.`,
     description: `Couronne de cauris : l'accueil festif du seuil.`,
     price: 42000,
-    image: "/La courone de l'oracle.png",
+    image: "/La courone de l'oracle.webp",
     deity: "Legba",
     available: true,
     variants: ["Ø50", "Ø80"],
@@ -179,7 +193,7 @@ export const ALL_PRODUCTS = [
     story: `Imaginez un nuage descendu se poser dans un salon. Le Nuage de cauris est une suspension organique faite de centaines de coquillages nacrés qui captent et diffusent une lumière douce. Seul, il devient pièce maîtresse ; en archipel, il dessine un ciel intérieur suspendu au-dessus de vos invités.`,
     description: `Suspensions sculpturales en cauris, en forme de nuages de lumière.`,
     price: 180000,
-    image: "/Le nuage de cauris.png",
+    image: "/Le nuage de cauris.webp",
     deity: "Mami Wata",
     available: true,
     variants: ["S", "M", "XL"],
@@ -194,7 +208,7 @@ export const ALL_PRODUCTS = [
     story: `Le cauris fut monnaie, parure et oracle. Suspendu par milliers, il devient ici un ciel. La Voûte céleste tapisse un plafond entier de fils de cauris lumineux et compose une canopée scintillante au-dessus des halls et des réceptions. On ne traverse pas cet espace : on entre sous une voûte d'abondance.`,
     description: `Installations lumineuses grand format en cauris.`,
     price: 550000,
-    image: "/La Voute céleste.png",
+    image: "/La Voute céleste.webp",
     deity: "Mami Wata",
     available: true,
     variants: ["Sur mesure"],
@@ -209,7 +223,7 @@ export const ALL_PRODUCTS = [
     story: `Gardiens de nuit du patrimoine Vodun, les Sentinelles veillaient autrefois sur les passages et les seuils. La collection les réimagine en sculptures lumineuses monumentales : des cascades de fils teints rouge, or, indigo, turquoise qui s'embrasent à la tombée du jour. Posées en allée ou en duo, elles transforment une place ou une galerie marchande en théâtre de lumière.`,
     description: `Lanternes festives multicolores inspirées des masques traditionnels.`,
     price: 120000,
-    image: "/Le Sentinelle.png",
+    image: "/Le Sentinelle.webp",
     deity: "Legba",
     available: true,
     variants: ["1.5m", "2m"],
@@ -224,7 +238,7 @@ export const ALL_PRODUCTS = [
     story: `Suspendues en guirlandes au-dessus d'une place ou d'un marché, les Lanternes Cérémonielles ravivent l'esprit de fête. Chaque lanterne porte un visage : masque stylisé percé de lumière, dans des coloris vifs rouge, vert, indigo, or, blanc. La nuit, elles dessinent un ciel de visages bienveillants au-dessus de la foule.`,
     description: `Lanternes festives multicolores inspirées des masques traditionnels.`,
     price: 25000,
-    image: "/Lanternes Cérémonielles.png",
+    image: "/Lanternes Cérémonielles.webp",
     deity: "Xevioso",
     available: true,
     variants: ["Set de 3", "Set de 6", "Set de 12"],
@@ -239,7 +253,7 @@ export const ALL_PRODUCTS = [
     story: `Quand une marque ou une nation veut inscrire son identité dans la lumière, le Rideau Patrimoine répond. Façades de cauris et de fils d'or, vévés monumentaux dessinés en LED, symboles qui s'allument à la nuit : c'est une œuvre architecturale autant qu'une décoration. Une signature de prestige pour sièges sociaux, hôtels et ambassades culturelles.`,
     description: `Installations sur mesure, symboles Vodun illuminés, grand format.`,
     price: 850000,
-    image: "/Le Rideau Patrimoine.png",
+    image: "/Le Rideau Patrimoine.webp",
     deity: "Tous",
     available: true,
     variants: ["Sur devis"],
@@ -254,7 +268,7 @@ export const ALL_PRODUCTS = [
     story: `Porter le sacré au quotidien. Chaque t-shirt est une toile : un vévé sérigraphié à l'or ou en ton-sur-ton, tiré des symboles du panthéon. Coupe contemporaine, coton lourd 220g/m², et une collection par divinité pour choisir son signe autant que son style.`,
     description: `Coton 220g/m², motifs vévés, collections par divinités.`,
     price: 8000,
-    image: "/T-shirts sérigraphiés.png",
+    image: "/T-shirts sérigraphiés.webp",
     deity: "Tous",
     available: true,
     variants: ["XS", "S", "M", "L", "XL", "3XL"],
@@ -269,7 +283,7 @@ export const ALL_PRODUCTS = [
     story: `La tête se couronne aussi. Coton brossé 6 panneaux, broderie vévé ton-sur-ton. Un vêtement discret qui porte subtilement les valeurs et le signe de votre divinité.`,
     description: `Coton brossé 6 panneaux, broderie vévé ton-sur-ton.`,
     price: 8000,
-    image: "/Casquettes & Headwear.png",
+    image: "/Casquettes & Headwear.webp",
     deity: "Tous",
     available: true,
     variants: ["Taille Unique"],
@@ -284,7 +298,7 @@ export const ALL_PRODUCTS = [
     story: `Urbain et identitaire. Logo brodé en or véritable, fermeture arrière avec encoche en laiton lourd gravée au symbole de la marque. Une casquette 5 panneaux à l'allure résolument premium.`,
     description: `Logo brodé or, fermeture laiton gravé du symbole de la marque.`,
     price: 9000,
-    image: "/Casquettes & Headwear.png",
+    image: "/Casquettes & Headwear.webp",
     deity: "Tous",
     available: true,
     variants: ["Taille Unique"],
@@ -299,7 +313,7 @@ export const ALL_PRODUCTS = [
     story: `L'icône des gardiens du rituel. Tissu local wax revisité avec subtilité, doublure en pur satin noir pour préserver le cheveu, ce couvre-chef traditionnel se porte fier. Édition limitée signée.`,
     description: `Tissu local wax, doublure satin noir, édition limitée signée.`,
     price: 15000,
-    image: "/Casquettes & Headwear.png",
+    image: "/Casquettes & Headwear.webp",
     deity: "Tous",
     available: true,
     variants: ["S/M", "L/XL"],
@@ -314,7 +328,7 @@ export const ALL_PRODUCTS = [
     story: `La tête se couronne aussi. Bucket hat en wax premium béninois, motifs géométriques Vodun, doublure soie, édition numérotée. Un vestiaire de tête qui passe du street au cérémoniel sans changer d'âme.`,
     description: `Tissu wax premium, motifs géométriques Vodun, doublure soie.`,
     price: 12000,
-    image: "/Casquettes & Headwear.png",
+    image: "/Casquettes & Headwear.webp",
     deity: "Tous",
     available: true,
     variants: ["S/M", "L/XL"],
@@ -329,7 +343,7 @@ export const ALL_PRODUCTS = [
     story: `L’élégance posée. La chemise col mao réinterprète le vestiaire formel avec des broderies géométriques tirées des vévés et des boutons de bois tournés. À porter au bureau comme en cérémonie : l’identité Vodun, dans sa version habillée.`,
     description: `Col mao, broderies géométriques, boutons bois.`,
     price: 35000,
-    image: "/T-shirts sérigraphiés.png",
+    image: "/T-shirts sérigraphiés.webp",
     deity: "Tous",
     available: true,
     variants: ["S", "M", "L", "XL"],
@@ -344,7 +358,7 @@ export const ALL_PRODUCTS = [
     story: `Ces objets ne meublent pas un espace. Ils l’habitent. Masques contemporains, bas-reliefs peints, sculptures Bocio originales, textiles muraux en fibres locales, miroirs encadrés de symboles : chaque objet décoratif porte le geste de l’artisan et la charge du symbole. Des œuvres à vivre, pas seulement à regarder.`,
     description: `Masques, sculptures, textiles muraux. Œuvres d’art décoratives.`,
     price: 85000,
-    image: "/Mobilier Résidentiel.png",
+    image: "/Mobilier Résidentiel.webp",
     deity: "Tous",
     available: true,
     variants: [
@@ -365,7 +379,7 @@ export const ALL_PRODUCTS = [
     story: `Le temps, gravé dans le bois du Bénin. Chaque montre est une pièce numérotée : boîtier en bois local ou métal forgé, cadran orné d'un vévé, bracelet en cuir tanné ou raphia tressé. Au dos, votre gravure. Un objet qui se transmet.`,
     description: `Boîtier bois ou métal forgé, cadran vévé, éditions numérotées.`,
     price: 65000,
-    image: "/Montres Artisanales.png",
+    image: "/Montres Artisanales.webp",
     deity: "Tous",
     available: true,
     variants: [
@@ -386,7 +400,7 @@ export const ALL_PRODUCTS = [
     story: `Un bracelet Vodun n'est pas un bijou. C'est une protection. Perles Asso aux couleurs codées par divinité, ou joncs en bronze coulé à l'ancienne. Chaque bracelet est livré avec son certificat de symbolique.`,
     description: `Perles Asso couleurs codées ou bronze coulé, avec certificat.`,
     price: 3500,
-    image: "/Bracelets de puissance.png",
+    image: "/Bracelets de puissance.webp",
     video: "/b19e787ca1fc41728cd6725092ba5736.mp4",
     deity: "Tous",
     available: true,
@@ -411,7 +425,7 @@ export const ALL_PRODUCTS = [
     story: `L'élégance du cuir rencontrant l'artisanat béninois. Des sacoches et accessoires de maroquinerie conçus pour durer, marqués de l'empreinte Vodun pour une identité forte au quotidien.`,
     description: `Cuir véritable, tannage artisanal, motifs gravés.`,
     price: 45000,
-    image: "/Maroquinerie & sacoches.png",
+    image: "/Maroquinerie & sacoches.webp",
     deity: "Tous",
     available: true,
     variants: [
@@ -432,7 +446,7 @@ export const ALL_PRODUCTS = [
     story: `Du mobilier qui se transmet. Sièges sculptés à la pyrogravure, tables aux pieds de fer forgé symbolique, lits à baldaquin forgé, rangements à panneaux sacrés : chaque pièce est en bois massif béninois, pensée pour durer une génération et porter, gravée, la mémoire d'un symbole.`,
     description: `Bois massif béninois, pyrogravure, incrustations métal — pièce unique signée.`,
     price: 450000,
-    image: "/Mobilier Résidentiel.png",
+    image: "/Mobilier Résidentiel.webp",
     deity: "Tous",
     available: true,
     variants: [
@@ -452,7 +466,7 @@ export const ALL_PRODUCTS = [
     story: `La pièce signature. Bois massif sculpté à la main, laque noire mate et incrustations or, vévés gravés en relief, cuir pleine fleur capitonné : Le Trône de Direction est un fauteuil de pouvoir, pivotant et réglable, fabriqué en pièce unique signée pour durer une génération.`,
     description: `Bois massif sculpté, laque noire + incrustations or, cuir pleine fleur. Pièce unique signée.`,
     price: 750000,
-    image: "/Le trône de direction.png",
+    image: "/Le trône de direction.webp",
     deity: "Ogou",
     available: true,
     variants: ["Finition Or — Cuir Noir", "Finition Or — Cuir Brun"],
@@ -468,7 +482,7 @@ export const ALL_PRODUCTS = [
     story: `Des ombres sacrées sur vos murs. Inspirée des lanternes royales, cette suspension en métal travaillé diffuse la lumière à travers des ornementations percées, tissant des vévés d'ombres et de reflets sur votre intérieur.`,
     description: `Projette des ombres de vévés, ambiance unique et mémorable.`,
     price: 65000,
-    image: "/Led.png",
+    image: "/Led.webp",
     deity: "Xevioso",
     available: true,
     variants: ["Bronze", "Noir mat", "Or patiné"],
@@ -483,7 +497,7 @@ export const ALL_PRODUCTS = [
     story: `La chaleur des fibres naturelles locales au service de la lumière sacrée. Fabriquée par nos artisans tresseurs, cet abat-jour enveloppe l'ampoule pour créer une lueur ambrée et très chaleureuse, qui rappelle le couchant de Ouidah.`,
     description: `Abat-jour en fibres naturelles locales, lumière tamisée chaude.`,
     price: 45000,
-    image: "/Led.png",
+    image: "/Led.webp",
     deity: "Tous",
     available: true,
     variants: ["S", "M", "L"],
@@ -498,7 +512,7 @@ export const ALL_PRODUCTS = [
     story: `L'art du métal au service de la foi. De lourdes feuilles de bronze soigneusement découpées au laser suivant des motifs géométriques millénaires. Une édition artisanale de pur prestige pour magnifier vos bougies ou ampoules.`,
     description: `Motifs géométriques découpés au laser, édition artisanale bronze.`,
     price: 110000,
-    image: "/Led.png",
+    image: "/Led.webp",
     deity: "Tous",
     available: true,
     variants: ["Petit format", "Grand format"],
@@ -513,7 +527,7 @@ export const ALL_PRODUCTS = [
     story: `Dans l'intimité, le feu éclaire la voie. Massif, trapu et élégant, ce bougeoir taillé à même la souche du bois tropical béninois arbore les silhouettes longilignes de nos gardiens tutélaires. Idéal pour accueillir un cierge rituel.`,
     description: `Bois massif béninois, formes symboliques ciselées par la main de l'homme.`,
     price: 25000,
-    image: "/Led.png",
+    image: "/Led.webp",
     deity: "Ogou",
     available: true,
     variants: ["Taille unique"],
@@ -528,7 +542,7 @@ export const ALL_PRODUCTS = [
     story: `Habiller votre espace d'une identité africaine d'exception. Un projet d'ambiance complet. Mobilier de salle à motifs vévés, luminaires sur mesure pour lobbies premium, masques de réception, et vaisselle artisanale : un accompagnement design et sourcing de bout en bout pour donner à votre établissement une forte identité culturelle.`,
     description: `Aménagement sur mesure B2B pour hôtels et restaurants, signature afro-premium.`,
     price: 1500000,
-    image: "/Mobilier Résidentiel.png",
+    image: "/Mobilier Résidentiel.webp",
     deity: "Tous",
     available: true,
     variants: ["Sur Devis - Étude architecturale"],
@@ -543,7 +557,7 @@ export const ALL_PRODUCTS = [
     story: `Une marque qui vous ressemble, jusque dans les murs. Du bureau de direction en bois massif noir incrusté d'or au comptoir d'accueil gravé, en passant par la signalétique, nous équipons vos espaces de bureau d'une identité Vodun cohérente.`,
     description: `Aménagement sur mesure B2B (Bureau direction, salle d'attente, accueil).`,
     price: 1200000,
-    image: "/Mobilier Résidentiel.png",
+    image: "/Mobilier Résidentiel.webp",
     deity: "Tous",
     available: true,
     variants: ["Sur Devis - Projet sur mesure"],

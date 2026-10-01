@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { apiAdminSettings, apiAdminUpdateSettings } from '../../../api';
 
 const iStyle = { background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'10px', color:'#F4F0E6', padding:'9px 13px', fontSize:'0.85rem', outline:'none', fontFamily:"'Plus Jakarta Sans', sans-serif", transition:'border-color 0.2s, box-shadow 0.2s' };
 
@@ -44,7 +45,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export default function AdminSettings({ onLogout }) {
+export default function AdminSettings({ onLogout, token }) {
   const [s, setS] = useState({
     siteName:'Vodun Concept Store', siteSlogan:"Là où le sacré devient désirable",
     adminEmail:'admin@vodun-concept.com', contactEmail:'contact@vodun-concept.com',
@@ -56,18 +57,56 @@ export default function AdminSettings({ onLogout }) {
   const [newPwd,   setNewPwd]   = useState('');
   const [confPwd,  setConfPwd]  = useState('');
   const [pwdMsg,   setPwdMsg]   = useState('');
+  const [loaded,   setLoaded]   = useState(false);
+
+  // Chargement des réglages depuis la BDD
+  useEffect(() => {
+    if (!token) return;
+    apiAdminSettings(token)
+      .then((data) => {
+        if (!data) return;
+        setS(prev => ({
+          ...prev,
+          siteName: data.siteName || prev.siteName,
+          siteSlogan: data.siteSlogan || prev.siteSlogan,
+          adminEmail: data.adminEmail || prev.adminEmail,
+          contactEmail: data.contactEmail || prev.contactEmail,
+          whatsapp: data.whatsapp || prev.whatsapp,
+          instagram: data.instagram || prev.instagram,
+          currency: data.currency || prev.currency,
+          maintenanceMode: data.maintenanceMode === 'true',
+          showPrices: data.showPrices === 'true',
+          allowOrders: data.allowOrders === 'true',
+        }));
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, [token]);
 
   const set = k => v => setS(p => ({...p, [k]:v}));
   const inp = k => e => setS(p => ({...p, [k]:e.target.value}));
 
-  const save = () => { localStorage.setItem('vodun-admin-settings', JSON.stringify(s)); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+  const save = async () => {
+    try {
+      await apiAdminUpdateSettings(token, {
+        siteName: s.siteName, siteSlogan: s.siteSlogan, adminEmail: s.adminEmail,
+        contactEmail: s.contactEmail, whatsapp: s.whatsapp, instagram: s.instagram,
+        currency: s.currency,
+        maintenanceMode: String(s.maintenanceMode), showPrices: String(s.showPrices),
+        allowOrders: String(s.allowOrders),
+      });
+      setSaved(true); setTimeout(() => setSaved(false), 2500);
+    } catch {
+      setSaved(false);
+    }
+  };
 
   const changePwd = () => {
     if (newPwd.length < 8) { setPwdMsg('8 caractères minimum.'); return; }
     if (newPwd !== confPwd) { setPwdMsg('Les mots de passe ne correspondent pas.'); return; }
-    setPwdMsg('Mis à jour (effectif avec le backend).');
+    setPwdMsg('Modifiez ADMIN_PASSWORD dans les variables d\'environnement du serveur (Plesk) puis redémarrez l\'application.');
     setNewPwd(''); setConfPwd('');
-    setTimeout(() => { setPwdMsg(''); setPwdOpen(false); }, 3000);
+    setTimeout(() => { setPwdMsg(''); setPwdOpen(false); }, 6000);
   };
 
   return (
@@ -133,11 +172,13 @@ export default function AdminSettings({ onLogout }) {
         </Row>
       </Section>
 
-      {/* Backend notice */}
-      <div style={{ borderRadius:'14px', border:'1px solid rgba(184,134,11,0.2)', background:'rgba(184,134,11,0.04)', padding:'16px 20px' }}>
-        <p style={{ fontSize:'0.65rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.25em', color:'#B8860B', margin:'0 0 6px' }}>⚡ Backend non connecté</p>
+      {/* Notice backend */}
+      <div style={{ borderRadius:'14px', border:'1px solid rgba(45,128,80,0.3)', background:'rgba(45,128,80,0.06)', padding:'16px 20px' }}>
+        <p style={{ fontSize:'0.65rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.25em', color:'#2d8050', margin:'0 0 6px' }}>
+          {loaded ? '✓ Connecté à la base de données' : 'Connexion à la base…'}
+        </p>
         <p style={{ fontSize:'0.75rem', color:'rgba(244,240,230,0.4)', margin:0, lineHeight:1.6 }}>
-          Données en localStorage uniquement. Une fois Supabase ou Firebase branché, tout sera synchronisé en temps réel.
+          Réglages enregistrés dans PostgreSQL (serveur d'hébergement). Le mot de passe admin se modifie via la variable d'environnement <code style={{ color:'#B8860B' }}>ADMIN_PASSWORD</code> (Plesk → Node.js).
         </p>
       </div>
 

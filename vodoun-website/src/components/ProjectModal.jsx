@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiCreateQuote } from '../api';
 
 /**
  * ProjectModal — détail d'un projet professionnel + demande de devis.
@@ -24,8 +25,19 @@ export default function ProjectModal({ project, onClose }) {
 
   if (!project) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      await apiCreateQuote({
+        client_name: fd.get('nom') || '',
+        email: fd.get('email') || '',
+        phone: fd.get('telephone') || '',
+        domain: fd.get('type') || '',
+        project_title: project.title,
+        message: fd.get('message') || '',
+      });
+    } catch { /* Le mailto reste un fallback ; la confirmation s'affiche dans tous les cas */ }
     setSent(true);
   };
 
@@ -105,22 +117,22 @@ Merci de me faire parvenir un devis personnalisé.`;
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Nom complet</label>
-                        <input required type="text" placeholder="Jean Dupont" className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
+                        <input required type="text" name="nom" placeholder="Jean Dupont" className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
                       </div>
                       <div>
                         <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Email</label>
-                        <input required type="email" placeholder="contact@entreprise.com" className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
+                        <input required type="email" name="email" placeholder="contact@entreprise.com" className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
                       </div>
                     </div>
 
                     <div>
                       <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Téléphone (facultatif)</label>
-                      <input type="tel" placeholder="+229 ..." className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
+                      <input type="tel" name="telephone" placeholder="+229 ..." className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
                     </div>
 
                     <div>
                       <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Type de projet</label>
-                      <select required defaultValue={project.domain || 'Autre'} className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun">
+                      <select required name="type" defaultValue={project.domain || 'Autre'} className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun">
                         <option value="Hôtel / Restaurant">Hôtel / Restaurant</option>
                         <option value="Bureaux / Siège social">Bureaux / Siège social</option>
                         <option value="Installation monumentale">Installation monumentale</option>
@@ -137,7 +149,7 @@ Merci de me faire parvenir un devis personnalisé.`;
 
                     <div>
                       <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Description du projet</label>
-                      <textarea required defaultValue={prefillDesc} rows={5} className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun resize-none" />
+                      <textarea required name="message" defaultValue={prefillDesc} rows={5} className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun resize-none" />
                     </div>
 
                     <button type="submit" className="w-full py-4 rounded-xl font-bold uppercase tracking-[0.4em] text-sm mt-2 shadow-lg hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(135deg, #B8860B, #8a6208)', color: '#F4F0E6' }}>

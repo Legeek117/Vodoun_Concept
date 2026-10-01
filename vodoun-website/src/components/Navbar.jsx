@@ -75,7 +75,7 @@ export default function Navbar({ currentPath }) {
             aria-label="Vodun Concept Store — Accueil"
           >
             <img
-              src="/logo_vodoun.png"
+              src="/logo_vodoun.webp"
               alt="Vodun Concept Store"
               className="logo-glow"
               style={{ height: 'clamp(42px, 7.5vw, 78px)', width: 'auto', objectFit: 'contain' }}

@@ -2,15 +2,40 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../store';
 import { useCurrency } from '../context/CurrencyContext';
+import { apiCreateOrder } from '../api';
 import gsap from 'gsap';
 
 export default function CartDrawer({ isOpen, onClose }) {
   const { cart, removeFromCart, updateQuantity, totalPrice, clearCart, totalItems } = useCart();
   const { formatPrice } = useCurrency();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [orderRef, setOrderRef] = useState(null);
+  const [orderError, setOrderError] = useState(null);
   const drawerRef = useRef(null);
   const overlayRef = useRef(null);
   const itemsContainerRef = useRef(null);
+
+  const handleCheckout = async () => {
+    setOrderError(null);
+    try {
+      const res = await apiCreateOrder({
+        customer_name: 'Client site web',
+        currency: 'XOF',
+        total: totalPrice,
+        items: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          qty: item.quantity,
+          price: item.price,
+          options: item.options || {},
+        })),
+      });
+      setOrderRef(res.ref || null);
+    } catch (e) {
+      setOrderError(e.message);
+    }
+    setIsCheckingOut(true);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -109,7 +134,7 @@ export default function CartDrawer({ isOpen, onClose }) {
             <span className="text-[9px] uppercase tracking-[0.4em] text-or/50 mb-1 block">Votre Sélection</span>
             <h2 className="font-playfair text-2xl md:text-3xl font-bold text-ivoire flex items-center gap-3">
               <img
-                src="/icone.png"
+                src="/icone.webp"
                 alt=""
                 className="icon-glow-form h-8 md:h-9 w-auto translate-y-[3px] flex-shrink-0"
                 loading="lazy"
@@ -134,7 +159,7 @@ export default function CartDrawer({ isOpen, onClose }) {
             <div className="text-center flex flex-col items-center justify-center h-full py-12">
               <div className="w-24 h-24 rounded-full bg-or/5 flex items-center justify-center mb-6 border border-or/15 overflow-hidden icon-glow">
                 <img
-                  src="/icone.png"
+                  src="/icone.webp"
                   alt=""
                   className="w-full h-full object-contain p-2"
                   loading="lazy"
@@ -240,7 +265,7 @@ export default function CartDrawer({ isOpen, onClose }) {
             </div>
 
             <button
-              onClick={() => setIsCheckingOut(true)}
+              onClick={handleCheckout}
               className="group relative w-full py-4 rounded-xl font-bold uppercase tracking-[0.4em] text-sm overflow-hidden transition-all duration-300"
               style={{
                 background: 'linear-gradient(135deg, #B8860B 0%, #8a6208 100%)',
@@ -277,6 +302,20 @@ export default function CartDrawer({ isOpen, onClose }) {
               <p className="text-ivoire/60 mb-10 text-center text-sm md:text-lg leading-relaxed font-playfair italic">
                 Notre système de paiement est en cours de consécration. Pour finaliser votre acquisition dès maintenant, notre équipe vous accompagne personnellement.
               </p>
+              {orderRef && !orderError && (
+                <div className="mb-8 text-center">
+                  <div className="inline-flex items-center gap-3 px-5 py-3 rounded-xl border border-or/40 bg-or/10">
+                    <span className="text-[9px] uppercase tracking-[0.3em] text-ivoire/60">Référence de commande</span>
+                    <span className="font-mono text-or font-bold tracking-widest">{orderRef}</span>
+                  </div>
+                  <p className="mt-3 text-[11px] text-ivoire/40">Votre commande a bien été enregistrée. Mentionnez cette référence lors de votre contact.</p>
+                </div>
+              )}
+              {orderError && (
+                <div className="mb-8 text-center text-[12px] text-red-400/90">
+                  La commande n'a pas pu être enregistrée en ligne — contactez-nous directement.
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row gap-4">
                 <button onClick={() => setIsCheckingOut(false)} className="px-8 py-4 rounded-xl border border-ivoire/10 text-ivoire text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-ivoire hover:text-noir transition-all duration-500 order-2 sm:order-1 flex-grow">
                   Retour

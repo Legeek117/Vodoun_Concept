@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ALL_PRODUCTS, useCart } from '../store';
+import { useCart, useProducts } from '../store';
 import { useCurrency } from '../context/CurrencyContext';
 import Navbar from '../components/Navbar';
 import SoundControl from '../components/SoundControl';
@@ -11,8 +11,9 @@ export default function ProductPage3D() {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const products = useProducts();
   const { formatPrice, currency } = useCurrency();
-  const product = ALL_PRODUCTS.find((p) => p.id === productId);
+  const product = products.find((p) => p.id === productId);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || 'Default');
   const [added, setAdded] = useState(false);

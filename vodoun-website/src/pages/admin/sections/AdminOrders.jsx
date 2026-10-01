@@ -19,7 +19,7 @@ function StatusBadge({ status }) {
 
 const iStyle = { background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'10px', color:'#F4F0E6', padding:'10px 14px', fontSize:'0.875rem', outline:'none', fontFamily:"'Plus Jakarta Sans', sans-serif" };
 
-export default function AdminOrders({ orders, setOrders }) {
+export default function AdminOrders({ orders, setOrders, onStatusChange }) {
   const [search,  setSearch]  = useState('');
   const [filter,  setFilter]  = useState('Tous');
   const [sel,     setSel]     = useState(null);
@@ -31,6 +31,7 @@ export default function AdminOrders({ orders, setOrders }) {
   });
 
   const updateStatus = (id, status) => {
+    if (onStatusChange) onStatusChange(id, status);
     setOrders(prev => prev.map(o => o.id===id ? {...o, status} : o));
     if (sel?.id===id) setSel(p => ({...p, status}));
   };

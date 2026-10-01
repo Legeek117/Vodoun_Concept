@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { apiAdminLogin } from '../../api';
 import './admin.css';
 
-const ADMIN_PASSWORD = 'vodun-admin-2024';
-const ADMIN_EMAIL    = 'admin@vodun-concept.com';
-
 export default function AdminLogin({ onLogin }) {
-  const [email,    setEmail]    = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error,    setError]    = useState('');
   const [loading,  setLoading]  = useState(false);
@@ -22,22 +20,22 @@ export default function AdminLogin({ onLogin }) {
     );
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
-    setTimeout(() => {
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        sessionStorage.setItem('vodun-admin-auth', 'true');
-        onLogin();
-      } else {
-        setError('Email ou mot de passe incorrect.');
-        if (errorRef.current) {
-          gsap.fromTo(errorRef.current, { x: -10 },
-            { x: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
-        }
+    try {
+      const res = await apiAdminLogin(username.trim(), password);
+      sessionStorage.setItem('vodun-admin-token', res.token);
+      sessionStorage.setItem('vodun-admin-auth', 'true');
+      onLogin();
+    } catch {
+      setError('Identifiants invalides.');
+      if (errorRef.current) {
+        gsap.fromTo(errorRef.current, { x: -10 },
+          { x: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
       }
-      setLoading(false);
-    }, 700);
+    }
+    setLoading(false);
   };
 
   return (
@@ -52,7 +50,7 @@ export default function AdminLogin({ onLogin }) {
         {/* Logo */}
         <div style={{ textAlign:'center', marginBottom:'32px' }}>
           <img
-            src="/logo_vodoun.png"
+            src="/logo_vodoun.webp"
             alt="Vodun Concept Store"
             style={{ height:'80px', width:'auto', objectFit:'contain', margin:'0 auto', display:'block' }}
           />
@@ -73,10 +71,10 @@ export default function AdminLogin({ onLogin }) {
           </h2>
 
           <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-            <div>
-              <label style={{ display:'block', fontSize:'0.58rem', textTransform:'uppercase', letterSpacing:'0.35em', color:'rgba(244,240,230,0.35)', marginBottom:'8px' }}>Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                className="ag-input" placeholder="admin@vodun-concept.com" autoComplete="email" />
+<div>
+              <label style={{ display: 'block', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.35em', color: 'rgba(244,240,230,0.35)', marginBottom: '8px' }}>Identifiant</label>
+              <input type="text" value={username} onChange={e => setUsername(e.target.value)} required
+                className="ag-input" placeholder="admin" autoComplete="username" />
             </div>
 
             <div>

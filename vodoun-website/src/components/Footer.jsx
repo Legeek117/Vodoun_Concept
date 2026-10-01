@@ -15,7 +15,7 @@ export default function Footer() {
                     <div className="lg:col-span-1">
                         <Link to="/accueil" aria-label="Vodun Concept Store — Accueil">
                             <img
-                                src="/logo_vodoun.png"
+                                src="/logo_vodoun.webp"
                                 alt="Vodun Concept Store"
                                 className="logo-glow"
                                 style={{ height: 'clamp(72px, 14vw, 100px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}

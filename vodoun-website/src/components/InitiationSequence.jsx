@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, Suspense, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
+import { useProgress } from '@react-three/drei';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -348,6 +350,8 @@ function MasqueReveal({ visible, onZoomComplete, lang }) {
   const glowRef    = useRef(null);
   const overlayRef = useRef(null);
   const [stepIdx, setStepIdx] = useState(-1);
+  const { active, progress } = useProgress(); // suivi du chargement GLB en arrière-plan
+  const maskLoading = visible && (active || progress < 100);
 
   useEffect(() => {
     if (!visible) { setStepIdx(-1); return; }
@@ -417,6 +421,33 @@ function MasqueReveal({ visible, onZoomComplete, lang }) {
           </Suspense>
         </Canvas>
       </div>
+
+      {/* ═══ Loader de sécurité (si réseau trop lent malgré le préchargement) ═══
+          N'apparaît généralement JAMAIS : le GLB est préchargé à la phase 1. */}
+      {maskLoading && (
+        <div style={{
+          position: 'absolute', top: '39%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 22, pointerEvents: 'none',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
+        }}>
+          <span style={{
+            color: '#D2B98E', letterSpacing: '0.3em', fontSize: '0.68rem',
+            fontWeight: 700, textTransform: 'uppercase', opacity: 0.85,
+          }}>
+            {lang === 'fr' ? 'Le Gardien se réveille…' : 'The Guardian awakens…'}
+          </span>
+          <div style={{
+            width: '120px', height: '2px',
+            background: 'rgba(210,185,142,0.15)', borderRadius: '2px', overflow: 'hidden',
+          }}>
+            <div style={{
+              width: `${progress}%`, height: '100%',
+              background: '#D2B98E', transition: 'width 0.3s ease',
+            }} />
+          </div>
+        </div>
+      )}
 
       {/* Panneau latéral droit — textes à côté du masque */}
       <div style={{
@@ -575,6 +606,19 @@ export default function InitiationSequence() {
 
   useEffect(() => { preloadAccueil(); }, []);
 
+  /* ═══ Préchargement différé du masque ═══
+     Le GLB (2 Mo) n'est chargé qu'APRÈS le clic sur « DÉCOUVRIR » (phase ≥ 1),
+     soit ~15 s d'avance avant le reveal (phase 4) : arrivée garantie, zéro
+     saccade au moment critique.
+     Bonus : ceux qui passent l'initiation ne téléchargent JAMAIS le GLB. */
+  const masquePreloaded = useRef(false);
+  useEffect(() => {
+    if (phase >= 1 && !masquePreloaded.current) {
+      masquePreloaded.current = true;
+      useLoader.preload(GLTFLoader, '/masque.glb');
+    }
+  }, [phase]);
+
   useEffect(() => {
     const key = phase in PHASE_BG ? phase : 0;
     const target = PHASE_BG[key];
@@ -688,7 +732,7 @@ export default function InitiationSequence() {
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 7], fov: 65 }}
           style={{ background: 'transparent', width: '100%', height: '100%' }}
-          gl={{ alpha: true, antialias: true }}>
+          gl={{ alpha: true, antialias: false }}>
           <Suspense fallback={null}>
             {/* Galaxie — phase 0 + pendant transition (showGalaxy) */}
             {(phase === 0 || showGalaxy) && (
@@ -782,7 +826,7 @@ export default function InitiationSequence() {
               maxWidth: '94vw',
             }}>
             <img
-              src="/logo_vodoun_blanc_crop.png"
+              src="/logo_vodoun_blanc_crop.webp"
               alt="Vodun Concept Store"
               className="block relative"
               style={{

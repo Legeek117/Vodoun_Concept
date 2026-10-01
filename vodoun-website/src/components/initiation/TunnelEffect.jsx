@@ -24,7 +24,6 @@ const RING_COLORS = ['#D2B98E', '#C8973A', '#FFF5CC', '#E8C870'];
 export default function TunnelEffect({ active = true, speed = 1.0 }) {
   const groupRef     = useRef(null);
   const dustRef      = useRef(null);
-  const glowRef      = useRef(null);
   const elapsedRef   = useRef(0);
 
   // Données des anneaux
@@ -84,12 +83,7 @@ export default function TunnelEffect({ active = true, speed = 1.0 }) {
       groupRef.current.position.y = Math.cos(t * 0.45) * 0.04;
     }
 
-    // Pulsation de la lueur centrale
-    if (glowRef.current) {
-      const pulse = 0.8 + Math.sin(t * 2.5) * 0.2;
-      glowRef.current.intensity = 3.5 * pulse;
-      glowRef.current.distance  = TUNNEL_DEPTH * (0.9 + Math.sin(t * 1.8) * 0.1);
-    }
+    // Pulsation de la lueur centrale — supprimée : plus de pointLight (voir plus bas)
 
     // Anneaux
     meshRefs.current.forEach((mesh, i) => {
@@ -140,21 +134,9 @@ export default function TunnelEffect({ active = true, speed = 1.0 }) {
 
   return (
     <group ref={groupRef}>
-      {/* Lueur centrale pulsante */}
-      <pointLight
-        ref={glowRef}
-        position={[0, 0, -TUNNEL_DEPTH * 0.85]}
-        color="#D2B98E"
-        intensity={3.5}
-        distance={TUNNEL_DEPTH}
-      />
-      {/* Lueur secondaire plus proche */}
-      <pointLight
-        position={[0, 0, -TUNNEL_DEPTH * 0.3]}
-        color="#C8973A"
-        intensity={1.2}
-        distance={30}
-      />
+      {/* NB : les pointLights ont été supprimées — elles n'éclairaient aucun objet
+          (anneaux en MeshBasicMaterial + poussière en points ignorent la lumière).
+          Gain GPU gratuit. */}
 
       {/* Anneaux */}
       {rings.map((ring, i) => {

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Icon } from '../AdminPage';
+import { apiAdminCreateProduct, apiAdminUpdateProduct, apiAdminDeleteProduct, apiUploadImage } from '../../../api';
 
 const CATEGORIES = ['Décorations Festives','Mode','Accessoires','Décoration','Mobilier'];
 const DEITIES    = ['Dan','Legba','Sakpata','Mami Wata','Xevioso','Ogu','Tous'];
@@ -53,13 +54,16 @@ function GlassTextarea({ label, ...props }) {
   );
 }
 
-export default function AdminProducts({ products, setProducts }) {
+export default function AdminProducts({ products, setProducts, token }) {
   const [search,  setSearch]  = useState('');
   const [cat,     setCat]     = useState('Tous');
   const [editing, setEditing] = useState(null);
   const [form,    setForm]    = useState(EMPTY);
   const [isNew,   setIsNew]   = useState(false);
   const [delId,   setDelId]   = useState(null);
+  const [saving,  setSaving]  = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
 
   const filtered = products.filter(p => {
     return p.name.toLowerCase().includes(search.toLowerCase()) && (cat === 'Tous' || p.category === cat);
@@ -70,15 +74,46 @@ export default function AdminProducts({ products, setProducts }) {
   const close    = () => { setEditing(null); };
   const f        = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
 
-  const save = () => {
+  const save = async () => {
     const prod = { ...form, price: Number(form.price), variants: form.variants.split(',').map(v => v.trim()).filter(Boolean) };
-    if (isNew) {
-      prod.id = prod.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      setProducts(prev => [...prev, prod]);
-    } else {
-      setProducts(prev => prev.map(p => p.id === editing ? prod : p));
+    if (isNew) prod.id = prod.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    setSaving(true);
+    try {
+      if (isNew) await apiAdminCreateProduct(token, prod);
+      else       await apiAdminUpdateProduct(token, editing, prod);
+      if (isNew) setProducts(prev => [...prev, prod]);
+      else       setProducts(prev => prev.map(p => p.id === editing ? prod : p));
+      close();
+    } catch (e) {
+      window.alert(`Erreur: ${e.message}`);
+    } finally { setSaving(false); }
+  };
+
+  const toggleAvailable = async (p) => {
+    const updated = { ...p, available: p.available !== false ? false : true };
+    try { await apiAdminUpdateProduct(token, p.id, updated); } catch { /* ignore */ }
+    setProducts(prev => prev.map(x => x.id === p.id ? updated : x));
+  };
+
+  const remove = async () => {
+    try { await apiAdminDeleteProduct(token, delId); } catch { /* ignore */ }
+    setProducts(p => p.filter(x => x.id !== delId));
+    setDelId(null);
+  };
+
+  const onFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+    setUploading(true);
+    try {
+      const res = await apiUploadImage(token, file);
+      setForm(p => ({ ...p, image: res.url }));
+    } catch (err) {
+      window.alert(`Upload impossible: ${err.message}`);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
     }
-    close();
   };
 
   return (
@@ -137,7 +172,7 @@ export default function AdminProducts({ products, setProducts }) {
                     {Number(p.price).toLocaleString('fr-FR')} F
                   </td>
                   <td style={{ padding:'12px 16px' }}>
-                    <button onClick={() => setProducts(prev => prev.map(x => x.id===p.id ? {...x, available:!x.available} : x))}>
+                    <button onClick={() => toggleAvailable(p)}>
                       <span className="ag-badge" style={{
                         color: p.available!==false ? '#2d8050' : '#8E2420',
                         background: p.available!==false ? 'rgba(45,128,80,0.15)' : 'rgba(142,36,32,0.15)',
@@ -190,7 +225,11 @@ export default function AdminProducts({ products, setProducts }) {
                 <GlassSelect label="Divinité"    value={form.deity||'Tous'} onChange={f('deity')} options={DEITIES} />
               </div>
               <GlassInput label="Prix (FCFA) *" value={form.price} onChange={f('price')} type="number" placeholder="8000" />
-              <GlassInput label="Chemin image" value={form.image} onChange={f('image')} placeholder="/mon-image.png" />
+              <GlassInput label="Chemin image" value={form.image} onChange={f('image')} placeholder="/uploads/xxx.webp" />
+                  <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display:'none' }} />
+                  <button onClick={() => fileRef.current?.click()} disabled={uploading} className="ag-btn-ghost" style={{ alignSelf:'flex-start', fontSize:'0.62rem', padding:'8px 14px' }}>
+                    {uploading ? 'Traitement WebP…' : '⬆ Uploader une image (auto WebP)'}
+                  </button>
               <GlassInput label="Variantes (virgule)" value={form.variants} onChange={f('variants')} placeholder="S, M, L, XL" />
               <GlassInput label="Délai" value={form.delay} onChange={f('delay')} placeholder="En stock · 3 à 5 jours" />
               <GlassTextarea label="Description" value={form.description} onChange={f('description')} rows={2} />
@@ -207,8 +246,8 @@ export default function AdminProducts({ products, setProducts }) {
                 ))}
               </div>
               <div style={{ display:'flex', gap:'10px', paddingTop:'8px' }}>
-                <button onClick={save} className="ag-btn-primary" style={{ flex:1 }}>
-                  {isNew ? 'Créer' : 'Enregistrer'}
+                <button onClick={save} disabled={saving} className="ag-btn-primary" style={{ flex:1 }}>
+                  {saving ? 'Enregistrement…' : (isNew ? 'Créer' : 'Enregistrer')}
                 </button>
                 <button onClick={close} className="ag-btn-ghost">Annuler</button>
               </div>
@@ -224,7 +263,7 @@ export default function AdminProducts({ products, setProducts }) {
             <h3 style={{ fontFamily:"'Playfair Display', serif", fontWeight:900, fontSize:'1.1rem', color:'#F4F0E6', margin:'0 0 10px' }}>Supprimer ce produit ?</h3>
             <p style={{ fontSize:'0.8rem', color:'rgba(244,240,230,0.45)', marginBottom:'24px' }}>Cette action est irréversible.</p>
             <div style={{ display:'flex', gap:'10px' }}>
-              <button onClick={() => { setProducts(p => p.filter(x => x.id!==delId)); setDelId(null); }}
+              <button onClick={remove}
                 style={{ flex:1, padding:'12px', borderRadius:'10px', fontWeight:900, fontSize:'0.7rem', textTransform:'uppercase', letterSpacing:'0.2em', background:'rgba(142,36,32,0.8)', color:'#F4F0E6', border:'1px solid rgba(142,36,32,0.6)', cursor:'pointer' }}>
                 Supprimer
               </button>

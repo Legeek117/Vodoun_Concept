@@ -76,7 +76,6 @@ export default function Hero() {
           muted
           playsInline
           className="w-full h-full object-cover opacity-80"
-          style={{ filter: 'brightness(0.9) contrast(1.05)' }}
         >
           <source src="/a_Cinematic_macro_anim_1.mp4" type="video/mp4" />
         </video>

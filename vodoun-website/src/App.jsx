@@ -5,7 +5,7 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
 import ProceduralCanvas from './components/ProceduralCanvas';
-import { ALL_PRODUCTS } from './store';
+import { useProducts } from './store';
 import usePageMeta from './hooks/usePageMeta';
 import { useLanguage } from './context/LanguageContext';
 import fr from './i18n/fr';
@@ -43,10 +43,11 @@ function App() {
     };
   }, []);
 
+  const products = useProducts();
   const universProducts = {
-    decorations: ALL_PRODUCTS.filter(p => p.category === 'Décorations Festives').slice(0, 2),
-    mode:        ALL_PRODUCTS.filter(p => p.category === 'Mode').slice(0, 2),
-    mobilier:    ALL_PRODUCTS.filter(p => p.category === 'Mobilier').slice(0, 2),
+    decorations: products.filter(p => p.category === 'Décorations Festives').slice(0, 2),
+    mode:        products.filter(p => p.category === 'Mode').slice(0, 2),
+    mobilier:    products.filter(p => p.category === 'Mobilier').slice(0, 2),
   };
 
   const divinities = [
@@ -70,7 +71,6 @@ function App() {
           <ProceduralCanvas
             scrollRef={scrollRef}
             className="w-full h-full"
-            style={{ filter: 'brightness(1.1) contrast(1.05)' }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-noir/40 via-transparent to-noir/60 opacity-80" />
         </div>
@@ -79,7 +79,7 @@ function App() {
         <div className="relative z-10">
 
           {/* Marquee */}
-          <div className="bg-or/90 backdrop-blur-md py-8 md:py-12 overflow-hidden border-y border-noir/20 flex relative z-20">
+          <div className="bg-or/90 py-8 md:py-12 overflow-hidden border-y border-noir/20 flex relative z-20">
             <div className="flex whitespace-nowrap animate-marquee">
               {[...Array(2)].map((_, groupIndex) => (
                 <div key={groupIndex} className="flex">
@@ -122,7 +122,7 @@ function App() {
           </section>
 
           {/* Section 2 : Héritage */}
-          <section className="py-32 md:py-60 px-[5vw] bg-noir/40 backdrop-blur-sm">
+          <section className="py-32 md:py-60 px-[5vw] bg-noir/40">
             <div className="max-w-4xl mx-auto text-center">
               <span className="section-label text-or mb-8 block">L'Héritage</span>
               <h2 className="editorial-heading text-ivoire mb-12 !text-[clamp(2rem,6vw,4rem)]">Né du souffle de Ouidah</h2>

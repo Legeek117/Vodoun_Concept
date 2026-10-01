@@ -292,7 +292,7 @@ export default function NavigationTransition() {
             style={{ margin: 0, lineHeight: 1 }}
           >
             <img
-              src="/logo_vodoun.png"
+              src="/logo_vodoun.webp"
               alt="Vodun Concept Store"
               style={{ height: 'clamp(50px, 10vw, 90px)', width: 'auto', objectFit: 'contain' }}
             />

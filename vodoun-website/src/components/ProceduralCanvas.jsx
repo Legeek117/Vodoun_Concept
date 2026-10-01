@@ -21,6 +21,11 @@ const PHASES = [
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
+/* Équivalent du badge CSS retiré `filter: brightness(1.1) contrast(1.05)`
+   (composition : c*1.155 - 6.4, clampé) — appliqué aux palettes pour un
+   rendu identique sans re-compositing coûteux du canvas en pleine page. */
+const adj = v => Math.max(0, Math.min(255, Math.round(v * 1.155 - 6.4)));
+
 function getPalette(p) {
   let lo = PHASES[0], hi = PHASES[PHASES.length - 1];
   for (let i = 0; i < PHASES.length - 1; i++) {
@@ -30,10 +35,10 @@ function getPalette(p) {
   }
   const t = lo.at === hi.at ? 0 : (p - lo.at) / (hi.at - lo.at);
   return {
-    bg:    lo.bg.map((v, i)    => Math.round(lerp(v, hi.bg[i],    t))),
-    ember: lo.ember.map((v, i) => Math.round(lerp(v, hi.ember[i], t))),
-    gold:  lo.gold.map((v, i)  => Math.round(lerp(v, hi.gold[i],  t))),
-    halo:  lo.halo.map((v, i)  => Math.round(lerp(v, hi.halo[i],  t))),
+    bg:    lo.bg.map((v, i)    => adj(lerp(v, hi.bg[i],    t))),
+    ember: lo.ember.map((v, i) => adj(lerp(v, hi.ember[i], t))),
+    gold:  lo.gold.map((v, i)  => adj(lerp(v, hi.gold[i],  t))),
+    halo:  lo.halo.map((v, i)  => adj(lerp(v, hi.halo[i],  t))),
   };
 }
 
@@ -85,13 +90,17 @@ export default function ProceduralCanvas({ scrollRef, style = {} }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    // Taille = taille du parent (pas window) pour couvrir toute la zone
+    // Taille = taille du parent (pas window) pour couvrir toute la zone.
+    // Rendu en demi-résolution : le CSS étire ×2, le paint 2D est ~4× plus
+    // léger — rendu équivalent sur un fond de particules. Le contexte reste
+    // en unités CSS via setTransform(0.5) : tailles/vitesses inchangées.
     const setSize = () => {
       const parent = canvas.parentElement;
       const W = parent ? parent.offsetWidth  : window.innerWidth;
       const H = parent ? parent.offsetHeight : window.innerHeight;
-      canvas.width  = W;
-      canvas.height = H;
+      canvas.width  = Math.max(2, Math.round(W * 0.5));
+      canvas.height = Math.max(2, Math.round(H * 0.5));
+      ctx.setTransform(0.5, 0, 0, 0.5, 0, 0);
       // Réinitialise les particules sur la nouvelle taille
       stateRef.current = {
         particles: mkParticles(W, H),
@@ -120,8 +129,8 @@ export default function ProceduralCanvas({ scrollRef, style = {} }) {
     };
 
     const animate = (ts) => {
-      const W   = canvas.width;
-      const H   = canvas.height;
+      const W   = canvas.width / 0.5;   // unités CSS (dessin à 0.5 via setTransform)
+      const H   = canvas.height / 0.5;
       const p   = scrollRef?.current ?? 0;
       const pal = getPalette(p);
       const st  = stateRef.current;

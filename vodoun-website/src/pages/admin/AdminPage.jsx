@@ -2,12 +2,42 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../../store';
+import { apiAdminOrders, apiAdminSetOrderStatus, apiAdminSetQuoteStatus, apiGetProducts } from '../../api';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './sections/AdminDashboard';
 import AdminProducts from './sections/AdminProducts';
 import AdminOrders from './sections/AdminOrders';
 import AdminSettings from './sections/AdminSettings';
 import './admin.css';
+
+// Statuts BDD (français) → statuts UI (anglais du panneau)
+const STATUS_MAP = {
+  'nouvelle': 'pending', 'confirmée': 'confirmed', 'expédiée': 'shipped',
+  'livrée': 'delivered', 'annulée': 'cancelled',
+};
+const STATUS_REV = Object.fromEntries(Object.entries(STATUS_MAP).map(([k, v]) => [v, k]));
+
+function mapOrder(o) {
+  const items = o.items || [];
+  const first = items[0] || {};
+  const opt = (first.options && Object.keys(first.options).length) ? JSON.stringify(first.options) : '';
+  return {
+    id: o.ref || `#${o.id}`,
+    customer: o.customer_name || '—',
+    email: o.customer_email || '',
+    product: first.name || (items.length ? `${items.length} article(s)` : '—'),
+    variant: opt || '—',
+    qty: first.qty || items.length || 1,
+    total: Number(o.total) || 0,
+    date: o.created_at ? new Date(o.created_at).toLocaleDateString('fr-FR') : '—',
+    _ts: o.created_at || '',
+    status: STATUS_MAP[o.status] || o.status || 'pending',
+    phone: o.customer_phone || '',
+    address: [o.address, o.city, o.country].filter(Boolean).join(', ') || '—',
+    note: o.note || '',
+    items,
+  };
+}
 
 export const Icon = {
   dashboard: <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
@@ -28,23 +58,41 @@ const NAV_ITEMS = [
   { id: 'settings',  label: 'Paramètres',        icon: 'settings' },
 ];
 
-const MOCK_ORDERS = [
-  { id:'CMD-001', customer:'Amir Sossou',      email:'amir@example.com',    product:'Bracelet de Puissance',    variant:'Perles Asso — Dan',  qty:2, total:7000,   status:'pending',   date:'2024-12-01', phone:'+229 97 00 00 01', address:'Cotonou, Bénin' },
-  { id:'CMD-002', customer:'Fatoumata Diallo',  email:'fato@example.com',    product:'T-shirt Sérigraphié',      variant:'M',                  qty:1, total:8000,   status:'confirmed', date:'2024-12-02', phone:'+33 6 00 00 00 01', address:'Paris, France' },
-  { id:'CMD-003', customer:'Jean-Paul Mensah',  email:'jp@example.com',      product:'Cristal de la Prospérité', variant:'L',                  qty:3, total:54000,  status:'shipped',   date:'2024-12-03', phone:'+229 97 00 00 03', address:'Abomey-Calavi, Bénin' },
-  { id:'CMD-004', customer:'Sophie Gbèdji',     email:'sophie@example.com',  product:'Dad Hat brodé',            variant:'Taille Unique',      qty:1, total:8000,   status:'delivered', date:'2024-12-04', phone:'+229 97 00 00 04', address:'Porto-Novo, Bénin' },
-  { id:'CMD-005', customer:'Kouamé Assouman',   email:'kouame@example.com',  product:'Le Veilleur',              variant:'2m — Legba',         qty:1, total:150000, status:'pending',   date:'2024-12-05', phone:'+225 07 00 00 05', address:"Abidjan, Côte d'Ivoire" },
-  { id:'CMD-006', customer:'Nadia Houngbo',     email:'nadia@example.com',   product:'Montre Artisanale',        variant:'Bois + Cuir',        qty:1, total:65000,  status:'confirmed', date:'2024-12-06', phone:'+229 97 00 00 06', address:'Ouidah, Bénin' },
-  { id:'CMD-007', customer:'Thierry Akakpo',    email:'thierry@example.com', product:'Lanternes Cérémonielles',  variant:'Set de 6',           qty:2, total:50000,  status:'cancelled', date:'2024-12-07', phone:'+229 97 00 00 07', address:'Parakou, Bénin' },
-];
-
 export default function AdminPage() {
   const [isAuth,        setIsAuth]        = useState(() => sessionStorage.getItem('vodun-admin-auth') === 'true');
+  const [token,         setToken]         = useState(() => sessionStorage.getItem('vodun-admin-token') || null);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
-  const [products,      setProducts]      = useState(() => { const s = localStorage.getItem('vodun-admin-products'); return s ? JSON.parse(s) : ALL_PRODUCTS; });
-  const [orders,        setOrders]        = useState(() => { const s = localStorage.getItem('vodun-admin-orders');   return s ? JSON.parse(s) : MOCK_ORDERS; });
+  const [apiError,      setApiError]      = useState(null);
+  const [products,      setProducts]      = useState(ALL_PRODUCTS);
+  const [orders,        setOrders]        = useState([]);
 
+  // Chargement des données réelles depuis la BDD
+  useEffect(() => {
+    if (!isAuth) return;
+    let active = true;
+    Promise.allSettled([apiGetProducts(), apiAdminOrders(token)])
+      .then(([p, o]) => {
+        if (!active) return;
+        if (p.status === 'fulfilled' && Array.isArray(p.value) && p.value.length) setProducts(p.value);
+        if (o.status === 'fulfilled' && Array.isArray(o.value)) setOrders(o.value.map(mapOrder));
+        if (p.status === 'rejected' && o.status === 'rejected') setApiError('Impossible de joindre l\'API. Vérifiez que le serveur Node est démarré.');
+      });
+    return () => { active = false; };
+  }, [isAuth, token]);
+
+  // Changement de statut → API + mise à jour locale
+  const handleStatusChange = async (collection, id, status) => {
+    const fr = STATUS_REV[status] || status;
+    if (collection === 'orders') {
+      try { await apiAdminSetOrderStatus(token, id, fr); } catch { /* ignore */ }
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    } else {
+      try { await apiAdminSetQuoteStatus(token, id, fr); } catch { /* ignore */ }
+    }
+  };
+
+  // Verrouille le scroll de la page pendant que le panneau est ouvert
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
@@ -52,19 +100,21 @@ export default function AdminPage() {
     return () => { document.body.style.overflow = ''; document.documentElement.style.overflow = ''; };
   }, []);
 
-  useEffect(() => { localStorage.setItem('vodun-admin-products', JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem('vodun-admin-orders',   JSON.stringify(orders));   }, [orders]);
+  const handleLogout = () => {
+    sessionStorage.removeItem('vodun-admin-auth');
+    sessionStorage.removeItem('vodun-admin-token');
+    setToken(null);
+    setIsAuth(false);
+  };
 
-  const handleLogout = () => { sessionStorage.removeItem('vodun-admin-auth'); setIsAuth(false); };
-
-  if (!isAuth) return <AdminLogin onLogin={() => setIsAuth(true)} />;
+  if (!isAuth) return <AdminLogin onLogin={() => { setToken(sessionStorage.getItem('vodun-admin-token') || null); setIsAuth(true); }} />;
 
   const renderSection = () => {
     switch(activeSection) {
       case 'dashboard': return <AdminDashboard products={products} orders={orders} setActiveSection={setActiveSection} />;
-      case 'products':  return <AdminProducts  products={products} setProducts={setProducts} />;
-      case 'orders':    return <AdminOrders    orders={orders}     setOrders={setOrders} />;
-      case 'settings':  return <AdminSettings  onLogout={handleLogout} />;
+      case 'products':  return <AdminProducts  products={products} setProducts={setProducts} token={token} />;
+      case 'orders':    return <AdminOrders    orders={orders}     setOrders={setOrders} onStatusChange={(id, st) => handleStatusChange('orders', id, st)} />;
+      case 'settings':  return <AdminSettings  onLogout={handleLogout} token={token} />;
       default:          return <AdminDashboard products={products} orders={orders} setActiveSection={setActiveSection} />;
     }
   };
@@ -97,7 +147,7 @@ export default function AdminPage() {
         <div style={{ padding:'28px 20px 20px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div>
-              <img src="/logo_vodoun.png" alt="Vodun Concept Store" style={{ height:'40px', width:'auto', objectFit:'contain', display:'block' }} />
+              <img src="/logo_vodoun.webp" alt="Vodun Concept Store" style={{ height:'40px', width:'auto', objectFit:'contain', display:'block' }} />
               <span style={{ fontSize:'0.5rem', textTransform:'uppercase', letterSpacing:'0.4em', color:'rgba(244,240,230,0.25)', display:'block', marginTop:'5px' }}>Admin Panel</span>
             </div>
             {/* Dot décoratif */}
@@ -152,12 +202,17 @@ export default function AdminPage() {
           position:'sticky', top:0, zIndex:20,
         }} className="ag-topbar-mobile">
           <button onClick={() => setSidebarOpen(true)} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(244,240,230,0.6)', padding:0 }}>{Icon.menu}</button>
-          <img src="/logo_vodoun.png" alt="Vodun Concept Store" style={{ height:'32px', width:'auto', objectFit:'contain' }} />
+          <img src="/logo_vodoun.webp" alt="Vodun Concept Store" style={{ height:'32px', width:'auto', objectFit:'contain' }} />
           <div style={{ width:'22px' }} />
         </header>
 
         {/* Section */}
         <main className="ag-scroll" style={{ flex:1, overflowY:'auto', padding:'28px 28px 48px' }}>
+          {apiError && (
+            <div style={{ marginBottom:'20px', padding:'14px 18px', borderRadius:'12px', border:'1px solid rgba(142,36,32,0.4)', background:'rgba(142,36,32,0.12)', color:'#f87171', fontSize:'0.8rem', letterSpacing:'0.04em' }}>
+              ⚠ {apiError}
+            </div>
+          )}
           {renderSection()}
         </main>
       </div>

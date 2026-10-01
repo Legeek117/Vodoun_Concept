@@ -163,7 +163,7 @@ export default function GlobalLoader({ isExiting = false, onExitComplete }) {
           style={{ opacity: 0 }}
         >
           <img
-            src="/logo_vodoun.png"
+            src="/logo_vodoun.webp"
             alt="Vodun Concept Store"
             style={{ height: 'clamp(60px, 12vw, 100px)', width: 'auto', objectFit: 'contain' }}
           />

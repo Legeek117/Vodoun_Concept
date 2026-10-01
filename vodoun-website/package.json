@@ -7,17 +7,24 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node app.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.6.1",
     "@studio-freight/lenis": "^1.0.42",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
     "gsap": "^3.15.0",
     "howler": "^2.2.4",
+    "multer": "^1.4.5-lts.2",
+    "pg": "^8.16.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
+    "sharp": "^0.33.5",
     "three": "^0.184.0"
   },
   "devDependencies": {

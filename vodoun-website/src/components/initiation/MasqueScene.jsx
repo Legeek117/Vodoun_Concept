@@ -23,7 +23,9 @@ function MasqueModel({ spinRef, targetRef }) {
 
   useEffect(() => {
     if (!gltf?.scene || !spinRef.current) return;
-    const scene = gltf.scene.clone(true);
+    // NB : plus de .clone(true) — la scène n'est montée qu'une seule fois,
+    // le clone dupliquait tous les buffers géométriques (RAM + temps de setup).
+    const scene = gltf.scene;
     scene.updateMatrixWorld(true);
 
     // Normaliser à 2.8 unités

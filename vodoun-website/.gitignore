@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets — jamais commités
+.env
+.env.*
+!.env.example
+
+# Runtime / assets de travail
+# images uploadées (elles vivent sur le serveur, pas dans git)
+uploads
+# sources Blender (les .glb servis sont dans public/)
+blender
+*.log.1

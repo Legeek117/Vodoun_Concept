@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import gsap from 'gsap';
-import { ALL_PRODUCTS, COLLECTIONS } from '../store';
+import { COLLECTIONS, useProducts } from '../store';
 import ProductCard from '../components/ProductCard';
 import ProceduralCanvas from '../components/ProceduralCanvas';
 import usePageMeta from '../hooks/usePageMeta';
@@ -9,25 +9,26 @@ import usePageMeta from '../hooks/usePageMeta';
 export default function ShopPage() {
   const { collectionId } = useParams();
   const [selected, setSelected] = useState(collectionId || 'all');
+  const products = useProducts();
 
   usePageMeta({
-    title: selected === 'all' ? 'Boutique' : `Boutique Â· ${COLLECTIONS.find(c => c.id === selected)?.name || selected}`,
-    description: 'Explorez toutes les collections Vodun Concept Store : mobilier d\'art, bijoux, mode, dÃ©corations festives et accessoires inspirÃ©s de la culture Vodun.',
+    title: selected === 'all' ? 'Boutique' : `Boutique · ${COLLECTIONS.find(c => c.id === selected)?.name || selected}`,
+    description: 'Explorez toutes les collections Vodun Concept Store : mobilier d\'art, bijoux, mode, décorations festives et accessoires inspirés de la culture Vodun.',
   });
   const scrollRef  = useRef(0);
   const heroRef    = useRef(null);
   const filtersRef = useRef(null);
 
   const filteredProducts = selected === 'all'
-    ? ALL_PRODUCTS
+    ? products
     : selected.startsWith('univers-')
-      ? ALL_PRODUCTS.filter(p => {
+      ? products.filter(p => {
         const deity = selected.replace('univers-', '');
         return p.deity?.toLowerCase() === deity.toLowerCase();
       })
-      : ALL_PRODUCTS.filter(p => p.category.toLowerCase().includes(selected.toLowerCase().replace('-', ' ')));
+      : products.filter(p => p.category.toLowerCase().includes(selected.toLowerCase().replace('-', ' ')));
 
-  // ScrollProgress via ref â€” pas de re-render
+  // ScrollProgress via ref — pas de re-render
   useEffect(() => {
     const handleScroll = () => {
       const loopDistance = 4000;
@@ -93,7 +94,7 @@ export default function ShopPage() {
             </span>
           </h1>
           <p className="text-brun/80 text-sm md:text-lg max-w-xl mb-8 font-playfair font-medium leading-relaxed animate-hero">
-            Explorez nos collections identitaires, oÃ¹ chaque piÃ¨ce raconte une part de l'hÃ©ritage ancestral.
+            Explorez nos collections identitaires, où chaque pièce raconte une part de l'héritage ancestral.
           </p>
           <div ref={filtersRef} className="relative mt-8">
             {/* Desktop: Horizontal Scroll Liquid Glass */}
@@ -214,7 +215,7 @@ export default function ShopPage() {
 
           {filteredProducts.length === 0 && (
             <div className="text-center py-40 opacity-40 uppercase tracking-[0.4em] text-xs">
-              Aucun vestige trouvÃ©
+              Aucun vestige trouvé
             </div>
           )}
         </div>
@@ -225,15 +226,15 @@ export default function ShopPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
             {/* Logo & Brand */}
             <div className="lg:col-span-1">
-              <a href="/accueil" aria-label="Vodun Concept Store â€” Accueil">
+              <a href="/accueil" aria-label="Vodun Concept Store — Accueil">
                 <img
-                  src="/logo_vodoun.png"
+                  src="/logo_vodoun.webp"
                   alt="Vodun Concept Store"
                   style={{ height: 'clamp(50px, 8vw, 80px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
                 />
               </a>
-              <p className="text-ivoire/60 text-sm leading-relaxed mb-6">Ouidah, BÃ©nin</p>
-              <p className="text-ivoire/40 text-xs uppercase tracking-[0.5em]">L'HÃ©ritage Immortel</p>
+              <p className="text-ivoire/60 text-sm leading-relaxed mb-6">Ouidah, Bénin</p>
+              <p className="text-ivoire/40 text-xs uppercase tracking-[0.5em]">L'Héritage Immortel</p>
             </div>
 
             {/* Navigation Links */}
@@ -242,8 +243,8 @@ export default function ShopPage() {
               <ul className="space-y-3">
                 <li><Link to="/accueil" className="text-ivoire/80 text-sm uppercase tracking-[0.3em] hover:text-or transition-colors">Accueil</Link></li>
                 <li><Link to="/boutique" className="text-ivoire/80 text-sm uppercase tracking-[0.3em] hover:text-or transition-colors">Boutique</Link></li>
-                <li><Link to="/a-propos" className="text-ivoire/80 text-sm uppercase tracking-[0.3em] hover:text-or transition-colors">Ã€ Propos</Link></li>
-                <li><Link to="/pantheon" className="text-ivoire/80 text-sm uppercase tracking-[0.3em] hover:text-or transition-colors">PanthÃ©on</Link></li>
+                <li><Link to="/a-propos" className="text-ivoire/80 text-sm uppercase tracking-[0.3em] hover:text-or transition-colors">À Propos</Link></li>
+                <li><Link to="/pantheon" className="text-ivoire/80 text-sm uppercase tracking-[0.3em] hover:text-or transition-colors">Panthéon</Link></li>
               </ul>
             </div>
 
@@ -272,11 +273,11 @@ export default function ShopPage() {
 
           {/* Bottom Bar */}
           <div className="pt-8 border-t border-ivoire/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-ivoire/40 text-xs uppercase tracking-[0.3em]">Â© 2025 Vodun Concept Store Â· Ouidah Â· BÃ©nin</p>
+            <p className="text-ivoire/40 text-xs uppercase tracking-[0.3em]">© 2025 Vodun Concept Store · Ouidah · Bénin</p>
             <div className="flex gap-8">
-              <span className="text-ivoire/40 text-xs uppercase tracking-[0.2em] hover:text-or cursor-pointer transition-colors">Mentions LÃ©gales</span>
+              <span className="text-ivoire/40 text-xs uppercase tracking-[0.2em] hover:text-or cursor-pointer transition-colors">Mentions Légales</span>
               <span className="text-ivoire/40 text-xs uppercase tracking-[0.2em] hover:text-or cursor-pointer transition-colors">CGV</span>
-              <span className="text-ivoire/40 text-xs uppercase tracking-[0.2em] hover:text-or cursor-pointer transition-colors">Politique de ConfidentialitÃ©</span>
+              <span className="text-ivoire/40 text-xs uppercase tracking-[0.2em] hover:text-or cursor-pointer transition-colors">Politique de Confidentialité</span>
             </div>
           </div>
         </div>
