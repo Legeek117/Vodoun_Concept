@@ -1,69 +1,27 @@
 # ═══════════════════════════════════════════════════════════════
-#  Vodun Concept Store — .htaccess (version minimale et prudente)
+#  Vodun Concept Store — .htaccess
 #
-#  Contenu volontairement limité à ce qui est strictement nécessaire,
-#  sur la base du bloc qui fonctionnait déjà sur l'hébergement :
-#  le front appelle l'API via /api/index.php (chemin réel, cf. src/api.js),
-#  donc AUCUNE règle de réécriture n'est requise pour /api/*.
+#  Contenu volontairement limité au strict nécessaire : le fallback
+#  React Router (BrowserRouter). C'est la configuration qui a été
+#  validée en production sur cet hébergement.
+#
+#  ⚠️  Ne pas ajouter d'autres directives ici.
+#      Les blocs de durcissement (Require, AddType, Expires, Header…)
+#      exigent des droits Apache plus stricts (AllowOverride AuthConfig,
+#      FileInfo) et provoquent une erreur 500 sur ce mutualisé.
+#      La redirection www → sans www se règle dans Plesk
+#      (Domains → vodunconceptstore.bj → SEO Settings → 301 redirect),
+#      pas dans ce fichier, afin qu'un ré-upload ne puisse plus casser le site.
+#
+#  L'API n'a besoin d'aucune règle : le front appelle directement
+#  /api/index.php (chemin réel), cf. src/api.js.
 # ═══════════════════════════════════════════════════════════════
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-
-  # ── 1. Domaine canonique unique : www.vodunconceptstore.bj → vodunconceptstore.bj
-  #      Doit rester AVANT le fallback SPA, sinon /accueil sur www serait
-  #      servi tel quel au lieu d'être redirigé.
-  RewriteCond %{HTTP_HOST} ^www\.vodunconceptstore\.bj$ [NC]
-  RewriteRule ^(.*)$ https://vodunconceptstore.bj/$1 [R=301,L]
-
-  # ── 2. React Router (SPA) : les fichiers réels sont servis normalement,
-  #      tout le reste tombe sur index.html.
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^index\.html$ - [L]
   RewriteRule . /index.html [L]
 </IfModule>
-
-# ═══════════════════════════════════════════════════════════════
-#  DESSOUS : durcissement OPTIONNEL, désactivé par défaut.
-#  Ces blocs sont utiles mais exigent des droits Apache plus stricts
-#  (AllowOverride AuthConfig / FileInfo) — c'est généralement ici que
-#  naissait l'erreur 500 sur certains hébergeurs mutualisés.
-#
-#  Pour les activer : supprimez le « # » devant chaque ligne du bloc,
-#  puis testez. En cas de 500, reprosez le fichier tel quel (version
-#  minimale ci-dessus) — le site refonctionnera.
-# ═══════════════════════════════════════════════════════════════
-
-# ── A. Empêcher l'accès direct aux fichiers internes de l'API
-#      (config.secret.php contient les identifiants BDD)
-# <IfModule mod_authz_core.c>
-#   <FilesMatch "^(config|config\.secret|config\.secret\.example|lib)\.php$">
-#     Require all denied
-#   </FilesMatch>
-#   <Files "seed-products.json">
-#     Require all denied
-#   </Files>
-# </IfModule>
-
-# ── B. Compression gzip des bundles
-# <IfModule mod_deflate.c>
-#   AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
-# </IfModule>
-
-# ── C. Cache navigateur (les JS/CSS sont hashés par Vite)
-# <IfModule mod_expires.c>
-#   ExpiresActive On
-#   ExpiresByType text/html "access plus 0 seconds"
-#   ExpiresByType text/css "access plus 1 year"
-#   ExpiresByType application/javascript "access plus 1 year"
-#   ExpiresByType image/webp "access plus 1 week"
-# </IfModule>
-
-# ── D. En-têtes de sécurité
-# <IfModule mod_headers.c>
-#   Header set X-Content-Type-Options "nosniff"
-#   Header set X-Frame-Options "SAMEORIGIN"
-#   Header set Referrer-Policy "strict-origin-when-cross-origin"
-# </IfModule>
