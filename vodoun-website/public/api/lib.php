@@ -52,6 +52,10 @@ function bearer_token(): ?string {
         }
     }
     if ($auth !== '' && preg_match('/^Bearer\s+(.+)$/i', $auth, $m)) return trim($m[1]);
+    // Repli : certains serveurs (nginx/PHP-FPM) retirent l'en-tête Authorization.
+    // Le front envoie alors le même jeton dans X-Admin-Token.
+    $alt = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
+    if (is_string($alt) && $alt !== '') return trim($alt);
     return null;
 }
 

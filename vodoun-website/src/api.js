@@ -1,8 +1,17 @@
 // Client API — même origine en production (servi par app.js), proxy Vite en dev
 const API_BASE = import.meta.env.VITE_API_BASE || '';
 
+// On appelle directement le point d'entrée PHP (/api/index.php) en lui
+// transmettant la route via ?r=... : l'API fonctionne même si le serveur
+// n'applique pas les règles de réécriture /api/* (fichier .htaccess absent,
+// Apache désactivé, etc.). /api/index.php est un chemin réel qui existe.
+function apiUrl(path) {
+  const route = path.startsWith('/api') ? path.slice(4) : path;
+  return `${API_BASE}/api/index.php?r=${encodeURIComponent(route)}`;
+}
+
 async function api(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(apiUrl(path), {
     headers: options.body ? { 'Content-Type': 'application/json', ...(options.headers || {}) } : (options.headers || {}),
     ...options,
   });
@@ -21,7 +30,7 @@ export const apiCreateQuote   = (quote)  => api('/api/quotes',  { method: 'POST'
 export const apiGetSettings   = () => api('/api/settings');
 
 // ── Admin ──────────────────────────────────────────────────────────────────
-const authHeaders = (token) => ({ Authorization: `Bearer ${token}` });
+const authHeaders = (token) => ({ Authorization: `Bearer ${token}`, 'X-Admin-Token': token });
 
 export const apiAdminLogin    = (username, password) =>
   api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
@@ -52,7 +61,7 @@ export const apiAdminUpdateSettings = (token, settings) =>
 export async function apiUploadImage(token, file) {
   const fd = new FormData();
   fd.append('image', file);
-  const res = await fetch(`${API_BASE}/api/upload`, {
+  const res = await fetch(apiUrl('/api/upload'), {
     method: 'POST',
     headers: authHeaders(token),
     body: fd,

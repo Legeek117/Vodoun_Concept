@@ -17,13 +17,29 @@ $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 if ($method === 'OPTIONS') { http_response_code(204); exit; }
 
 // ── Calcul de la route (ex. /products/42) ───────────────────────────────────
-$uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/api/index.php')), '/');
-$route = $uri;
-if ($scriptDir !== '' && $scriptDir !== '/' && str_starts_with($route, $scriptDir)) {
-    $route = substr($route, strlen($scriptDir));
+// Trois sources, par ordre de priorité — pour fonctionner avec OU sans règles
+// de réécriture /api/* côté serveur :
+//   1) ?r=/products        (appel direct à /api/index.php : aucun rewrite requis)
+//   2) PATH_INFO           (/api/index.php/products)
+//   3) REQUEST_URI         (rewrite /api/* → /api/index.php)
+$route = null;
+if (isset($_GET['r']) && is_string($_GET['r']) && $_GET['r'] !== '') {
+    $route = '/' . trim($_GET['r'], '/');
+} elseif (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO'] !== '') {
+    $route = '/' . trim((string)$_SERVER['PATH_INFO'], '/');
 }
-$route = '/' . trim($route, '/');
+if ($route === null) {
+    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/api/index.php')), '/');
+    $route = $uri;
+    if ($scriptDir !== '' && $scriptDir !== '/' && str_starts_with($route, $scriptDir)) {
+        $route = substr($route, strlen($scriptDir));
+    }
+    if (str_starts_with($route, '/index.php')) {
+        $route = substr($route, strlen('/index.php'));
+    }
+    $route = '/' . trim($route, '/');
+}
 
 try {
     // L'installation (schéma + seed) ne doit pas masquer le diagnostic des routes :
