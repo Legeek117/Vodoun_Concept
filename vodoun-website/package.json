@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node -e \"console.log('build deja genere (dossier dist/ du depot) - aucun build serveur necessaire')\"",
+    "build:vite": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node app.js"
