@@ -1,37 +1,26 @@
 # ═══════════════════════════════════════════════════════════════
 #  Vodun Concept Store — .htaccess
 #
-#  Contenu volontairement limité au strict nécessaire : le fallback
-#  React Router (BrowserRouter). C'est la configuration qui a été
-#  validée en production sur cet hébergement.
+#  ⚠️  L'ORDRE DES LIGNES EST IMPORTANT ET NE DOIT PAS ÊTRE MODIFIÉ.
 #
-#  ⚠️  Ne pas ajouter d'autres directives ici.
-#      Les blocs de durcissement (Require, AddType, Expires, Header…)
-#      exigent des droits Apache plus stricts (AllowOverride AuthConfig,
-#      FileInfo) et provoquent une erreur 500 sur ce mutualisé.
-#      La redirection www → sans www se règle dans Plesk
-#      (Domains → vodunconceptstore.bj → SEO Settings → 301 redirect),
-#      pas dans ce fichier, afin qu'un ré-upload ne puisse plus casser le site.
+#  RewriteRule ^index\.html$ - [L]  arrive AVANT les RewriteCond.
+#  C'est cette règle qui stoppe le traitement quand la requête porte
+#  déjà sur index.html. Sans elle, Apache réécrit /index.html vers
+#  /index.html en boucle et finit en erreur 500.
+#
+#  Ce fichier est volontairement minimal : aucune directive de
+#  durcissement (Require, AddType, Expires, Header…), car elles
+#  exigent des droits Apache plus stricts et provoquent des 500
+#  sur certains mutualisés.
 #
 #  L'API n'a besoin d'aucune règle : le front appelle directement
 #  /api/index.php (chemin réel), cf. src/api.js.
+#  La redirection www → sans www se règle dans Plesk, pas ici.
 # ═══════════════════════════════════════════════════════════════
 
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-
-  # Fichiers et dossiers réels : servis normalement, jamais réécrits
-  # (assets hashés, images WebP, /api/index.php, /sitemap.xml, /robots.txt…)
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-
-  # Garde-fou anti-boucle : une fois la réécriture vers index.html effectuée,
-  # la condition échoue et le traitement s'arrête. Sans cette ligne, si
-  # index.html est introuvable depuis la racine du DocumentRoot, Apache
-  # réécrit en boucle et renvoie une erreur 500 au lieu d'un 404.
-  RewriteCond %{REQUEST_URI} !^/index\.html$
-
-  # Tout le reste → l'application React Router
-  RewriteRule ^ index.html [L]
-</IfModule>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
