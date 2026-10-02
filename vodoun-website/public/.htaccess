@@ -1,108 +1,69 @@
 # ═══════════════════════════════════════════════════════════════
-#  Vodun Concept Store — .htaccess pour hébergement mutualisé Apache
-#  (OVH, Infomaniak, Hostinger, Ionos, Planethoster, etc.)
+#  Vodun Concept Store — .htaccess (version minimale et prudente)
 #
-#  Placement : ce fichier vit dans public/ → Vite le copie dans dist/
-#  à chaque build. Pour le mutualisé : uploader le CONTENU de dist/
-#  dans public_html/ (ou htdocs/), .htaccess à la racine.
-#
-#  Netlify ignore ce fichier (il utilise _redirects + netlify.toml),
-#  aucun conflit : le même dist marche sur les deux types d'hébergement.
+#  Contenu volontairement limité à ce qui est strictement nécessaire,
+#  sur la base du bloc qui fonctionnait déjà sur l'hébergement :
+#  le front appelle l'API via /api/index.php (chemin réel, cf. src/api.js),
+#  donc AUCUNE règle de réécriture n'est requise pour /api/*.
 # ═══════════════════════════════════════════════════════════════
 
-# ── 1. API PHP (/api/*) puis React Router (BrowserRouter)
-#      Sans le fallback SPA, /accueil, /boutique… répondent 404.
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # ── Domaine canonique unique : www.vodunconceptstore.bj → vodunconceptstore.bj (301)
+  # ── 1. Domaine canonique unique : www.vodunconceptstore.bj → vodunconceptstore.bj
+  #      Doit rester AVANT le fallback SPA, sinon /accueil sur www serait
+  #      servi tel quel au lieu d'être redirigé.
   RewriteCond %{HTTP_HOST} ^www\.vodunconceptstore\.bj$ [NC]
   RewriteRule ^(.*)$ https://vodunconceptstore.bj/$1 [R=301,L]
 
-  # Transmet l'en-tête Authorization à PHP (PHP-FPM/CGI le retire parfois)
-  RewriteCond %{HTTP:Authorization} .
-  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-  # API PHP : toutes les routes /api/* → /api/index.php
-  # (le script réel n'est pas réécrit → pas de boucle infinie)
-  RewriteRule ^api/index\.php$ - [L]
-  RewriteRule ^api/?$ api/index.php [L,QSA]
-  RewriteRule ^api/(.*)$ api/index.php [L,QSA]
-
-  # React Router (SPA) : ne PAS toucher /api ni /uploads (gérés autrement)
-  RewriteCond %{REQUEST_URI} !^/api(/|$)
-  RewriteCond %{REQUEST_URI} !^/uploads(/|$)
-  # Ne pas réécrire les fichiers qui existent réellement
-  # (assets JS/CSS hashés, images WebP, vidéos, masque.glb…)
+  # ── 2. React Router (SPA) : les fichiers réels sont servis normalement,
+  #      tout le reste tombe sur index.html.
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  # Ne pas réécrire index.html lui-même
   RewriteRule ^index\.html$ - [L]
-  # Tout le reste → l'application SPA
   RewriteRule . /index.html [L]
 </IfModule>
 
-# ── 1bis. Fichiers internes de l'API : interdire l'accès HTTP direct
-#      (config, connexion BDD et helpers ne doivent être atteints que via index.php)
-<IfModule mod_authz_core.c>
-  <FilesMatch "^(config|config\.secret|config\.secret\.example|lib)\.php$">
-    Require all denied
-  </FilesMatch>
-  <Files "seed-products.json">
-    Require all denied
-  </Files>
-</IfModule>
+# ═══════════════════════════════════════════════════════════════
+#  DESSOUS : durcissement OPTIONNEL, désactivé par défaut.
+#  Ces blocs sont utiles mais exigent des droits Apache plus stricts
+#  (AllowOverride AuthConfig / FileInfo) — c'est généralement ici que
+#  naissait l'erreur 500 sur certains hébergeurs mutualisés.
+#
+#  Pour les activer : supprimez le « # » devant chaque ligne du bloc,
+#  puis testez. En cas de 500, reprosez le fichier tel quel (version
+#  minimale ci-dessus) — le site refonctionnera.
+# ═══════════════════════════════════════════════════════════════
 
-# ── 2. Compression (gzip / brotli) pour le texte
-#      Les mutualisés récents ont souvent mod_deflate actif par défaut ;
-#      sinon ce bloc active la compression des bundles.
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/plain text/css
-  AddOutputFilterByType DEFLATE application/javascript application/json
-  AddOutputFilterByType DEFLATE image/svg+xml font/woff2
-</IfModule>
+# ── A. Empêcher l'accès direct aux fichiers internes de l'API
+#      (config.secret.php contient les identifiants BDD)
+# <IfModule mod_authz_core.c>
+#   <FilesMatch "^(config|config\.secret|config\.secret\.example|lib)\.php$">
+#     Require all denied
+#   </FilesMatch>
+#   <Files "seed-products.json">
+#     Require all denied
+#   </Files>
+# </IfModule>
 
-# ── 3. Types MIME manquants parfois sur les vieux Apache
-AddType image/webp .webp
-AddType model/gltf-binary .glb
-AddType audio/mpeg .mp3
-AddType application/xml .xml
-AddType text/plain .txt
+# ── B. Compression gzip des bundles
+# <IfModule mod_deflate.c>
+#   AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
+# </IfModule>
 
-# ── 4. Cache navigateur
-#      ⚠️ JS/CSS sont hashés par Vite (index-AbCdEf.js) : cache long OK.
-#      ⚠️ Les images de public/ ne sont PAS hashées : cache court + ETag
-#         (Apache se charge de la revalidation automatiquement).
-<IfModule mod_expires.c>
-  ExpiresActive On
+# ── C. Cache navigateur (les JS/CSS sont hashés par Vite)
+# <IfModule mod_expires.c>
+#   ExpiresActive On
+#   ExpiresByType text/html "access plus 0 seconds"
+#   ExpiresByType text/css "access plus 1 year"
+#   ExpiresByType application/javascript "access plus 1 year"
+#   ExpiresByType image/webp "access plus 1 week"
+# </IfModule>
 
-  # HTML : jamais mis en cache (toujours version fraîche)
-  ExpiresByType text/html "access plus 0 seconds"
-
-  # Bundles hashés : long
-  ExpiresByType text/css            "access plus 1 year"
-  ExpiresByType application/javascript "access plus 1 year"
-
-  # Images non-hashées : revalidation rapide
-  ExpiresByType image/webp "access plus 1 week"
-  ExpiresByType image/jpeg "access plus 1 week"
-  ExpiresByType image/png  "access plus 1 week"
-  ExpiresByType image/svg+xml "access plus 1 week"
-
-  # Médias (déjà légers après compression) : 1 mois
-  ExpiresByType video/mp4       "access plus 1 month"
-  ExpiresByType audio/mpeg      "access plus 1 month"
-  ExpiresByType model/gltf-binary "access plus 1 month"
-  ExpiresByType application/octet-stream "access plus 1 month"
-</IfModule>
-
-# ── 5. Sécurité basique (bonnes pratiques, font partie du pack mutualisé)
-<IfModule mod_headers.c>
-  # Anti-sniffing MIME
-  Header set X-Content-Type-Options "nosniff"
-  # Bloque l'affichage du site dans une iframe tierce
-  Header set X-Frame-Options "SAMEORIGIN"
-  # Referrer policy
-  Header set Referrer-Policy "strict-origin-when-cross-origin"
-</IfModule>
+# ── D. En-têtes de sécurité
+# <IfModule mod_headers.c>
+#   Header set X-Content-Type-Options "nosniff"
+#   Header set X-Frame-Options "SAMEORIGIN"
+#   Header set Referrer-Policy "strict-origin-when-cross-origin"
+# </IfModule>
