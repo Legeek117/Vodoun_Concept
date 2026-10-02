@@ -36,6 +36,7 @@ export default function usePageMeta({
   image,
   type = 'website',
   noindex = false,
+  canonical: canonicalPath,
 } = {}) {
   const { pathname } = useLocation();
 
@@ -43,7 +44,13 @@ export default function usePageMeta({
     const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — ${SITE_TAGLINE}`;
     const desc = description || SITE_DESC;
     const path = pathname && pathname !== '/' ? pathname.replace(/\/+$/, '') : '/';
-    const canonical = absUrl(path);
+    // Un canonical explicite permet de consolider plusieurs URL vers une seule
+    // (ex. la séquence d'initiation « / » vers la page d'accueil « /accueil »)
+    // en conservant les signaux de la racine, contrairement à « noindex ».
+    const target = canonicalPath
+      ? String(canonicalPath).replace(/\/+$/, '') || '/'
+      : path;
+    const canonical = absUrl(target);
     const ogImage = image
       ? (image.startsWith('http') ? image : absUrl(image))
       : DEFAULT_OG_IMAGE;
@@ -67,5 +74,5 @@ export default function usePageMeta({
     upsertMeta('name', 'twitter:image', ogImage);
 
     upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
-  }, [title, description, image, type, noindex, pathname]);
+  }, [title, description, image, type, noindex, canonicalPath, pathname]);
 }

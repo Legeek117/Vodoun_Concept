@@ -599,10 +599,13 @@ export default function InitiationSequence() {
 
   usePageMeta({
     title: 'Initiation',
-    noindex: true,
     description: lang === 'fr'
       ? 'Entrez dans l\'univers Vodun Concept Store.'
       : 'Enter the Vodun Concept Store universe.',
+    // Page d'animation sans contenu indexable : on la canonicalise vers
+    // l'accueil plutôt que de la « noindex », afin que la racine conserve
+    // ses signaux de liens au lieu de les perdre.
+    canonical: '/accueil',
   });
 
   useEffect(() => { preloadAccueil(); }, []);
