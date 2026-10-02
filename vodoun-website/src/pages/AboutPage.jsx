@@ -72,7 +72,7 @@ export default function AboutPage() {
             <img
               src="/logo_vodoun.webp"
               alt="Vodun Concept Store"
-              style={{ height: 'clamp(48px, 7vw, 80px)', width: 'auto', objectFit: 'contain' }}
+              style={{ height: 'clamp(88px, 14vw, 160px)', width: 'auto', objectFit: 'contain' }}
             />
           </div>
           <h1 className="editorial-heading text-noir !text-[clamp(2.5rem,8vw,5.5rem)] max-w-5xl reveal leading-none mb-10">

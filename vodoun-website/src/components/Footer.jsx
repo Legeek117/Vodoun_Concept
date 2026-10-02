@@ -18,7 +18,7 @@ export default function Footer() {
                                 src="/logo_vodoun.webp"
                                 alt="Vodun Concept Store"
                                 className="logo-glow"
-                                style={{ height: 'clamp(96px, 18vw, 140px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
+                                style={{ height: 'clamp(72px, 14vw, 100px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
                             />
                         </Link>
                         <p className="text-ivoire/60 text-sm leading-relaxed mb-6">Ouidah, Bénin</p>
