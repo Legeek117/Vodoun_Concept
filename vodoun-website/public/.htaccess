@@ -39,6 +39,17 @@
   RewriteRule . /index.html [L]
 </IfModule>
 
+# ── 1bis. Fichiers internes de l'API : interdire l'accès HTTP direct
+#      (config, connexion BDD et helpers ne doivent être atteints que via index.php)
+<IfModule mod_authz_core.c>
+  <FilesMatch "^(config|config\.secret|config\.secret\.example|lib)\.php$">
+    Require all denied
+  </FilesMatch>
+  <Files "seed-products.json">
+    Require all denied
+  </Files>
+</IfModule>
+
 # ── 2. Compression (gzip / brotli) pour le texte
 #      Les mutualisés récents ont souvent mod_deflate actif par défaut ;
 #      sinon ce bloc active la compression des bundles.
