@@ -6,7 +6,6 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import sharp from 'sharp';
 import { pool, rowToProduct, makeRef, verifyHash } from './db.js';
 
 const router = express.Router();
@@ -193,23 +192,51 @@ router.post('/auth/login', async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'Erreur BDD' }); }
 });
 
-// ── Upload d'image (multipart, comprimée en WebP) ───────────────────────────
+// ── Upload d'image (multipart) ──────────────────────────────────────────────
+// sharp (traitement WebP) est chargé à la demande : il requiert Node >= 18.17.
+// Sur un Node plus ancien (ex. Plesk 16), l'upload fonctionne quand même :
+// on enregistre alors l'image originale sans conversion.
 const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const uploadStorage = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
+let sharpLib; // undefined = pas encore tenté, null = indisponible
+async function getSharp() {
+  if (sharpLib !== undefined) return sharpLib;
+  try {
+    sharpLib = (await import('sharp')).default;
+  } catch (e) {
+    console.warn('[upload] sharp indisponible (Node trop ancien ?) — conversion WebP désactivée :', e.message.split('\n')[0]);
+    sharpLib = null;
+  }
+  return sharpLib;
+}
+
+const EXT_BY_MIME = {
+  'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
+  'image/gif': 'gif', 'image/avif': 'avif', 'image/tiff': 'tiff',
+};
+
 router.post('/upload', requireAdmin, uploadStorage.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Aucun fichier reçu (champ "image")' });
+  const sharp = await getSharp();
   try {
-    const filename = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}.webp`;
-    const outPath = path.join(uploadDir, filename);
-    const img = sharp(req.file.buffer, { failOn: 'none' }).rotate();
-    const meta = await img.metadata();
-    if (meta.width > 1600) img.resize({ width: 1600 });
-    await img.webp({ quality: 82 }).toFile(outPath);
-    res.status(201).json({ ok: true, url: `/uploads/${filename}`, width: meta.width, height: meta.height });
-  } catch (e) { console.error(e); res.status(500).json({ error: "Conversion d'image impossible" }); }
+    if (sharp) {
+      const filename = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}.webp`;
+      const outPath = path.join(uploadDir, filename);
+      const img = sharp(req.file.buffer, { failOn: 'none' }).rotate();
+      const meta = await img.metadata();
+      if (meta.width > 1600) img.resize({ width: 1600 });
+      await img.webp({ quality: 82 }).toFile(outPath);
+      return res.status(201).json({ ok: true, url: `/uploads/${filename}`, width: meta.width, height: meta.height, optimized: true });
+    }
+    // Repli sans sharp : on conserve l'image d'origine telle quelle
+    const ext = EXT_BY_MIME[req.file.mimetype] || path.extname(req.file.originalname || '').replace('.', '') || 'bin';
+    const filename = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}.${ext}`;
+    fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
+    res.status(201).json({ ok: true, url: `/uploads/${filename}`, optimized: false, warning: 'Image non convertie (sharp indisponible sur ce serveur)' });
+  } catch (e) { console.error(e); res.status(500).json({ error: "Traitement d'image impossible" }); }
 });
 
 export default router;
