@@ -62,11 +62,40 @@ function bearer_token(): ?string {
 function require_admin(): array {
     $token = bearer_token();
     if ($token === null) json_out(['error' => 'Authentification requise'], 401);
-    $st = db()->prepare('SELECT id, username FROM admins WHERE token = ? LIMIT 1');
+    $st = db()->prepare('SELECT id, username, display_name, role FROM admins WHERE token = ? LIMIT 1');
     $st->execute([$token]);
     $row = $st->fetch();
     if (!$row) json_out(['error' => 'Token invalide'], 401);
+    if (empty($row['role'])) $row['role'] = 'admin';
     return $row;
+}
+
+// Rôles : 'admin' (tout) et 'gestion' (tout sauf la gestion des utilisateurs).
+function require_role(array $admin, array $roles): void {
+    if (!in_array((string)($admin['role'] ?? ''), $roles, true)) {
+        json_out(['error' => 'Accès refusé (droits insuffisants)'], 403);
+    }
+}
+
+// Représentation publique d'un compte admin (jamais de hash ni de jeton).
+function admin_public(array $row): array {
+    return [
+        'id'           => (int)$row['id'],
+        'username'     => (string)$row['username'],
+        'display_name' => (string)($row['display_name'] ?? ''),
+        'role'         => (string)($row['role'] ?: 'admin'),
+    ];
+}
+
+function admin_list_row(array $row): array {
+    return [
+        'id'           => (int)$row['id'],
+        'username'     => (string)$row['username'],
+        'display_name' => (string)($row['display_name'] ?? ''),
+        'role'         => (string)($row['role'] ?: 'admin'),
+        'created_at'   => $row['created_at'] ?? null,
+        'online'       => !empty($row['online']),
+    ];
 }
 
 // Compatible avec l'ancien hash sha256 (Node) et les nouveaux password_hash()
@@ -195,7 +224,9 @@ SQL,
 CREATE TABLE IF NOT EXISTS admins (
   id            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   username      VARCHAR(128) NOT NULL UNIQUE,
+  display_name  VARCHAR(128),
   password_hash VARCHAR(128) NOT NULL,
+  role          VARCHAR(32) NOT NULL DEFAULT 'admin',
   token         VARCHAR(128),
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
@@ -241,8 +272,20 @@ function seed_admin(PDO $pdo): void {
         $pass = bin2hex(random_bytes(6));
         error_log("[vodun] ADMIN_PASSWORD non défini — mot de passe provisoire : {$pass}");
     }
-    $st = $pdo->prepare('INSERT INTO admins (username, password_hash, token) VALUES (?,?,?)');
-    $st->execute([$user, password_hash($pass, PASSWORD_DEFAULT), bin2hex(random_bytes(24))]);
+    $st = $pdo->prepare('INSERT INTO admins (username, display_name, password_hash, role, token) VALUES (?,?,?,?,?)');
+    $st->execute([$user, 'Administrateur', password_hash($pass, PASSWORD_DEFAULT), 'admin', bin2hex(random_bytes(24))]);
+}
+
+// Ajoute les colonnes role/display_name aux bases créées avant leur introduction
+// (migration automatique et idempotente — inutile de lancer un script SQL).
+function migrate_admins(): void {
+    $cols = db()->query('SHOW COLUMNS FROM admins')->fetchAll(PDO::FETCH_COLUMN);
+    if (!in_array('display_name', $cols, true)) {
+        db()->exec("ALTER TABLE admins ADD COLUMN display_name VARCHAR(128) NULL AFTER username");
+    }
+    if (!in_array('role', $cols, true)) {
+        db()->exec("ALTER TABLE admins ADD COLUMN role VARCHAR(32) NOT NULL DEFAULT 'admin' AFTER password_hash");
+    }
 }
 
 function install(): void {
@@ -250,6 +293,7 @@ function install(): void {
     foreach (schema_statements() as $stmt) {
         $pdo->exec($stmt);
     }
+    migrate_admins();
     seed_products($pdo);
     seed_admin($pdo);
 }
@@ -261,7 +305,8 @@ function ensure_installed(): void {
     $done = true;
     $tables = db()->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
     $need = ['products', 'orders', 'quotes', 'settings', 'admins'];
-    if (array_diff($need, $tables)) install();
+    if (array_diff($need, $tables)) { install(); return; }
+    migrate_admins();
 }
 
 // ── Upload : helpers image ──────────────────────────────────────────────────

@@ -26,8 +26,7 @@ export default function AdminLogin({ onLogin }) {
     try {
       const res = await apiAdminLogin(username.trim(), password);
       sessionStorage.setItem('vodun-admin-token', res.token);
-      sessionStorage.setItem('vodun-admin-auth', 'true');
-      onLogin();
+      onLogin(res);
     } catch {
       setError('Identifiants invalides.');
       if (errorRef.current) {

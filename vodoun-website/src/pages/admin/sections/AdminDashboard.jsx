@@ -1,102 +1,166 @@
-const STATUS_COLORS = { pending:'#B8860B', confirmed:'#1C4A66', shipped:'#6B2A5E', delivered:'#20603C', cancelled:'#8E2420' };
+import { useMemo } from 'react';
+import { Sparkline, LineChart, Donut, BarChart } from '../components/Charts';
+
+const STATUS_COLORS = { pending:'#D4A017', confirmed:'#3E7CA8', shipped:'#9B4D8F', delivered:'#2d8050', cancelled:'#B03A31' };
 const STATUS_LABELS = { pending:'En attente', confirmed:'Confirmée', shipped:'Expédiée', delivered:'Livrée', cancelled:'Annulée' };
 
-function StatCard({ label, value, sub, color = '#B8860B', icon }) {
+function Panel({ title, action, children, style, className = '' }) {
   return (
-    <div className="ag-stat" style={{ padding:'22px 24px' }}>
-      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'16px' }}>
-        <p style={{ fontSize:'0.58rem', textTransform:'uppercase', letterSpacing:'0.35em', color:'rgba(244,240,230,0.4)', margin:0 }}>{label}</p>
-        {icon && <span style={{ fontSize:'1.2rem', opacity:0.35 }}>{icon}</span>}
+    <div className={`ag-glass ${className}`} style={style}>
+      {title && (
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px', padding:'16px 20px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+          <h2 style={{ fontSize:'0.68rem', textTransform:'uppercase', letterSpacing:'0.25em', fontWeight:900, color:'#F4F0E6', margin:0 }}>{title}</h2>
+          {action}
+        </div>
+      )}
+      <div style={{ padding:'18px 20px' }}>{children}</div>
+    </div>
+  );
+}
+
+function KpiCard({ label, value, sub, color, values, icon }) {
+  return (
+    <div className="ag-stat" style={{ padding:'18px 20px 0' }}>
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px' }}>
+        <div>
+          <p style={{ fontSize:'0.56rem', textTransform:'uppercase', letterSpacing:'0.3em', color:'rgba(244,240,230,0.4)', margin:0 }}>{label}</p>
+          <p style={{ fontFamily:"'Playfair Display', serif", fontWeight:900, fontSize:'1.7rem', color, margin:'10px 0 4px', lineHeight:1 }}>{value}</p>
+          {sub && <p style={{ fontSize:'0.66rem', color:'rgba(244,240,230,0.3)', margin:0 }}>{sub}</p>}
+        </div>
+        {icon && <span style={{ fontSize:'1.1rem', opacity:0.3 }}>{icon}</span>}
       </div>
-      <p style={{ fontFamily:"'Playfair Display', serif", fontWeight:900, fontSize:'1.9rem', color, margin:'0 0 6px', lineHeight:1 }}>{value}</p>
-      {sub && <p style={{ fontSize:'0.68rem', color:'rgba(244,240,230,0.3)', margin:0 }}>{sub}</p>}
+      <div style={{ margin:'12px -20px 0' }}>
+        <Sparkline values={values} color={color} height={44} />
+      </div>
     </div>
   );
 }
 
-function GlassPanel({ children, style = {} }) {
-  return (
-    <div className="ag-glass" style={{ ...style }}>
-      {children}
-    </div>
-  );
+// Série journalière sur les N derniers jours (CA hors annulées + nb commandes)
+function dailySeries(orders, days = 14) {
+  const now = new Date();
+  const out = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+    const next = new Date(d); next.setDate(d.getDate() + 1);
+    const day = orders.filter((o) => { const t = new Date(o._ts || o.date); return t >= d && t < next; });
+    out.push({
+      label: d.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit' }),
+      revenue: day.filter((o) => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0),
+      count: day.length,
+    });
+  }
+  return out;
 }
 
-export default function AdminDashboard({ products, orders, setActiveSection }) {
-  const totalRevenue  = orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0);
-  const pending       = orders.filter(o => o.status === 'pending').length;
-  const delivered     = orders.filter(o => o.status === 'delivered').length;
-  const recent        = [...orders].sort((a, b) => new Date(b._ts || b.date) - new Date(a._ts || a.date)).slice(0, 5);
-  const categoryCounts = products.reduce((acc, p) => { acc[p.category] = (acc[p.category] || 0) + 1; return acc; }, {});
+export default function AdminDashboard({ products = [], orders = [], quotes = [], setActiveSection, admin }) {
+  const totalRevenue = orders.filter((o) => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0);
+  const pending      = orders.filter((o) => o.status === 'pending').length;
+  const delivered    = orders.filter((o) => o.status === 'delivered').length;
+  const avgBasket    = orders.length ? totalRevenue / orders.filter((o) => o.status !== 'cancelled').length || 0 : 0;
+
+  const series   = useMemo(() => dailySeries(orders, 14), [orders]);
+  const recent   = useMemo(() => [...orders].sort((a, b) => new Date(b._ts || b.date) - new Date(a._ts || a.date)).slice(0, 6), [orders]);
+  const recentQ  = useMemo(() => [...quotes].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 4), [quotes]);
+
+  const statusData = useMemo(() => Object.keys(STATUS_LABELS)
+    .map((k) => ({ label: STATUS_LABELS[k], value: orders.filter((o) => o.status === k).length, color: STATUS_COLORS[k] }))
+    .filter((d) => d.value > 0), [orders]);
+
+  const categoryData = useMemo(() => {
+    const counts = products.reduce((acc, p) => { acc[p.category || 'Autre'] = (acc[p.category || 'Autre'] || 0) + 1; return acc; }, {});
+    return Object.entries(counts).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value);
+  }, [products]);
+
+  const today = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const firstname = (admin?.display_name || admin?.username || 'Admin').split(' ')[0];
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', gap:'24px' }}>
-      {/* Titre */}
+    <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+      {/* En-tête */}
       <div>
-        <h1 style={{ fontFamily:"'Playfair Display', serif", fontWeight:900, fontSize:'1.8rem', textTransform:'uppercase', letterSpacing:'-0.01em', color:'#F4F0E6', margin:0 }}>
-          Tableau de bord
+        <h1 style={{ fontFamily:"'Playfair Display', serif", fontWeight:900, fontSize:'1.9rem', color:'#F4F0E6', margin:0 }}>
+          Bonjour, {firstname}
         </h1>
-        <p style={{ fontSize:'0.65rem', textTransform:'uppercase', letterSpacing:'0.3em', color:'rgba(244,240,230,0.3)', marginTop:'6px' }}>
-          Vue d'ensemble · Vodun Concept Store
+        <p style={{ fontSize:'0.65rem', textTransform:'capitalize', letterSpacing:'0.2em', color:'rgba(244,240,230,0.35)', marginTop:'6px' }}>
+          {today}
         </p>
       </div>
 
-      {/* Stats grid */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:'14px' }}>
-        <StatCard icon="💰" label="Chiffre d'affaires" value={`${totalRevenue.toLocaleString('fr-FR')}`} sub="FCFA · commandes actives" color="#B8860B" />
-        <StatCard icon="📦" label="Commandes totales"  value={orders.length} sub={`${pending} en attente`} color="#F4F0E6" />
-        <StatCard icon="✦"  label="Produits actifs"    value={products.filter(p => p.available !== false).length} sub={`${products.length} au total`} color="#F4F0E6" />
-        <StatCard icon="✅" label="Livrées"             value={delivered} sub={`${orders.length ? Math.round(delivered/orders.length*100) : 0}% du total`} color="#2d8050" />
+      {/* KPI */}
+      <div className="ag-grid-kpi">
+        <KpiCard icon="💰" label="Chiffre d'affaires" color="#D4A017" value={`${totalRevenue.toLocaleString('fr-FR')} F`}
+          sub={`${orders.length} commande(s)`} values={series.map((s) => s.revenue)} />
+        <KpiCard icon="🧾" label="Commandes" color="#3E7CA8" value={orders.length}
+          sub={`${pending} en attente · ${delivered} livrée(s)`} values={series.map((s) => s.count)} />
+        <KpiCard icon="🛍️" label="Panier moyen" color="#2d8050"
+          value={`${Math.round(avgBasket).toLocaleString('fr-FR')} F`} sub="hors commandes annulées" values={series.map((s) => s.revenue)} />
+        <KpiCard icon="📐" label="Devis B2B" color="#9B4D8F" value={quotes.length}
+          sub={`${quotes.filter((q) => q.status === 'nouvelle').length} nouveau(x)`} values={series.map((s) => s.count)} />
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 320px', gap:'14px' }}>
-        {/* Commandes récentes */}
-        <GlassPanel>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 20px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-            <h2 style={{ fontSize:'0.7rem', textTransform:'uppercase', letterSpacing:'0.25em', fontWeight:900, color:'#F4F0E6', margin:0 }}>Commandes récentes</h2>
-            <button onClick={() => setActiveSection('orders')}
-              style={{ fontSize:'0.6rem', textTransform:'uppercase', letterSpacing:'0.25em', fontWeight:900, color:'#B8860B', background:'none', border:'none', cursor:'pointer' }}>
-              Tout voir →
-            </button>
-          </div>
-          <div>
-            {recent.map((order) => (
-              <div key={order.id} className="ag-table-row" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', gap:'12px' }}>
-                <div style={{ minWidth:0 }}>
-                  <p style={{ fontSize:'0.85rem', fontWeight:700, color:'#F4F0E6', margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{order.customer}</p>
-                  <p style={{ fontSize:'0.7rem', color:'rgba(244,240,230,0.38)', margin:'2px 0 0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{order.product}</p>
+      {/* Courbe CA + Donut statuts */}
+      <div className="ag-grid-main">
+        <Panel title="Chiffre d'affaires · 14 derniers jours"
+          action={<span style={{ fontSize:'0.62rem', letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(244,240,230,0.3)' }}>FCFA</span>}>
+          <LineChart
+            labels={series.map((s) => s.label)}
+            series={[{ name:'Chiffre d\'affaires', color:'#D4A017', values: series.map((s) => s.revenue) }]}
+            height={300}
+          />
+        </Panel>
+        <Panel title="Statuts des commandes">
+          {statusData.length ? (
+            <Donut data={statusData} centerLabel="commandes" centerValue={orders.length} />
+          ) : (
+            <p style={{ fontSize:'0.75rem', color:'rgba(244,240,230,0.35)', textAlign:'center', padding:'40px 0' }}>Aucune commande pour le moment.</p>
+          )}
+        </Panel>
+      </div>
+
+      {/* Barres catégories + Commandes récentes */}
+      <div className="ag-grid-2">
+        <Panel title="Produits par catégorie">
+          {categoryData.length
+            ? <BarChart data={categoryData} color="#B8860B" height={260} />
+            : <p style={{ fontSize:'0.75rem', color:'rgba(244,240,230,0.35)', textAlign:'center', padding:'40px 0' }}>Aucun produit.</p>}
+        </Panel>
+
+        <Panel title="Commandes récentes"
+          action={<button onClick={() => setActiveSection('orders')} className="ag-link">Tout voir →</button>}>
+          {recent.length ? recent.map((o) => (
+            <div key={o.id} className="ag-table-row" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px', padding:'11px 0' }}>
+              <div style={{ minWidth:0 }}>
+                <p style={{ fontSize:'0.82rem', fontWeight:700, color:'#F4F0E6', margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.customer}</p>
+                <p style={{ fontSize:'0.68rem', color:'rgba(244,240,230,0.38)', margin:'2px 0 0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.id} · {o.product}</p>
+              </div>
+              <div style={{ textAlign:'right', flexShrink:0 }}>
+                <p style={{ fontSize:'0.8rem', fontWeight:900, color:'#D4A017', margin:0 }}>{o.total.toLocaleString('fr-FR')} F</p>
+                <span className="ag-badge" style={{ color:STATUS_COLORS[o.status], background:`${STATUS_COLORS[o.status]}1A`, borderColor:`${STATUS_COLORS[o.status]}44`, marginTop:'4px' }}>
+                  {STATUS_LABELS[o.status]}
+                </span>
+              </div>
+            </div>
+          )) : <p style={{ fontSize:'0.75rem', color:'rgba(244,240,230,0.35)', textAlign:'center', padding:'40px 0' }}>Aucune commande.</p>}
+        </Panel>
+      </div>
+
+      {/* Devis B2B récents */}
+      {recentQ.length > 0 && (
+        <Panel title="Devis B2B récents">
+          <div className="ag-grid-2" style={{ gap:'10px' }}>
+            {recentQ.map((q) => (
+              <div key={q.id} style={{ padding:'12px 14px', borderRadius:'12px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', gap:'10px' }}>
+                  <p style={{ fontSize:'0.8rem', fontWeight:700, color:'#F4F0E6', margin:0 }}>{q.client_name}</p>
+                  <span className="ag-badge" style={{ color:'#9B4D8F', background:'#9B4D8F1A', borderColor:'#9B4D8F44' }}>{q.ref}</span>
                 </div>
-                <div style={{ textAlign:'right', flexShrink:0 }}>
-                  <p style={{ fontSize:'0.82rem', fontWeight:900, color:'#B8860B', margin:0 }}>{order.total.toLocaleString('fr-FR')} F</p>
-                  <span className="ag-badge" style={{ color:STATUS_COLORS[order.status], background:STATUS_COLORS[order.status]+'18', borderColor:STATUS_COLORS[order.status]+'40', marginTop:'4px', display:'inline-flex' }}>
-                    {STATUS_LABELS[order.status]}
-                  </span>
-                </div>
+                <p style={{ fontSize:'0.7rem', color:'rgba(244,240,230,0.4)', margin:'4px 0 0' }}>{q.project_title || q.domain || '—'}</p>
               </div>
             ))}
           </div>
-        </GlassPanel>
-
-        {/* Catégories */}
-        <GlassPanel>
-          <div style={{ padding:'18px 20px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-            <h2 style={{ fontSize:'0.7rem', textTransform:'uppercase', letterSpacing:'0.25em', fontWeight:900, color:'#F4F0E6', margin:0 }}>Par catégorie</h2>
-          </div>
-          <div style={{ padding:'16px 20px', display:'flex', flexDirection:'column', gap:'14px' }}>
-            {Object.entries(categoryCounts).map(([cat, count]) => (
-              <div key={cat}>
-                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px' }}>
-                  <span style={{ fontSize:'0.72rem', color:'rgba(244,240,230,0.55)' }}>{cat}</span>
-                  <span style={{ fontSize:'0.72rem', fontWeight:900, color:'#B8860B' }}>{count}</span>
-                </div>
-                <div className="ag-progress-track">
-                  <div className="ag-progress-fill" style={{ width:`${(count/products.length)*100}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </GlassPanel>
-      </div>
+        </Panel>
+      )}
     </div>
   );
 }

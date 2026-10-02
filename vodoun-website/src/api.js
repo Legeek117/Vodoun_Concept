@@ -35,6 +35,17 @@ const authHeaders = (token) => ({ Authorization: `Bearer ${token}`, 'X-Admin-Tok
 export const apiAdminLogin    = (username, password) =>
   api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
 
+// Session / profil de l'admin connecté
+export const apiAdminMe             = (token)      => api('/api/auth/me',       { headers: authHeaders(token) });
+export const apiAdminUpdateProfile  = (token, data) => api('/api/auth/profile',  { method: 'PUT', headers: authHeaders(token), body: JSON.stringify(data) });
+export const apiAdminChangePassword = (token, data) => api('/api/auth/password', { method: 'PUT', headers: authHeaders(token), body: JSON.stringify(data) });
+
+// Gestion des utilisateurs (rôle admin uniquement)
+export const apiAdminUsers       = (token)         => api('/api/users',        { headers: authHeaders(token) });
+export const apiAdminCreateUser  = (token, data)   => api('/api/users',        { method: 'POST',   headers: authHeaders(token), body: JSON.stringify(data) });
+export const apiAdminUpdateUser  = (token, id, d)  => api(`/api/users/${id}`,  { method: 'PATCH',  headers: authHeaders(token), body: JSON.stringify(d) });
+export const apiAdminDeleteUser  = (token, id)     => api(`/api/users/${id}`,  { method: 'DELETE', headers: authHeaders(token) });
+
 export const apiAdminOrders   = (token) => api('/api/orders',        { headers: authHeaders(token) });
 export const apiAdminQuotes   = (token) => api('/api/quotes',        { headers: authHeaders(token) });
 export const apiAdminSettings = (token) => api('/api/settings',      { headers: authHeaders(token) });

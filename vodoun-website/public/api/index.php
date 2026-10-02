@@ -267,7 +267,150 @@ try {
         $token = bin2hex(random_bytes(24));
         $up = db()->prepare('UPDATE admins SET token = ? WHERE id = ?');
         $up->execute([$token, $row['id']]);
-        json_out(['ok' => true, 'token' => $token, 'username' => $row['username']]);
+        json_out([
+            'ok'           => true,
+            'token'        => $token,
+            'id'           => (int)$row['id'],
+            'username'     => $row['username'],
+            'display_name' => $row['display_name'] ?? '',
+            'role'         => $row['role'] ?: 'admin',
+        ]);
+    }
+
+    // ── Session / profil de l'admin connecté ────────────────────────────────
+    if ($route === '/auth/me' && $method === 'GET') {
+        $admin = require_admin();
+        json_out(['ok' => true] + admin_public($admin));
+    }
+
+    if ($route === '/auth/profile' && $method === 'PUT') {
+        $admin = require_admin();
+        $b = body();
+        $name = trim((string)($b['display_name'] ?? ''));
+        if ($name === '' || mb_strlen($name) > 128) {
+            json_out(['error' => 'Nom de profil invalide (1 à 128 caractères)'], 400);
+        }
+        $st = db()->prepare('UPDATE admins SET display_name = ? WHERE id = ?');
+        $st->execute([$name, $admin['id']]);
+        json_out(['ok' => true, 'display_name' => $name]);
+    }
+
+    if ($route === '/auth/password' && $method === 'PUT') {
+        $admin = require_admin();
+        $b = body();
+        $current = (string)($b['current_password'] ?? '');
+        $new     = (string)($b['new_password'] ?? '');
+        if (strlen($new) < 8) {
+            json_out(['error' => 'Le nouveau mot de passe doit faire au moins 8 caractères'], 400);
+        }
+        $st = db()->prepare('SELECT password_hash FROM admins WHERE id = ? LIMIT 1');
+        $st->execute([$admin['id']]);
+        $row = $st->fetch();
+        if (!$row || !verify_password($current, (string)$row['password_hash'])) {
+            json_out(['error' => 'Mot de passe actuel incorrect'], 403);
+        }
+        $up = db()->prepare('UPDATE admins SET password_hash = ? WHERE id = ?');
+        $up->execute([password_hash($new, PASSWORD_DEFAULT), $admin['id']]);
+        json_out(['ok' => true]);
+    }
+
+    // ── Gestion des utilisateurs (réservée au rôle « admin ») ───────────────
+    if ($route === '/users' && $method === 'GET') {
+        $admin = require_admin();
+        require_role($admin, ['admin']);
+        $rows = db()->query(
+            'SELECT id, username, display_name, role, created_at, (token IS NOT NULL) AS online
+             FROM admins ORDER BY id'
+        )->fetchAll();
+        json_out(array_map('admin_list_row', $rows));
+    }
+
+    if ($route === '/users' && $method === 'POST') {
+        $admin = require_admin();
+        require_role($admin, ['admin']);
+        $b        = body();
+        $username = trim((string)($b['username'] ?? ''));
+        $password = (string)($b['password'] ?? '');
+        $display  = trim((string)($b['display_name'] ?? ''));
+        $role     = (string)($b['role'] ?? 'gestion');
+        if (!preg_match('/^[a-zA-Z0-9._-]{3,64}$/', $username)) {
+            json_out(['error' => 'Identifiant invalide (3 à 64 caractères : lettres, chiffres, . _ -)'], 400);
+        }
+        if (strlen($password) < 8) {
+            json_out(['error' => 'Mot de passe : 8 caractères minimum'], 400);
+        }
+        if (!in_array($role, ['admin', 'gestion'], true)) $role = 'gestion';
+        if ($display === '') $display = $username;
+        try {
+            $st = db()->prepare('INSERT INTO admins (username, display_name, password_hash, role, token) VALUES (?,?,?,?,NULL)');
+            $st->execute([$username, $display, password_hash($password, PASSWORD_DEFAULT), $role]);
+            json_out(['ok' => true, 'id' => (int)db()->lastInsertId()], 201);
+        } catch (PDOException $e) {
+            if ((int)($e->errorInfo[1] ?? 0) === 1062) {
+                json_out(['error' => 'Cet identifiant existe déjà'], 409);
+            }
+            throw $e;
+        }
+    }
+
+    if (preg_match('#^/users/(\d+)$#', $route, $m) && $method === 'PATCH') {
+        $admin = require_admin();
+        require_role($admin, ['admin']);
+        $id = (int)$m[1];
+        $b  = body();
+        $st = db()->prepare('SELECT id, role FROM admins WHERE id = ? LIMIT 1');
+        $st->execute([$id]);
+        $target = $st->fetch();
+        if (!$target) json_out(['error' => 'Utilisateur introuvable'], 404);
+
+        $sets = [];
+        $args = [];
+        if (array_key_exists('display_name', $b)) {
+            $name = trim((string)$b['display_name']);
+            if ($name === '' || mb_strlen($name) > 128) json_out(['error' => 'Nom de profil invalide'], 400);
+            $sets[] = 'display_name = ?'; $args[] = $name;
+        }
+        if (array_key_exists('role', $b)) {
+            $role = (string)$b['role'];
+            if (!in_array($role, ['admin', 'gestion'], true)) json_out(['error' => 'Rôle invalide'], 400);
+            if ($id === (int)$admin['id'] && $role !== (string)$admin['role']) {
+                json_out(['error' => 'Vous ne pouvez pas modifier votre propre rôle'], 400);
+            }
+            if ((string)$target['role'] === 'admin' && $role !== 'admin') {
+                $n = (int)db()->query("SELECT COUNT(*) FROM admins WHERE role = 'admin'")->fetchColumn();
+                if ($n <= 1) json_out(['error' => 'Impossible de rétrograder le dernier administrateur'], 400);
+            }
+            $sets[] = 'role = ?'; $args[] = $role;
+        }
+        if (!empty($b['password'])) {
+            if (strlen((string)$b['password']) < 8) json_out(['error' => 'Mot de passe : 8 caractères minimum'], 400);
+            $sets[] = 'password_hash = ?'; $args[] = password_hash((string)$b['password'], PASSWORD_DEFAULT);
+        }
+        if (!$sets) json_out(['error' => 'Aucune modification'], 400);
+        $args[] = $id;
+        $up = db()->prepare('UPDATE admins SET ' . implode(', ', $sets) . ' WHERE id = ?');
+        $up->execute($args);
+        json_out(['ok' => true]);
+    }
+
+    if (preg_match('#^/users/(\d+)$#', $route, $m) && $method === 'DELETE') {
+        $admin = require_admin();
+        require_role($admin, ['admin']);
+        $id = (int)$m[1];
+        if ($id === (int)$admin['id']) {
+            json_out(['error' => 'Vous ne pouvez pas supprimer votre propre compte'], 400);
+        }
+        $st = db()->prepare('SELECT role FROM admins WHERE id = ? LIMIT 1');
+        $st->execute([$id]);
+        $target = $st->fetch();
+        if (!$target) json_out(['error' => 'Utilisateur introuvable'], 404);
+        if ((string)$target['role'] === 'admin') {
+            $n = (int)db()->query("SELECT COUNT(*) FROM admins WHERE role = 'admin'")->fetchColumn();
+            if ($n <= 1) json_out(['error' => 'Impossible de supprimer le dernier administrateur'], 400);
+        }
+        $d = db()->prepare('DELETE FROM admins WHERE id = ?');
+        $d->execute([$id]);
+        json_out(['ok' => true]);
     }
 
     // ── Upload d'image (multipart, champ « image ») ─────────────────────────

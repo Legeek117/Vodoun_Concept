@@ -45,7 +45,7 @@ function Row({ label, desc, children }) {
   );
 }
 
-export default function AdminSettings({ onLogout, token }) {
+export default function AdminSettings({ onLogout, token, onGoProfile }) {
   const [s, setS] = useState({
     siteName:'Vodun Concept Store', siteSlogan:"Là où le sacré devient désirable",
     adminEmail:'admin@vodun-concept.com', contactEmail:'contact@vodun-concept.com',
@@ -53,10 +53,6 @@ export default function AdminSettings({ onLogout, token }) {
     whatsapp:'+229 97 00 00 00', instagram:'@vodun.concept',
   });
   const [saved,    setSaved]    = useState(false);
-  const [pwdOpen,  setPwdOpen]  = useState(false);
-  const [newPwd,   setNewPwd]   = useState('');
-  const [confPwd,  setConfPwd]  = useState('');
-  const [pwdMsg,   setPwdMsg]   = useState('');
   const [loaded,   setLoaded]   = useState(false);
 
   // Chargement des réglages depuis la BDD
@@ -101,14 +97,6 @@ export default function AdminSettings({ onLogout, token }) {
     }
   };
 
-  const changePwd = () => {
-    if (newPwd.length < 8) { setPwdMsg('8 caractères minimum.'); return; }
-    if (newPwd !== confPwd) { setPwdMsg('Les mots de passe ne correspondent pas.'); return; }
-    setPwdMsg('Modifiez ADMIN_PASSWORD dans les variables d\'environnement du serveur (Plesk) puis redémarrez l\'application.');
-    setNewPwd(''); setConfPwd('');
-    setTimeout(() => { setPwdMsg(''); setPwdOpen(false); }, 6000);
-  };
-
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:'20px', maxWidth:'760px' }}>
       <div>
@@ -149,19 +137,9 @@ export default function AdminSettings({ onLogout, token }) {
         <Row label="Email admin" desc="Identifiant de connexion">
           <input value={s.adminEmail} onChange={inp('adminEmail')} style={{ ...iStyle, width:'220px' }} onFocus={e=>{e.target.style.borderColor='rgba(184,134,11,0.6)';}} onBlur={e=>{e.target.style.borderColor='rgba(255,255,255,0.08)';}} />
         </Row>
-        <Row label="Mot de passe" desc="Modifier le mot de passe">
-          <button onClick={() => setPwdOpen(v => !v)} className="ag-btn-ghost" style={{ fontSize:'0.65rem', padding:'8px 16px' }}>Modifier</button>
+        <Row label="Mot de passe" desc="Le mot de passe se modifie depuis « Mon profil ».">
+          <button onClick={() => onGoProfile && onGoProfile()} className="ag-btn-ghost" style={{ fontSize:'0.65rem', padding:'8px 16px' }}>Mon profil</button>
         </Row>
-        {pwdOpen && (
-          <div style={{ margin:'0 20px 12px', padding:'16px', background:'rgba(255,255,255,0.02)', borderRadius:'12px', border:'1px solid rgba(255,255,255,0.06)', display:'flex', flexDirection:'column', gap:'10px' }}>
-            {[['newPwd',newPwd,setNewPwd,'Nouveau mot de passe'],['confPwd',confPwd,setConfPwd,'Confirmer']].map(([k,v,sv,ph]) => (
-              <input key={k} type="password" value={v} onChange={e => sv(e.target.value)} placeholder={ph}
-                style={{ ...iStyle }} onFocus={e=>{e.target.style.borderColor='rgba(184,134,11,0.5)';}} onBlur={e=>{e.target.style.borderColor='rgba(255,255,255,0.08)';}} />
-            ))}
-            {pwdMsg && <p style={{ fontSize:'0.72rem', color: pwdMsg.includes('jour') ? '#2d8050':'#f87171', margin:0 }}>{pwdMsg}</p>}
-            <button onClick={changePwd} className="ag-btn-primary" style={{ alignSelf:'flex-start' }}>Confirmer</button>
-          </div>
-        )}
         <Row label="Déconnexion" desc="Terminer la session">
           <button onClick={onLogout}
             style={{ padding:'9px 18px', borderRadius:'10px', fontSize:'0.65rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.2em', background:'rgba(142,36,32,0.2)', color:'#f87171', border:'1px solid rgba(142,36,32,0.4)', cursor:'pointer', transition:'all 0.2s' }}
@@ -178,7 +156,7 @@ export default function AdminSettings({ onLogout, token }) {
           {loaded ? '✓ Connecté à la base de données' : 'Connexion à la base…'}
         </p>
         <p style={{ fontSize:'0.75rem', color:'rgba(244,240,230,0.4)', margin:0, lineHeight:1.6 }}>
-          Réglages enregistrés dans PostgreSQL (serveur d'hébergement). Le mot de passe admin se modifie via la variable d'environnement <code style={{ color:'#B8860B' }}>ADMIN_PASSWORD</code> (Plesk → Node.js).
+          Réglages enregistrés dans la base MariaDB du site. Le mot de passe et le nom de profil de chaque compte se modifient depuis l'onglet <b style={{ color:'#B8860B' }}>Mon profil</b>.
         </p>
       </div>
 
