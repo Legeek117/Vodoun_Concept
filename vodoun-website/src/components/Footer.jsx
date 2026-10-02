@@ -18,7 +18,7 @@ export default function Footer() {
                                 src="/logo_vodoun.webp"
                                 alt="Vodun Concept Store"
                                 className="logo-glow"
-                                style={{ height: 'clamp(72px, 14vw, 100px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
+                                style={{ height: 'clamp(96px, 18vw, 140px)', width: 'auto', objectFit: 'contain', marginBottom: '1.5rem' }}
                             />
                         </Link>
                         <p className="text-ivoire/60 text-sm leading-relaxed mb-6">Ouidah, Bénin</p>
@@ -82,7 +82,10 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-ivoire/10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-ivoire/40 text-xs uppercase tracking-[0.3em] text-center md:text-left leading-relaxed">{t.footer.rights}</p>
+                    <div className="flex flex-col gap-2 items-center md:items-start">
+                        <p className="text-ivoire/40 text-xs uppercase tracking-[0.3em] text-center md:text-left leading-relaxed">{t.footer.rights}</p>
+                        <p className="text-ivoire/25 text-[0.65rem] uppercase tracking-[0.3em] text-center md:text-left">{t.footer.credit}</p>
+                    </div>
                     <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center">
                         <Link to="/mentions-legales" className="text-ivoire/40 text-xs uppercase tracking-[0.2em] hover:text-or transition-colors text-center">{t.footer.legal}</Link>
                         <Link to="/cgv" className="text-ivoire/40 text-xs uppercase tracking-[0.2em] hover:text-or transition-colors text-center">{t.footer.cgv}</Link>

@@ -105,7 +105,7 @@ export default function Hero() {
  
         <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 md:gap-8 justify-center items-center">
           <Link to="/boutique" className="btn-premium w-full sm:w-auto text-xs md:text-sm px-10 py-5">
-            Collection
+            Collections
           </Link>
           <Link to="/projets-pro" className="btn-premium bg-transparent text-ivoire border-ivoire hover:bg-ivoire hover:text-noir w-full sm:w-auto text-xs md:text-sm px-10 py-5">
             Lancer un projet
