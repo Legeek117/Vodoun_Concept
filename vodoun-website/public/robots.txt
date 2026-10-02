@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/
 
-Sitemap: https://www.vodun-concept.com/sitemap.xml
+Sitemap: https://vodunconceptstore.bj/sitemap.xml

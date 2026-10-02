@@ -4,6 +4,7 @@ import usePageMeta from '../hooks/usePageMeta';
 export default function ComptePage() {
   usePageMeta({
     title: 'Suivi de commande',
+    noindex: true,
     description: 'Suivez votre commande Vodoun Concept Store en temps réel. Entrez votre code de commande pour connaître le statut de votre livraison.',
   });
 

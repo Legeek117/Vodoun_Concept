@@ -16,6 +16,10 @@
   RewriteEngine On
   RewriteBase /
 
+  # ── Domaine canonique unique : www.vodunconceptstore.bj → vodunconceptstore.bj (301)
+  RewriteCond %{HTTP_HOST} ^www\.vodunconceptstore\.bj$ [NC]
+  RewriteRule ^(.*)$ https://vodunconceptstore.bj/$1 [R=301,L]
+
   # Transmet l'en-tête Authorization à PHP (PHP-FPM/CGI le retire parfois)
   RewriteCond %{HTTP:Authorization} .
   RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -63,6 +67,8 @@
 AddType image/webp .webp
 AddType model/gltf-binary .glb
 AddType audio/mpeg .mp3
+AddType application/xml .xml
+AddType text/plain .txt
 
 # ── 4. Cache navigateur
 #      ⚠️ JS/CSS sont hashés par Vite (index-AbCdEf.js) : cache long OK.

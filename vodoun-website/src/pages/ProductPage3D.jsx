@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import SoundControl from '../components/SoundControl';
 import FloatingCart from '../components/FloatingCart';
 import usePageMeta from '../hooks/usePageMeta';
+import { absUrl } from '../config/site';
 
 export default function ProductPage3D() {
   const { productId } = useParams();
@@ -35,7 +36,7 @@ export default function ProductPage3D() {
       '@type': 'Product',
       name: product.name,
       description: product.story,
-      image: `https://www.vodun-concept.com${product.image}`,
+      image: absUrl(encodeURI(product.image)),
       sku: product.id,
       brand: {
         '@type': 'Brand',
@@ -49,7 +50,7 @@ export default function ProductPage3D() {
         availability: product.available
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
-        url: `https://www.vodun-concept.com/boutique/produit/${product.id}`,
+        url: absUrl(`/boutique/produit/${product.id}`),
         itemCondition: 'https://schema.org/NewCondition',
       },
     };

@@ -1,31 +1,71 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { SITE_NAME, SITE_TAGLINE, SITE_DESC, DEFAULT_OG_IMAGE, absUrl } from '../config/site';
 
-const SITE_NAME = 'Vodoun Concept Store';
+function upsertMeta(attr, key, content) {
+  if (content == null) return;
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+}
+
+function upsertLink(rel, href) {
+  let el = document.head.querySelector(`link[rel="${rel}"]`);
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', rel);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', href);
+}
 
 /**
- * Sets document title and meta description for the current page.
- * Falls back to site defaults if no values provided.
+ * Gère les balises SEO de la page courante : titre, description, URL canonique,
+ * Open Graph, Twitter Card et directive robots.
+ *
+ * Le canonique est calculé à partir du chemin réel (SITE_URL + pathname), ce qui
+ * évite les duplications et garde un domaine unique (sans www).
  */
-export default function usePageMeta({ title, description } = {}) {
+export default function usePageMeta({
+  title,
+  description,
+  image,
+  type = 'website',
+  noindex = false,
+} = {}) {
+  const { pathname } = useLocation();
+
   useEffect(() => {
-    // Title
-    document.title = title
-      ? `${title} — ${SITE_NAME}`
-      : `${SITE_NAME} — Là où le sacré devient désirable`;
+    const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — ${SITE_TAGLINE}`;
+    const desc = description || SITE_DESC;
+    const path = pathname && pathname !== '/' ? pathname.replace(/\/+$/, '') : '/';
+    const canonical = absUrl(path);
+    const ogImage = image
+      ? (image.startsWith('http') ? image : absUrl(image))
+      : DEFAULT_OG_IMAGE;
 
-    // Description
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute(
-        'content',
-        description ||
-          'Vodoun Concept Store : mobilier d\'art, bijoux, décorations festives et mode inspirés de la culture Vodoun. Artisanat béninois d\'exception. Ouidah, Bénin.'
-      );
-    }
+    document.title = fullTitle;
 
-    // Cleanup on unmount — restore defaults
-    return () => {
-      document.title = `${SITE_NAME} — Là où le sacré devient désirable`;
-    };
-  }, [title, description]);
+    upsertMeta('name', 'description', desc);
+    upsertLink('canonical', canonical);
+
+    upsertMeta('property', 'og:title', fullTitle);
+    upsertMeta('property', 'og:description', desc);
+    upsertMeta('property', 'og:url', canonical);
+    upsertMeta('property', 'og:image', ogImage);
+    upsertMeta('property', 'og:type', type);
+    upsertMeta('property', 'og:site_name', SITE_NAME);
+    upsertMeta('property', 'og:locale', 'fr_FR');
+
+    upsertMeta('name', 'twitter:card', 'summary_large_image');
+    upsertMeta('name', 'twitter:title', fullTitle);
+    upsertMeta('name', 'twitter:description', desc);
+    upsertMeta('name', 'twitter:image', ogImage);
+
+    upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
+  }, [title, description, image, type, noindex, pathname]);
 }

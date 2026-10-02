@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import usePageMeta from '../hooks/usePageMeta';
 
 export default function NotFoundPage() {
-  usePageMeta({ title: 'Page introuvable' });
+  usePageMeta({ title: 'Page introuvable', noindex: true });
 
   const containerRef = useRef(null);
 

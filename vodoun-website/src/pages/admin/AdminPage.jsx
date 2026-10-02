@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '../../store';
+import usePageMeta from '../../hooks/usePageMeta';
 import { apiAdminMe, apiAdminOrders, apiAdminQuotes, apiGetProducts, apiAdminSetOrderStatus } from '../../api';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './sections/AdminDashboard';
@@ -85,6 +86,9 @@ export default function AdminPage() {
   const [quotes,   setQuotes]   = useState([]);
 
   const isAuth = !!token && !!admin;
+
+  // Page privée : ne jamais indexer le panneau d'administration.
+  usePageMeta({ title: 'Administration', noindex: true });
 
   const persistAdmin = useCallback((a) => {
     setAdmin(a);

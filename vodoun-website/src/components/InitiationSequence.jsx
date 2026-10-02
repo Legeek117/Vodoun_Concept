@@ -598,7 +598,8 @@ export default function InitiationSequence() {
   const bgRef   = useRef(null);
 
   usePageMeta({
-    title: 'Initiation — Vodun Concept Store',
+    title: 'Initiation',
+    noindex: true,
     description: lang === 'fr'
       ? 'Entrez dans l\'univers Vodun Concept Store.'
       : 'Enter the Vodun Concept Store universe.',
