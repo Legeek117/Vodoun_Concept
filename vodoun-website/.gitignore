@@ -27,6 +27,8 @@ dist-ssr
 .env
 .env.*
 !.env.example
+# Config de l'API PHP (mot de passe BDD/admin) — copiez config.secret.example.php
+public/api/config.secret.php
 
 # Runtime / assets de travail
 # images uploadées (elles vivent sur le serveur, pas dans git)

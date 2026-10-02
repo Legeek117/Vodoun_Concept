@@ -10,12 +10,25 @@
 #  aucun conflit : le même dist marche sur les deux types d'hébergement.
 # ═══════════════════════════════════════════════════════════════
 
-# ── 1. React Router (BrowserRouter) : toutes les routes → index.html
-#      Sans ça, /accueil, /boutique… répondent 404.
+# ── 1. API PHP (/api/*) puis React Router (BrowserRouter)
+#      Sans le fallback SPA, /accueil, /boutique… répondent 404.
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
+  # Transmet l'en-tête Authorization à PHP (PHP-FPM/CGI le retire parfois)
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # API PHP : toutes les routes /api/* → /api/index.php
+  # (le script réel n'est pas réécrit → pas de boucle infinie)
+  RewriteRule ^api/index\.php$ - [L]
+  RewriteRule ^api/?$ api/index.php [L,QSA]
+  RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+
+  # React Router (SPA) : ne PAS toucher /api ni /uploads (gérés autrement)
+  RewriteCond %{REQUEST_URI} !^/api(/|$)
+  RewriteCond %{REQUEST_URI} !^/uploads(/|$)
   # Ne pas réécrire les fichiers qui existent réellement
   # (assets JS/CSS hashés, images WebP, vidéos, masque.glb…)
   RewriteCond %{REQUEST_FILENAME} !-f

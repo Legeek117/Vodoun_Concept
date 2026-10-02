@@ -14,15 +14,16 @@ export default defineConfig({
     target: 'es2020',
     rollupOptions: {
       output: {
+        // Découpage acyclique : « three » pur isolé, tout le reste (React,
+        // @react-three/fiber, gsap…) dans « vendor ». Un découpage qui sépare
+        // React de @react-three/fiber crée un cycle vendor ↔ three qui casse
+        // l'évaluation des modules sous Rollup (Vite 4).
         manualChunks(id) {
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'vendor'
-          }
-          if (id.includes('node_modules/three') || id.includes('@react-three')) {
+          if (id.includes('node_modules/three')) {
             return 'three'
           }
-          if (id.includes('node_modules/gsap')) {
-            return 'gsap'
+          if (id.includes('node_modules')) {
+            return 'vendor'
           }
         },
       },
