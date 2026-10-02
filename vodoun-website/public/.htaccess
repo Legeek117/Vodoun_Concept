@@ -20,8 +20,18 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Fichiers et dossiers réels : servis normalement, jamais réécrits
+  # (assets hashés, images WebP, /api/index.php, /sitemap.xml, /robots.txt…)
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^index\.html$ - [L]
-  RewriteRule . /index.html [L]
+
+  # Garde-fou anti-boucle : une fois la réécriture vers index.html effectuée,
+  # la condition échoue et le traitement s'arrête. Sans cette ligne, si
+  # index.html est introuvable depuis la racine du DocumentRoot, Apache
+  # réécrit en boucle et renvoie une erreur 500 au lieu d'un 404.
+  RewriteCond %{REQUEST_URI} !^/index\.html$
+
+  # Tout le reste → l'application React Router
+  RewriteRule ^ index.html [L]
 </IfModule>
