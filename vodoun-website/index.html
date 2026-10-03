@@ -2,8 +2,13 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/webp" href="/logo_vodoun.webp" />
-    <link rel="apple-touch-icon" href="/logo_vodoun.webp" />
+    <!-- Favicon : ICO en premier (c'est ce que Google récupère pour les résultats).
+         Le .ico est indispensable : sans lui Google affiche une icône générique. -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vodun Concept Store — Là où le sacré devient désirable</title>
     <meta name="description" content="Vodun Concept Store : mobilier d'art, bijoux, décorations festives et mode inspirés de la culture Vodun. Artisanat béninois d'exception. Ouidah, Bénin." />
@@ -19,27 +24,53 @@
     <meta name="twitter:title" content="Vodun Concept Store — Là où le sacré devient désirable" />
     <meta name="twitter:description" content="Vodun Concept Store : mobilier d'art, bijoux, décorations festives et mode inspirés de la culture Vodun. Artisanat béninois d'exception." />
     <meta name="twitter:image" content="https://vodunconceptstore.bj/logo_vodoun.webp" />
-    <!-- JSON-LD Organisation -->
+    <!-- Données structurées : Organisation + Site. Le @graph permet de déclarer
+         plusieurs entités liées, mieux reconnu par les moteurs de recherche
+         et les réponses générées par IA (Google AI Mode, AI Overviews). -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Store",
-      "name": "Vodun Concept Store",
-      "url": "https://vodunconceptstore.bj",
-      "logo": "https://vodunconceptstore.bj/logo_vodoun.webp",
-      "image": "https://vodunconceptstore.bj/logo_vodoun.webp",
-      "description": "Concept store inspiré de la culture Vodun. Mobilier d'art, bijoux, décorations festives et mode artisanat béninois d'exception.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Ouidah",
-        "addressCountry": "BJ"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "contact@vodun-concept.com",
-        "contactType": "customer service"
-      },
-      "sameAs": []
+      "@graph": [
+        {
+          "@type": ["Organization", "OnlineStore"],
+          "@id": "https://vodunconceptstore.bj/#organisation",
+          "name": "Vodun Concept Store",
+          "alternateName": "Vodun Concept",
+          "url": "https://vodunconceptstore.bj",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://vodunconceptstore.bj/icon-512.png",
+            "width": 512,
+            "height": 512
+          },
+          "image": "https://vodunconceptstore.bj/icon-512.png",
+          "description": "Concept store-beninois inspiré de la culture Vodoun : mobilier d'art, bijoux, décorations festives, arts de la table et mode. Créations artisanales conçues au Bénin, à Ouidah.",
+          "email": "contact@vodun-concept.com",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Ouidah",
+            "addressRegion": "Plateau",
+            "addressCountry": "BJ"
+          },
+          "areaServed": ["BJ", "FR", "BE", "CI"],
+          "currenciesAccepted": "EUR, XOF",
+          "paymentAccepted": "Carte bancaire, virement, mobile money",
+          "knowsLanguage": ["fr", "en"],
+          "sameAs": [
+            "https://www.instagram.com/vodun.concept.store",
+            "https://www.facebook.com/vodunconceptstore",
+            "https://www.linkedin.com/company/vodun-concept-store"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://vodunconceptstore.bj/#website",
+          "url": "https://vodunconceptstore.bj",
+          "name": "Vodun Concept Store",
+          "inLanguage": "fr-BJ",
+          "publisher": { "@id": "https://vodunconceptstore.bj/#organisation" }
+        }
+      ]
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">

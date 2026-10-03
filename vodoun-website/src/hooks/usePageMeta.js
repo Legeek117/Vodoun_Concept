@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SITE_NAME, SITE_TAGLINE, SITE_DESC, DEFAULT_OG_IMAGE, absUrl } from '../config/site';
+import { STATIC_PAGES } from '../config/seoPages';
 
 function upsertMeta(attr, key, content) {
   if (content == null) return;
@@ -41,8 +42,21 @@ export default function usePageMeta({
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — ${SITE_TAGLINE}`;
-    const desc = description || SITE_DESC;
+    // Les métadonnées partagées (src/config/seoPages.js) sont la référence :
+    // elles sont identiques à celles écrites dans le HTML pré-rendu par
+    // scripts/prerender.mjs. Le titre et la description passed par la page
+    // ne servent que de repli pour les routes sans métadonnées partagées
+    // (pages produit, qui génèrent les leurs à partir du produit).
+    const preset = STATIC_PAGES[pathname] || null;
+
+    const finalTitle = preset?.title || title;
+    const finalDesc = preset?.description || description;
+    const finalNoindex = preset?.noindex || noindex;
+
+    const fullTitle = finalTitle
+      ? (finalTitle.includes(SITE_NAME) ? finalTitle : `${finalTitle} — ${SITE_NAME}`)
+      : `${SITE_NAME} — ${SITE_TAGLINE}`;
+    const desc = finalDesc || SITE_DESC;
     const path = pathname && pathname !== '/' ? pathname.replace(/\/+$/, '') : '/';
     // Un canonical explicite permet de consolider plusieurs URL vers une seule
     // (ex. la séquence d'initiation « / » vers la page d'accueil « /accueil »)
@@ -73,6 +87,6 @@ export default function usePageMeta({
     upsertMeta('name', 'twitter:description', desc);
     upsertMeta('name', 'twitter:image', ogImage);
 
-    upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
+    upsertMeta('name', 'robots', finalNoindex ? 'noindex, nofollow' : 'index, follow');
   }, [title, description, image, type, noindex, canonicalPath, pathname]);
 }
