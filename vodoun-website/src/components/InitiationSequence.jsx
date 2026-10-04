@@ -633,8 +633,9 @@ export default function InitiationSequence() {
   }, [phase]);
 
   const t = {
-    kudo     : lang === 'fr' ? 'Kudo' : 'Kudo',
-    welcome  : lang === 'fr' ? 'Bienvenue à Vodun Concept Store' : 'Welcome to Vodun Concept Store',
+    // Salutation : une seule chaîne pour éviter toute difference entre
+    // la version francaise et anglaise (motsvodoun + francais + anglais).
+    greeting : 'Kwabō . Bienvenue . Welcome',
     discover : lang === 'fr' ? 'DÉCOUVRIR'            : 'DISCOVER',
     skip     : lang === 'fr' ? 'PASSER L\'INITIATION' : 'SKIP INITIATION',
     heritage : lang === 'fr' ? 'LE FEU ANCESTRAL S\'ÉVEILLE' : 'THE ANCESTRAL FIRE AWAKENS',
@@ -810,7 +811,7 @@ export default function InitiationSequence() {
               lineHeight: 1.5,
               whiteSpace: 'normal',
             }}>
-            {t.kudo} · {t.welcome}
+            {t.greeting}
           </span>
           {/* Séparateur fin — hors de la case aussi */}
           <span aria-hidden="true" className="block relative mx-auto"

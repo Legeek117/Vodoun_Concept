@@ -171,8 +171,7 @@ function App() {
           {/* Section finale : revivre l'initiation (bouton optionnel) */}
           <section className="py-24 md:py-40 px-[5vw]">
             <div className="max-w-4xl mx-auto text-center">
-              <span className="section-label text-or mb-6 block">{t.home.welcome}</span>
-              <h2 className="font-playfair text-ivoire text-3xl md:text-5xl font-black mb-6">{t.home.kudo} — {t.home.replay}</h2>
+              <h2 className="font-playfair text-ivoire text-3xl md:text-5xl font-black mb-6">{t.home.greeting}</h2>
               <p className="text-ivoire/70 font-playfair italic text-lg md:text-xl mb-12 leading-relaxed">
                 {t.home.replayIntro}
               </p>

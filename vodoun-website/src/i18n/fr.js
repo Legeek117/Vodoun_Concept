@@ -10,7 +10,7 @@ const fr = {
     },
     home: {
         welcome: 'Bienvenue',
-        kudo: 'Kudo',
+        greeting: 'Kwabō . Bienvenue . Welcome',
         welcomeFull: 'Bienvenue à Vodun Concept Store',
         replay: 'Revivre l\'initiation',
         replayIntro: "L'expérience d'entrée Vodun, à revivre à tout moment.",
