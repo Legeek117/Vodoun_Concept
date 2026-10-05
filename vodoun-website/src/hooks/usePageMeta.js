@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { SITE_NAME, SITE_TAGLINE, SITE_DESC, DEFAULT_OG_IMAGE, absUrl } from '../config/site';
+import { SITE_NAME, SITE_TAGLINE, SITE_DESC, DEFAULT_OG_IMAGE, absUrl, canonicalUrl } from '../config/site';
 import { STATIC_PAGES } from '../config/seoPages';
 
 function upsertMeta(attr, key, content) {
@@ -64,7 +64,7 @@ export default function usePageMeta({
     const target = canonicalPath
       ? String(canonicalPath).replace(/\/+$/, '') || '/'
       : path;
-    const canonical = absUrl(target);
+    const canonical = canonicalUrl(target);
     const ogImage = image
       ? (image.startsWith('http') ? image : absUrl(image))
       : DEFAULT_OG_IMAGE;

@@ -21,7 +21,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { STATIC_PAGES, escapeHtml, absoluteUrl } from '../src/config/seoPages.js';
-import { SITE_URL, SITE_NAME } from '../src/config/site.js';
+import { SITE_URL, SITE_NAME, canonicalUrl } from '../src/config/site.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -40,7 +40,7 @@ const setTag = (html, pattern, value) =>
 
 /** Construit le HTML statique d'une route. */
 function buildPage({ route, title, description, ld, noindex = false, image = OG_DEFAULT, noscript }) {
-  const canonical = absoluteUrl(route, SITE_URL);
+  const canonical = canonicalUrl(route);
   const urlTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 
   let html = readFileSync(join(DIST, 'index.html'), 'utf8');
@@ -85,7 +85,7 @@ const breadcrumb = (route, name) => ({
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE_URL}/accueil` },
-    { '@type': 'ListItem', position: 2, name, item: absoluteUrl(route, SITE_URL) },
+    { '@type': 'ListItem', position: 2, name, item: canonicalUrl(route) },
   ],
 });
 
@@ -99,7 +99,7 @@ for (const [route, cfg] of Object.entries(STATIC_PAGES)) {
     name: title,
     headline: title,
     description,
-    url: absoluteUrl(route, SITE_URL),
+    url: canonicalUrl(route),
     inLanguage: 'fr-BJ',
     isPartOf: { '@id': `${SITE_URL}/#website` },
     about: { '@id': ORGANISATION_ID },
@@ -134,10 +134,10 @@ if (existsSync(seedPath)) {
       sku: p.id,
       category: p.category,
       brand: { '@type': 'Brand', name: SITE_NAME },
-      url: absoluteUrl(route, SITE_URL),
+      url: canonicalUrl(route),
       offers: {
         '@type': 'Offer',
-        url: absoluteUrl(route, SITE_URL),
+        url: canonicalUrl(route),
         priceCurrency: 'XOF',
         price: p.price,
         availability: p.available === false

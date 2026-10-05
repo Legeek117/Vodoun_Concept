@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import SoundControl from '../components/SoundControl';
 import FloatingCart from '../components/FloatingCart';
 import usePageMeta from '../hooks/usePageMeta';
-import { absUrl } from '../config/site';
+import { absUrl, canonicalUrl } from '../config/site';
 
 export default function ProductPage3D() {
   const { productId } = useParams();
@@ -50,7 +50,7 @@ export default function ProductPage3D() {
         availability: product.available
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
-        url: absUrl(`/boutique/produit/${product.id}`),
+        url: canonicalUrl(`/boutique/produit/${product.id}`),
         itemCondition: 'https://schema.org/NewCondition',
       },
     };
