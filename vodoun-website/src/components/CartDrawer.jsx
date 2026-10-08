@@ -125,7 +125,10 @@ export default function CartDrawer({ isOpen, onClose }) {
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="fixed top-0 right-0 h-full w-full md:w-[480px] lg:w-[540px] bg-[#1A1410] z-[999] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col border-l border-or/20 overflow-hidden"
+        className="fixed top-0 right-0 h-full w-full md:w-[480px] lg:w-[540px] z-[999] flex flex-col overflow-hidden
+                   bg-[#1A1410]/95 backdrop-blur-2xl
+                   border-l border-white/[0.07]
+                   shadow-[-24px_0_80px_rgba(0,0,0,0.6)]"
         style={{ transform: 'translateX(100%)', transformOrigin: 'right center' }}
       >
         {/* Header with Glass Gradient */}
@@ -183,11 +186,18 @@ export default function CartDrawer({ isOpen, onClose }) {
               {cart.map((item) => (
                 <div
                   key={item.cartId}
-                  className="cart-item-card group flex flex-col sm:flex-row gap-4 md:gap-6 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:border-or/30 transition-all duration-500"
+                  className="cart-item-card group flex flex-col sm:flex-row gap-4 md:gap-5 p-4 md:p-5
+                             rounded-3xl
+                             bg-white/[0.04] backdrop-blur-sm
+                             border border-white/[0.07] hover:border-or/25
+                             shadow-[0_2px_12px_rgba(0,0,0,0.15)]
+                             hover:shadow-[0_4px_20px_rgba(184,134,11,0.1)]
+                             transition-all duration-400"
                   style={{ transformStyle: 'preserve-3d' }}
                 >
-                  {/* Image with Glow */}
-                  <div className="w-full sm:w-28 h-40 sm:h-28 flex-shrink-0 bg-noir rounded-xl overflow-hidden relative border border-white/10 group-hover:border-or/50 transition-colors duration-500">
+                  {/* Image */}
+                  <div className="w-full sm:w-24 h-36 sm:h-24 flex-shrink-0 rounded-2xl overflow-hidden relative
+                                  border border-white/10 group-hover:border-or/40 transition-colors duration-400">
                     <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-noir/40 to-transparent" />
                   </div>
@@ -211,18 +221,18 @@ export default function CartDrawer({ isOpen, onClose }) {
                     </div>
 
                     <div className="flex items-center justify-between mt-auto gap-4">
-                      {/* Quantity Controls */}
-                      <div className="flex items-center bg-noir/40 rounded-lg border border-white/5 p-0.5">
+                      {/* Quantity Controls — pill iOS */}
+                      <div className="flex items-center bg-white/[0.06] backdrop-blur-sm rounded-full border border-white/10 p-1 gap-1">
                         <button
                           onClick={() => updateQuantity(item.cartId, item.quantity - 1)}
-                          className="w-8 h-8 flex items-center justify-center text-ivoire/40 hover:text-or transition-colors font-bold text-xl"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-ivoire/50 hover:text-or hover:bg-white/10 transition-all duration-200 font-bold text-base leading-none"
                         >
-                          -
+                          −
                         </button>
                         <span className="w-6 text-center text-sm font-black text-ivoire">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.cartId, item.quantity + 1)}
-                          className="w-8 h-8 flex items-center justify-center text-ivoire/40 hover:text-or transition-colors font-bold text-lg"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-ivoire/50 hover:text-or hover:bg-white/10 transition-all duration-200 font-bold text-base leading-none"
                         >
                           +
                         </button>
@@ -266,11 +276,11 @@ export default function CartDrawer({ isOpen, onClose }) {
 
             <button
               onClick={handleCheckout}
-              className="group relative w-full py-4 rounded-xl font-bold uppercase tracking-[0.4em] text-sm overflow-hidden transition-all duration-300"
+              className="group relative w-full py-4 rounded-2xl font-bold uppercase tracking-[0.3em] text-sm overflow-hidden transition-all duration-300 active:scale-[0.98]"
               style={{
                 background: 'linear-gradient(135deg, #B8860B 0%, #8a6208 100%)',
                 color: '#F4F0E6',
-                boxShadow: '0 10px 40px rgba(184,134,11,0.3)',
+                boxShadow: '0 8px 32px rgba(184,134,11,0.35)',
               }}
             >
               <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -290,7 +300,7 @@ export default function CartDrawer({ isOpen, onClose }) {
       {/* Checkout Modal (Enhanced) */}
       {isCheckingOut && (
         <div className="fixed inset-0 bg-noir/95 z-[1000] flex items-center justify-center p-4 backdrop-blur-md">
-          <div className="bg-[#1A1410] border border-or/30 max-w-xl w-full p-8 md:p-12 rounded-3xl shadow-[0_30px_100px_rgba(0,0,0,0.8)] relative overflow-hidden">
+          <div className="bg-[#1A1410]/90 backdrop-blur-2xl border border-white/10 max-w-xl w-full p-8 md:p-12 rounded-3xl shadow-[0_30px_100px_rgba(0,0,0,0.8)] relative overflow-hidden">
             {/* Glow decor */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-or/5 rounded-full blur-[100px]" />
 
@@ -317,7 +327,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                 </div>
               )}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button onClick={() => setIsCheckingOut(false)} className="px-8 py-4 rounded-xl border border-ivoire/10 text-ivoire text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-ivoire hover:text-noir transition-all duration-500 order-2 sm:order-1 flex-grow">
+                <button onClick={() => setIsCheckingOut(false)} className="px-8 py-4 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm text-ivoire text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-ivoire hover:text-noir transition-all duration-400 order-2 sm:order-1 flex-grow">
                   Retour
                 </button>
                 <a href="mailto:contact@VODUN-concept.com" className="btn-premium flex-grow text-center order-1 sm:order-2">

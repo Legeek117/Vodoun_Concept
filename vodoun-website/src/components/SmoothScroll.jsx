@@ -51,7 +51,7 @@ export default function SmoothScroll() {
 
     const handleResize = () => {
       ScrollTrigger.refresh();
-      try { lenis.resize(); } catch (e) { /* Lenis peut être détruit */ }
+      try { lenis.resize(); } catch { /* Lenis peut être détruit */ }
     };
     window.addEventListener('resize', handleResize);
 
@@ -59,7 +59,7 @@ export default function SmoothScroll() {
       clearTimeout(timeoutRef.current);
       gsap.ticker.remove(tick);
       window.removeEventListener('resize', handleResize);
-      try { lenis.destroy(); } catch (e) { /* déjà détruit */ }
+      try { lenis.destroy(); } catch { /* déjà détruit */ }
       delete window.lenis;
       lenisRef.current = null;
     };
@@ -70,7 +70,7 @@ export default function SmoothScroll() {
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
     window.scrollTo(0, 0);
-    try { lenisRef.current?.scrollTo(0, { immediate: true }); } catch (e) { /* noop */ }
+    try { lenisRef.current?.scrollTo(0, { immediate: true }); } catch { /* noop */ }
     timeoutRef.current = setTimeout(() => ScrollTrigger.refresh(), 150);
     return () => clearTimeout(timeoutRef.current);
   }, [pathname]);

@@ -88,41 +88,63 @@ export default function ProductCard({ product, index, isDark = false, variant = 
 
   return (
     <Link to={`/boutique/produit/${product.id}`} ref={containerRef} className="group cursor-pointer">
-      <div className="relative overflow-hidden aspect-[4/5] md:aspect-[4/5] mb-4 md:mb-8 bg-sable/20 border-2 border-ivoire/10 rounded-lg md:rounded-xl">
-        {product.video ? (
-          <video
-            src={product.video}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-          />
-        ) : (
-          <img
-            src={product.image}
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-          />
-        )}
-        <div className="absolute inset-0 bg-noir/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex items-end p-4 md:p-8">
-          <button className="btn-premium translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-out text-xs md:text-sm px-4 md:px-10 py-2 md:py-5">
-            Découvrir
-          </button>
+      {/* Image container — glass card iOS */}
+      <div className="relative overflow-hidden aspect-[4/5] mb-4 md:mb-6
+                      bg-white/[0.04] backdrop-blur-xl
+                      border border-white/10 group-hover:border-or/30
+                      rounded-3xl
+                      shadow-[0_4px_24px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]
+                      group-hover:shadow-[0_8px_40px_rgba(184,134,11,0.15),inset_0_1px_0_rgba(255,255,255,0.08)]
+                      transition-all duration-500 p-3">
+        {/* Image inner — coins arrondis */}
+        <div className="relative w-full h-full overflow-hidden rounded-2xl">
+          {product.video ? (
+            <video
+              src={product.video}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              autoPlay muted loop playsInline
+            />
+          ) : (
+            <img
+              src={product.image}
+              alt={product.name}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          )}
+          {/* Overlay hover — bouton Découvrir */}
+          <div className="absolute inset-0 bg-gradient-to-t from-noir/70 via-noir/10 to-transparent
+                          opacity-0 group-hover:opacity-100 transition-opacity duration-500
+                          flex items-end justify-center pb-6">
+            <span className="btn-premium text-xs px-6 py-2.5
+                             translate-y-4 group-hover:translate-y-0
+                             transition-transform duration-500 ease-out">
+              Découvrir
+            </span>
+          </div>
         </div>
       </div>
-      <div>
-        <span className="text-[0.5rem] md:text-[0.65rem] uppercase tracking-[0.2em] md:tracking-[0.3em] text-or font-bold block mb-1 md:mb-2">
+
+      {/* Texte */}
+      <div className="px-1">
+        <span className="text-[0.5rem] md:text-[0.6rem] uppercase tracking-[0.25em] text-or font-bold block mb-1.5">
           {product.category}
         </span>
-        <h3 className={`font-playfair text-lg md:text-3xl font-black mb-2 md:mb-4 group-hover:text-or transition-colors duration-300 ${isDark ? 'text-ivoire' : 'text-noir'}`}>
+        <h3 className={`font-playfair text-lg md:text-2xl font-black mb-2 md:mb-3
+                        group-hover:text-or transition-colors duration-300
+                        ${isDark ? 'text-ivoire' : 'text-noir'}`}>
           {product.name}
         </h3>
-        <p className={`text-xs md:text-sm opacity-100 mb-3 md:mb-6 leading-relaxed ${isDark ? 'text-ivoire/80' : 'text-brun'}`}>{product.story}</p>
-        <p className={`font-playfair text-sm md:text-xl font-bold ${isDark ? 'text-ivoire' : 'text-noir'}`}>{formatPrice(product.price)}</p>
+        <p className={`text-xs md:text-sm mb-3 md:mb-4 leading-relaxed
+                       ${isDark ? 'text-ivoire/60' : 'text-brun/70'}`}>
+          {product.story}
+        </p>
+        <p className={`font-playfair text-sm md:text-lg font-bold
+                       ${isDark ? 'text-ivoire' : 'text-noir'}`}>
+          {formatPrice(product.price)}
+        </p>
       </div>
     </Link>
   );

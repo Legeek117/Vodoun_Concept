@@ -108,11 +108,43 @@
   }
 
   .btn-premium {
-    @apply inline-block px-10 py-5 font-black uppercase tracking-[0.3em] text-sm rounded-none transition-all duration-500 border bg-or text-noir border-or hover:bg-noir hover:text-ivoire;
+    @apply inline-flex items-center justify-center px-8 py-3.5 font-black uppercase tracking-[0.25em] text-sm
+           rounded-2xl transition-all duration-300 border
+           bg-or text-noir border-or/80
+           hover:bg-noir hover:text-ivoire hover:border-or
+           shadow-[0_4px_16px_rgba(184,134,11,0.25)]
+           hover:shadow-[0_6px_24px_rgba(184,134,11,0.4)]
+           active:scale-[0.97];
   }
 
   .btn-premium-outline {
-    @apply inline-block px-10 py-5 border-2 font-black uppercase tracking-[0.3em] text-sm rounded-none transition-all duration-500 border-brun text-brun hover:bg-brun hover:text-ivoire;
+    @apply inline-flex items-center justify-center px-8 py-3.5 border font-black uppercase tracking-[0.25em] text-sm
+           rounded-2xl transition-all duration-300
+           border-brun/40 text-brun
+           hover:bg-brun hover:text-ivoire hover:border-brun
+           backdrop-blur-sm bg-white/5
+           shadow-[0_2px_8px_rgba(0,0,0,0.08)]
+           active:scale-[0.97];
+  }
+
+  /* ── Glass card iOS ── */
+  .glass-card {
+    @apply rounded-3xl border border-white/10
+           bg-white/[0.04] backdrop-blur-xl
+           shadow-[0_8px_32px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.06)];
+  }
+
+  .glass-card-dark {
+    @apply rounded-3xl border border-white/[0.07]
+           bg-black/20 backdrop-blur-2xl
+           shadow-[0_8px_40px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.05)];
+  }
+
+  /* ── Pill tag ── */
+  .pill-tag {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+           border border-or/20 bg-or/8 text-or
+           text-[0.6rem] uppercase tracking-[0.2em] font-bold;
   }
 
   .align-left {
