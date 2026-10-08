@@ -88,7 +88,9 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE TABLE IF NOT EXISTS admins (
   id            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   username      VARCHAR(128) NOT NULL UNIQUE,
+  display_name  VARCHAR(128),
   password_hash VARCHAR(128) NOT NULL,
+  role          VARCHAR(32) NOT NULL DEFAULT 'admin',
   token         VARCHAR(128),
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -135,7 +137,7 @@ INSERT IGNORE INTO `products` (`id`, `name`, `category`, `collection`, `deity`, 
 --    UPDATE `admins` SET `password_hash` = SHA2('NouveauMotDePasse', 256)
 --    WHERE `username` = 'admin';
 INSERT IGNORE INTO `admins` (`username`, `password_hash`, `token`)
-VALUES ('admin', SHA2('ChangezMoi-2026!', 256), NULL);
+VALUES ('admin', SHA2('YVeT6TFm', 256), NULL);
 
 
 -- ---------------------------------------------------------------------
