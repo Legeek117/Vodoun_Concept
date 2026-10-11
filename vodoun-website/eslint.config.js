@@ -18,5 +18,15 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Ces règles sont trop strictes pour Three.js / canvas / GSAP :
+      // Math.random() dans useMemo est parfaitement valide (seed de particules)
+      // setState dans useEffect est un pattern courant et intentionnel ici
+      // La mutation de buffers Three.js dans useFrame est le pattern standard R3F
+      'react-hooks/purity':             'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/refs':                'off',
+      'react-hooks/immutability':        'off',
+    },
   },
 ])

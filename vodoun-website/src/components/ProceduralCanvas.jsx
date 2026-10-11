@@ -128,8 +128,15 @@ export default function ProceduralCanvas({ scrollRef, style = {} }) {
       return { segs, life: 0, maxLife: 0.1 + Math.random() * 0.2 };
     };
 
+    // Bug 3+7 fix : pause quand l'onglet est caché
+    let paused = document.hidden;
+    const onVisibility = () => { paused = document.hidden; };
+    document.addEventListener('visibilitychange', onVisibility);
+
     const animate = (ts) => {
-      const W   = canvas.width / 0.5;   // unités CSS (dessin à 0.5 via setTransform)
+      rafRef.current = requestAnimationFrame(animate);
+      if (paused) return;
+      const W   = canvas.width / 0.5;
       const H   = canvas.height / 0.5;
       const p   = scrollRef?.current ?? 0;
       const pal = getPalette(p);
@@ -216,9 +223,9 @@ export default function ProceduralCanvas({ scrollRef, style = {} }) {
       st.particles.forEach(pk => {
         pk.life += dt * 0.28;
         if (pk.life > pk.maxLife) {
-          // Reborn aléatoirement sur toute la hauteur
+          // Reborn sur toute la hauteur — pas uniquement en bas
           pk.x = Math.random() * W;
-          pk.y = H + 5;
+          pk.y = Math.random() * H;
           pk.life = 0;
           pk.vx = (Math.random() - 0.5) * 0.22;
           pk.vy = -(0.08 + Math.random() * 0.32);
@@ -257,7 +264,8 @@ export default function ProceduralCanvas({ scrollRef, style = {} }) {
         e.life += dt * 0.42 * ei;
         if (e.life > e.maxLife || e.y < -15) {
           e.x = Math.random() * W;
-          e.y = H + 5;
+          // Braises : reborn dans la moitié basse mais pas uniquement tout en bas
+          e.y = H * (0.4 + Math.random() * 0.6);
           e.life = 0;
           e.vx = (Math.random() - 0.5) * 0.38;
           e.vy = -(0.5 + Math.random() * 1.4) * ei;
@@ -278,14 +286,14 @@ export default function ProceduralCanvas({ scrollRef, style = {} }) {
         ctx.fill();
         ctx.shadowBlur  = 0;
       });
-
-      rafRef.current = requestAnimationFrame(animate);
+      // RAF appelé en haut de la boucle — pas de doublon ici
     };
 
     rafRef.current = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
+      document.removeEventListener('visibilitychange', onVisibility);
       ro.disconnect();
       window.removeEventListener('resize', setSize);
     };

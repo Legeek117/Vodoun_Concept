@@ -108,23 +108,52 @@
   }
 
   .btn-premium {
-    @apply inline-flex items-center justify-center px-8 py-3.5 font-black uppercase tracking-[0.25em] text-sm
+    @apply relative inline-flex items-center justify-center overflow-hidden
+           px-8 py-3.5 font-black uppercase tracking-[0.25em] text-sm
            rounded-2xl transition-all duration-300 border
            bg-or text-noir border-or/80
-           hover:bg-noir hover:text-ivoire hover:border-or
-           shadow-[0_4px_16px_rgba(184,134,11,0.25)]
-           hover:shadow-[0_6px_24px_rgba(184,134,11,0.4)]
+           hover:scale-[1.03]
+           hover:shadow-[0_0_28px_rgba(184,134,11,0.5),0_0_8px_rgba(184,134,11,0.3)]
+           hover:border-or
            active:scale-[0.97];
+    /* Shimmer pseudo-element via after */
+  }
+
+  /* Shimmer B — reflet diagonal qui traverse au hover */
+  .btn-premium::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    transform: translateX(-110%) skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+    transition: transform 0.65s ease-in-out;
+  }
+
+  .btn-premium:hover::after {
+    transform: translateX(110%) skewX(-20deg);
   }
 
   .btn-premium-outline {
-    @apply inline-flex items-center justify-center px-8 py-3.5 border font-black uppercase tracking-[0.25em] text-sm
+    @apply relative inline-flex items-center justify-center overflow-hidden
+           px-8 py-3.5 border font-black uppercase tracking-[0.25em] text-sm
            rounded-2xl transition-all duration-300
            border-brun/40 text-brun
-           hover:bg-brun hover:text-ivoire hover:border-brun
+           hover:border-brun/90
+           hover:scale-[1.03]
+           hover:shadow-[0_0_20px_rgba(74,49,32,0.2),inset_0_0_20px_rgba(74,49,32,0.04)]
            backdrop-blur-sm bg-white/5
-           shadow-[0_2px_8px_rgba(0,0,0,0.08)]
            active:scale-[0.97];
+  }
+
+  .btn-premium-outline::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    transform: translateX(-110%) skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: transform 0.65s ease-in-out;
+  }
+
+  .btn-premium-outline:hover::after {
+    transform: translateX(110%) skewX(-20deg);
   }
 
   /* ── Glass card iOS ── */

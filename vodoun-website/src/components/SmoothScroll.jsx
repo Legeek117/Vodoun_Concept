@@ -18,9 +18,14 @@ gsap.registerPlugin(ScrollTrigger);
 export default function SmoothScroll() {
   const { pathname } = useLocation();
   const lenisRef = useRef(null);
-  const timeoutRef = useRef(null);
+  const timeoutRef  = useRef(null);
+  const pathnameRef = useRef(pathname);
+  useEffect(() => { pathnameRef.current = pathname; }, [pathname]);
 
   useEffect(() => {
+    // Bug 4 fix : Lenis inutile sur la page d'initiation (position:fixed, rien à scroller)
+    if (pathnameRef.current === '/') return;
+
     // S'assurer que le scroll natif est possible (jamais bloqué)
     document.body.style.overflow = '';
     document.body.style.overflowY = '';

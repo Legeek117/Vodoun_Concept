@@ -238,6 +238,7 @@ function PhaseText({ text, visible, phaseKey }) {
         backdropFilter: c.blur,
         WebkitBackdropFilter: c.blur,
         border: c.border,
+        borderRadius: c.radius || '14px',
         padding: c.pad,
         maxWidth: '100%',
       }}>
@@ -733,26 +734,28 @@ export default function InitiationSequence() {
       {/* Compteur de phases */}
       <PhaseProgress phase={phase} />
 
-      {/* ═══ CANVAS THREE.JS ═══ */}
-      <div className="absolute inset-0">
-        <Canvas camera={{ position: [0, 0, 7], fov: 65 }}
-          style={{ background: 'transparent', width: '100%', height: '100%' }}
-          gl={{ alpha: true, antialias: false }}>
-          <Suspense fallback={null}>
-            {/* Galaxie — phase 0 + pendant transition (showGalaxy) */}
-            {(phase === 0 || showGalaxy) && (
-              <GalaxyBackground speedRef={galaxySpeedRef} opacityRef={galaxyOpacityRef} />
-            )}
-            <BraiseParticles
-              active={phase >= 1}
-              intensity={phase === 1 ? 1.0 : phase === 3.5 ? 1.15 : 1.0}
-              vortex={phase === 1 ? vortex : 1.0}
-            />
-            {/* Tunnel — phase 3.5 */}
-            <TunnelEffect active={phase === 3.5} speed={1.4} />
-          </Suspense>
-        </Canvas>
-      </div>
+      {/* ═══ CANVAS THREE.JS ═══
+           Bug 2 fix : démonté en phase 4 (masque) pour libérer le contexte WebGL
+           avant que MasqueReveal ouvre son propre Canvas. */}
+      {phase < 4 && (
+        <div className="absolute inset-0">
+          <Canvas camera={{ position: [0, 0, 7], fov: 65 }}
+            style={{ background: 'transparent', width: '100%', height: '100%' }}
+            gl={{ alpha: true, antialias: false }}>
+            <Suspense fallback={null}>
+              {(phase === 0 || showGalaxy) && (
+                <GalaxyBackground speedRef={galaxySpeedRef} opacityRef={galaxyOpacityRef} />
+              )}
+              <BraiseParticles
+                active={phase >= 1}
+                intensity={phase === 1 ? 1.0 : phase === 3.5 ? 1.15 : 1.0}
+                vortex={phase === 1 ? vortex : 1.0}
+              />
+              <TunnelEffect active={phase === 3.5} speed={1.4} />
+            </Suspense>
+          </Canvas>
+        </div>
+      )}
 
       {/* ═══ VÉVÉ — phase 2 ═══ */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 10 }}>
@@ -773,6 +776,7 @@ export default function InitiationSequence() {
           <div style={{
             background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(16px)',
             border: '1px solid rgba(210,185,142,0.15)',
+            borderRadius: '16px',
             padding: 'clamp(12px, 3vw, 18px) clamp(16px, 5vw, 36px)',
             maxWidth: 'min(580px, 90vw)',
             width: '100%',
@@ -828,6 +832,7 @@ export default function InitiationSequence() {
               background: 'rgba(0,0,0,0.4)',
               backdropFilter: 'blur(16px)',
               border: '1px solid rgba(210,185,142,0.08)',
+              borderRadius: '20px',
               maxWidth: '94vw',
             }}>
             <img
@@ -851,6 +856,7 @@ export default function InitiationSequence() {
             padding: 'clamp(14px, 3.5vw, 20px) clamp(28px, 8vw, 56px)',
             border: '1px solid rgba(210,185,142,0.45)',
             background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(14px)',
+            borderRadius: '14px',
             cursor: 'pointer', transition: 'border-color 0.4s, box-shadow 0.4s, transform 0.3s',
           }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#D2B98E'; e.currentTarget.style.boxShadow = '0 0 35px rgba(210,185,142,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
@@ -869,7 +875,9 @@ export default function InitiationSequence() {
           <button onClick={skipAll} style={{
             background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
             padding: 'clamp(5px, 1.5vw, 7px) clamp(12px, 4vw, 20px)',
-            border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '50px',
+            cursor: 'pointer',
             fontSize: 'clamp(0.55rem, 1.5vw, 0.65rem)',
             letterSpacing: 'clamp(0.2em, 1vw, 0.42em)',
             fontWeight: 600, textTransform: 'uppercase',

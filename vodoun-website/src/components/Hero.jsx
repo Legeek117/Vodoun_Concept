@@ -103,12 +103,40 @@ export default function Hero() {
           Expérience immersive · Artisanat du Bénin
         </p>
  
-        <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 md:gap-8 justify-center items-center">
-          <Link to="/boutique" className="btn-premium w-full sm:w-auto text-xs md:text-sm px-10 py-5">
-            Collections
+        <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 md:gap-8 justify-center items-center mt-28 md:mt-16">
+          <Link
+            to="/boutique"
+            className="group relative w-full sm:w-auto overflow-hidden
+                       text-xs md:text-sm px-10 py-5 font-black uppercase tracking-[0.25em]
+                       rounded-2xl transition-all duration-300
+                       bg-or text-noir border border-or/80
+                       hover:scale-[1.03] hover:shadow-[0_0_28px_rgba(184,134,11,0.55),0_0_8px_rgba(184,134,11,0.35)]
+                       hover:border-or active:scale-[0.97]"
+          >
+            {/* Shimmer B */}
+            <span aria-hidden="true"
+              className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out
+                         bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]" />
+            <span className="relative">Collections</span>
           </Link>
-          <Link to="/projets-pro" className="btn-premium bg-transparent text-ivoire border-ivoire hover:bg-ivoire hover:text-noir w-full sm:w-auto text-xs md:text-sm px-10 py-5">
-            Lancer un projet
+
+          <Link
+            to="/projets-pro"
+            className="group relative w-full sm:w-auto overflow-hidden
+                       text-xs md:text-sm px-10 py-5 font-black uppercase tracking-[0.25em]
+                       rounded-2xl transition-all duration-300
+                       bg-transparent text-ivoire
+                       border border-ivoire/40
+                       hover:scale-[1.03]
+                       hover:border-ivoire/90
+                       hover:shadow-[0_0_20px_rgba(244,240,230,0.2),inset_0_0_20px_rgba(244,240,230,0.04)]
+                       active:scale-[0.97]"
+          >
+            {/* Shimmer B */}
+            <span aria-hidden="true"
+              className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out
+                         bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-20deg]" />
+            <span className="relative">Lancer un projet</span>
           </Link>
         </div>
 
@@ -136,9 +164,8 @@ export default function Hero() {
         </span>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll Indicator — ligne seule, sans texte */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
-        <span className="text-[0.6rem] text-ivoire/40 uppercase tracking-[0.3em]">Défiler pour explorer</span>
         <div className="w-[1px] h-20 bg-gradient-to-b from-or to-transparent"></div>
       </div>
     </section>

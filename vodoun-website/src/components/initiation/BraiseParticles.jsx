@@ -2,8 +2,10 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const PARTICLE_COUNT = 1200;
-const TRAIL_LENGTH   = 6;
+// Bug 5 fix : réduire le nombre de particules sur mobile
+const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 768;
+const PARTICLE_COUNT = IS_MOBILE ? 600 : 1200;
+const TRAIL_LENGTH   = IS_MOBILE ? 3 : 6;
 
 export default function BraiseParticles({ active = true, intensity = 1.0, vortex = 0 }) {
   const pointsRef      = useRef(null);

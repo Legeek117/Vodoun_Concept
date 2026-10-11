@@ -1,48 +1,37 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-/**
- * TunnelEffect — portail sacré
- *
- * Améliorations vs v1 :
- * - Vitesse réduite (18 → 8 unités/s) pour un effet plus hypnotique
- * - 3 couleurs d'anneaux alternées (or, ambre, blanc-doré) pour moins de fade
- * - Particules de poussière dorée qui flottent dans le tunnel
- * - Lueur centrale pulsante qui grossit à mesure qu'on approche
- * - Légère rotation de caméra simulée via oscillation du groupe
- */
-
-const RING_COUNT    = 48;   // plus d'anneaux pour combler le ralenti
+const RING_COUNT    = 48;
 const RING_RADIUS   = 2.4;
 const TUNNEL_DEPTH  = 90;
 const SEGMENTS      = 96;
-const DUST_COUNT    = 120;  // particules de poussière dans le tunnel
+const DUST_COUNT    = 120;
 
 const RING_COLORS = ['#D2B98E', '#C8973A', '#FFF5CC', '#E8C870'];
 
 export default function TunnelEffect({ active = true, speed = 1.0 }) {
-  const groupRef     = useRef(null);
-  const dustRef      = useRef(null);
-  const elapsedRef   = useRef(0);
+  const groupRef   = useRef(null);
+  const dustRef    = useRef(null);
+  const elapsedRef = useRef(0);
+  // Bug 1 fix : stocker les clones dans un ref pour pouvoir les disposer
+  const clonedMatsRef = useRef([]);
 
-  // Données des anneaux
   const rings = useMemo(() => Array.from({ length: RING_COUNT }, (_, i) => ({
-    z:               -TUNNEL_DEPTH + (i / RING_COUNT) * TUNNEL_DEPTH,
-    radiusVar:       0.82 + Math.random() * 0.36,
-    rotOffset:       Math.random() * Math.PI * 2,
-    rotDir:          i % 2 === 0 ? 1 : -1,
-    colorIdx:        i % RING_COLORS.length,
-    thicknessVar:    0.93 + Math.random() * 0.07,
+    z:            -TUNNEL_DEPTH + (i / RING_COUNT) * TUNNEL_DEPTH,
+    radiusVar:    0.82 + Math.random() * 0.36,
+    rotOffset:    Math.random() * Math.PI * 2,
+    rotDir:       i % 2 === 0 ? 1 : -1,
+    colorIdx:     i % RING_COLORS.length,
+    thicknessVar: 0.93 + Math.random() * 0.07,
   })), []);
 
-  // Géométries par épaisseur (fin / normal / épais)
-  const geoThin   = useMemo(() => new THREE.RingGeometry(RING_RADIUS * 0.975, RING_RADIUS * 1.0,   SEGMENTS), []);
-  const geoNormal = useMemo(() => new THREE.RingGeometry(RING_RADIUS * 0.955, RING_RADIUS * 1.0,   SEGMENTS), []);
-  const geoThick  = useMemo(() => new THREE.RingGeometry(RING_RADIUS * 0.930, RING_RADIUS * 1.0,   SEGMENTS), []);
+  const geoThin   = useMemo(() => new THREE.RingGeometry(RING_RADIUS * 0.975, RING_RADIUS * 1.0, SEGMENTS), []);
+  const geoNormal = useMemo(() => new THREE.RingGeometry(RING_RADIUS * 0.955, RING_RADIUS * 1.0, SEGMENTS), []);
+  const geoThick  = useMemo(() => new THREE.RingGeometry(RING_RADIUS * 0.930, RING_RADIUS * 1.0, SEGMENTS), []);
 
-  // Matériaux clonés par couleur
-  const materials = useMemo(() => RING_COLORS.map(c => new THREE.MeshBasicMaterial({
+  // Matériaux de base (pas clonés — utilisés pour créer les clones une seule fois)
+  const baseMaterials = useMemo(() => RING_COLORS.map(c => new THREE.MeshBasicMaterial({
     color: new THREE.Color(c),
     transparent: true, opacity: 0,
     side: THREE.DoubleSide,
@@ -50,10 +39,27 @@ export default function TunnelEffect({ active = true, speed = 1.0 }) {
     depthWrite: false,
   })), []);
 
+  // Bug 1 fix : créer les clones UNE SEULE FOIS dans useMemo (pas dans JSX)
+  const clonedMaterials = useMemo(() => {
+    const clones = rings.map(ring => baseMaterials[ring.colorIdx].clone());
+    clonedMatsRef.current = clones;
+    return clones;
+  }, [rings, baseMaterials]);
+
+  // Bug 1 fix : disposer les clones au démontage
+  useEffect(() => {
+    return () => {
+      clonedMatsRef.current.forEach(m => m.dispose());
+      geoThin.dispose();
+      geoNormal.dispose();
+      geoThick.dispose();
+      baseMaterials.forEach(m => m.dispose());
+    };
+  }, [geoThin, geoNormal, geoThick, baseMaterials]);
+
   const ringZRef  = useRef(rings.map(r => r.z));
   const meshRefs  = useRef([]);
 
-  // Données poussière
   const dustData = useMemo(() => {
     const pos = new Float32Array(DUST_COUNT * 3);
     const col = new Float32Array(DUST_COUNT * 3);
@@ -76,45 +82,30 @@ export default function TunnelEffect({ active = true, speed = 1.0 }) {
     elapsedRef.current += delta;
     const t = elapsedRef.current;
 
-    // Légère oscillation du groupe (sensation de flottement dans le tunnel)
     if (groupRef.current) {
       groupRef.current.rotation.z = Math.sin(t * 0.4) * 0.04;
       groupRef.current.position.x = Math.sin(t * 0.6) * 0.06;
       groupRef.current.position.y = Math.cos(t * 0.45) * 0.04;
     }
 
-    // Pulsation de la lueur centrale — supprimée : plus de pointLight (voir plus bas)
-
-    // Anneaux
     meshRefs.current.forEach((mesh, i) => {
       if (!mesh) return;
-
-      // Vitesse lente : 8 unités/s (vs 18 avant) × speed prop
       ringZRef.current[i] += delta * 8 * speed;
-
       if (ringZRef.current[i] > 5) {
         ringZRef.current[i] = -TUNNEL_DEPTH + Math.random() * 8;
       }
-
       mesh.position.z = ringZRef.current[i];
-
-      // Perspective : scale quadratique
       const p     = (ringZRef.current[i] + TUNNEL_DEPTH) / TUNNEL_DEPTH;
       const scale = (0.12 + p * p * 1.5) * rings[i].radiusVar;
       mesh.scale.setScalar(scale);
-
-      // Opacité : courbe plus douce, maximum plus élevé (0.9)
       let opacity;
       if (p < 0.12)      opacity = (p / 0.12) * 0.6;
       else if (p > 0.72) opacity = ((1 - p) / 0.28) * 0.9;
       else               opacity = 0.55 + p * 0.35;
       mesh.material.opacity = Math.max(0, Math.min(0.9, opacity));
-
-      // Rotation douce
       mesh.rotation.z = rings[i].rotOffset + t * 0.06 * rings[i].rotDir;
     });
 
-    // Poussière dorée
     if (dustRef.current) {
       const pos = dustRef.current.geometry.attributes.position.array;
       for (let i = 0; i < DUST_COUNT; i++) {
@@ -134,11 +125,7 @@ export default function TunnelEffect({ active = true, speed = 1.0 }) {
 
   return (
     <group ref={groupRef}>
-      {/* NB : les pointLights ont été supprimées — elles n'éclairaient aucun objet
-          (anneaux en MeshBasicMaterial + poussière en points ignorent la lumière).
-          Gain GPU gratuit. */}
-
-      {/* Anneaux */}
+      {/* Bug 1 fix : utiliser clonedMaterials (créés une seule fois) au lieu de .clone() dans JSX */}
       {rings.map((ring, i) => {
         const geo = ring.thicknessVar < 0.95 ? geoThin : ring.thicknessVar < 0.98 ? geoNormal : geoThick;
         return (
@@ -147,22 +134,18 @@ export default function TunnelEffect({ active = true, speed = 1.0 }) {
             ref={el => meshRefs.current[i] = el}
             position={[0, 0, ring.z]}
             geometry={geo}
-            material={materials[ring.colorIdx].clone()}
+            material={clonedMaterials[i]}
           />
         );
       })}
 
-      {/* Particules de poussière */}
       <points ref={dustRef}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" count={DUST_COUNT} array={dustData.positions} itemSize={3} />
           <bufferAttribute attach="attributes-color"    count={DUST_COUNT} array={dustData.colors}    itemSize={3} />
         </bufferGeometry>
-        <pointsMaterial
-          size={0.025} sizeAttenuation vertexColors
-          transparent opacity={0.55}
-          depthWrite={false} blending={THREE.AdditiveBlending}
-        />
+        <pointsMaterial size={0.025} sizeAttenuation vertexColors transparent opacity={0.55}
+          depthWrite={false} blending={THREE.AdditiveBlending} />
       </points>
     </group>
   );
