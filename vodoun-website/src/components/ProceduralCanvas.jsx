@@ -281,10 +281,8 @@ export default function ProceduralCanvas({ scrollRef, style = {} }) {
         ctx.beginPath();
         ctx.arc(e.x, e.y, e.r * fade, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${pal.ember[0]},${Math.round(pal.ember[1] * (0.35 + heat * 0.65))},${Math.round(pal.ember[2] * heat * 0.4)},${fade * 0.92})`;
-        ctx.shadowColor = `rgba(${pal.ember[0]},${pal.ember[1]},0,${fade * 0.28})`;
-        ctx.shadowBlur  = 4;
+        // shadowBlur supprimé — trop coûteux à 60fps sur mobile
         ctx.fill();
-        ctx.shadowBlur  = 0;
       });
       // RAF appelé en haut de la boucle — pas de doublon ici
     };

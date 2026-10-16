@@ -5,16 +5,24 @@ import { COLLECTIONS, useProducts } from '../store';
 import ProductCard from '../components/ProductCard';
 import ProceduralCanvas from '../components/ProceduralCanvas';
 import usePageMeta from '../hooks/usePageMeta';
+import { useLanguage } from '../context/LanguageContext';
+import fr from '../i18n/fr';
+import en from '../i18n/en';
 
 export default function ShopPage() {
   const { collectionId } = useParams();
   const [selected, setSelected] = useState(collectionId || 'all');
   const products = useProducts();
+  const { lang } = useLanguage();
+  const t = lang === 'fr' ? fr : en;
 
   usePageMeta({
-    title: selected === 'all' ? 'Boutique' : `Boutique · ${COLLECTIONS.find(c => c.id === selected)?.name || selected}`,
-    description: 'Explorez toutes les collections Vodun Concept Store : mobilier d\'art, bijoux, mode, décorations festives et accessoires inspirés de la culture Vodun.',
+    title: selected === 'all' ? t.shop.heading : `${t.shop.heading} · ${COLLECTIONS.find(c => c.id === selected)?.name || selected}`,
+    description: lang === 'fr'
+      ? 'Explorez toutes les collections Vodun Concept Store : mobilier d\'art, bijoux, mode, décorations festives et accessoires inspirés de la culture Vodun.'
+      : 'Explore all Vodun Concept Store collections: art furniture, jewelry, fashion, festive decorations and accessories inspired by Vodun culture.',
   });
+
   const scrollRef  = useRef(0);
   const heroRef    = useRef(null);
   const filtersRef = useRef(null);
@@ -45,13 +53,7 @@ export default function ShopPage() {
       gsap.fromTo(
         heroElements,
         { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          stagger: 0.15,
-          ease: 'power3.out',
-        }
+        { y: 0, opacity: 1, duration: 1, stagger: 0.15, ease: 'power3.out' }
       );
     }
   }, []);
@@ -63,21 +65,14 @@ export default function ShopPage() {
       gsap.fromTo(
         filterButtons,
         { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.05,
-          ease: 'power2.out',
-          delay: 0.5,
-        }
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.05, ease: 'power2.out', delay: 0.5 }
       );
     }
   }, []);
 
   return (
     <div className="min-h-screen bg-noir text-ivoire">
-      {/* 1. Header Section (Refined Ivory Background) */}
+      {/* 1. Header Section */}
       <div ref={heroRef} className="bg-[#F4F0E6] text-noir py-12 pt-28 md:py-16 md:pt-32 relative z-50 overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-10 left-5 w-20 h-20 border border-or/10 rounded-full animate-pulse" style={{ animationDuration: '4s' }} />
@@ -86,26 +81,22 @@ export default function ShopPage() {
         <div className="absolute top-1/3 right-1/4 w-1 h-16 bg-or/10" />
 
         <div className="max-w-7xl mx-auto px-[5vw] relative">
-          <span className="section-label mb-3 block text-[10px] animate-hero">Catalogue</span>
+          <span className="section-label mb-3 block text-[10px] animate-hero">{t.shop.label}</span>
           <h1 className="editorial-heading text-noir mb-4 !text-[clamp(2.5rem,8vw,5rem)] leading-[0.9] animate-hero">
-            Boutique<br /><span className="italic text-or relative inline-block">
+            {t.shop.heading}<br /><span className="italic text-or relative inline-block">
               Vodun
               <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-or scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left" />
             </span>
           </h1>
           <p className="text-brun/80 text-sm md:text-lg max-w-xl mb-8 font-playfair font-medium leading-relaxed animate-hero">
-            Explorez nos collections identitaires, où chaque pièce raconte une part de l'héritage ancestral.
+            {t.shop.subheading}
           </p>
           <div ref={filtersRef} className="relative mt-8">
             {/* Desktop: Horizontal Scroll Liquid Glass */}
             <div className="hidden md:block">
               <div
                 className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
-                style={{
-                  msOverflowStyle: 'none',
-                  scrollbarWidth: 'none',
-                  WebkitOverflowScrolling: 'touch',
-                }}
+                style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
               >
                 <div
                   className="flex-shrink-0 flex items-center px-3 py-3 rounded-2xl"
@@ -125,10 +116,9 @@ export default function ShopPage() {
                     onClick={() => setSelected('all')}
                     className={`snap-start flex-shrink-0 px-5 py-2.5 rounded-xl transition-all duration-500 font-bold uppercase tracking-[0.25em] text-[0.6rem] ${selected === 'all'
                       ? 'text-ivoire bg-noir shadow-[0_4px_20px_rgba(0,0,0,0.25)]'
-                      : 'text-noir/70 hover:text-noir hover:bg-noir/5'
-                      }`}
+                      : 'text-noir/70 hover:text-noir hover:bg-noir/5'}`}
                   >
-                    Tous
+                    {t.shop.all}
                   </button>
                   {COLLECTIONS.filter((col) => !col.deity).map((col) => (
                     <button
@@ -136,8 +126,7 @@ export default function ShopPage() {
                       onClick={() => setSelected(col.id)}
                       className={`snap-start flex-shrink-0 px-5 py-2.5 rounded-xl transition-all duration-500 font-bold uppercase tracking-[0.25em] text-[0.6rem] ${selected === col.id
                         ? 'text-ivoire bg-noir shadow-[0_4px_20px_rgba(0,0,0,0.25)]'
-                        : 'text-noir/70 hover:text-noir hover:bg-noir/5'
-                        }`}
+                        : 'text-noir/70 hover:text-noir hover:bg-noir/5'}`}
                     >
                       {col.name}
                     </button>
@@ -166,10 +155,9 @@ export default function ShopPage() {
                   onClick={() => setSelected('all')}
                   className={`flex-1 min-w-[30%] px-3 py-2 rounded-xl transition-all duration-500 font-bold uppercase tracking-[0.2em] text-[0.55rem] ${selected === 'all'
                     ? 'text-ivoire bg-noir shadow-[0_4px_20px_rgba(0,0,0,0.25)]'
-                    : 'text-noir/70 hover:text-noir hover:bg-noir/5'
-                    }`}
+                    : 'text-noir/70 hover:text-noir hover:bg-noir/5'}`}
                 >
-                  Tous
+                  {t.shop.all}
                 </button>
                 {COLLECTIONS.filter((col) => !col.deity).map((col) => (
                   <button
@@ -177,8 +165,7 @@ export default function ShopPage() {
                     onClick={() => setSelected(col.id)}
                     className={`flex-1 min-w-[30%] px-3 py-2 rounded-xl transition-all duration-500 font-bold uppercase tracking-[0.2em] text-[0.55rem] ${selected === col.id
                       ? 'text-ivoire bg-noir shadow-[0_4px_20px_rgba(0,0,0,0.25)]'
-                      : 'text-noir/70 hover:text-noir hover:bg-noir/5'
-                      }`}
+                      : 'text-noir/70 hover:text-noir hover:bg-noir/5'}`}
                   >
                     {col.name}
                   </button>
@@ -187,10 +174,10 @@ export default function ShopPage() {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-noir/20 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-noir/20 to-transparent" />
       </div>
 
-      {/* 2. Products Section with Background Video */}
+      {/* 2. Products Section */}
       <div className="relative min-h-screen overflow-hidden">
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
           <ProceduralCanvas
@@ -203,19 +190,13 @@ export default function ShopPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-[5vw] py-16 md:py-24">
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-12 lg:gap-24">
             {filteredProducts.map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={index}
-                isDark={true}
-                variant="square"
-              />
+              <ProductCard key={product.id} product={product} index={index} isDark={true} variant="square" />
             ))}
           </div>
 
           {filteredProducts.length === 0 && (
             <div className="text-center py-40 opacity-40 uppercase tracking-[0.4em] text-xs">
-              Aucun vestige trouvé
+              {t.shop.empty}
             </div>
           )}
         </div>

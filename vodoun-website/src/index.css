@@ -22,6 +22,12 @@
     scroll-behavior: auto !important;
   }
 
+  /* Promotion GPU du canvas animé — évite les repaints sur le thread principal */
+  canvas {
+    will-change: contents;
+    transform: translateZ(0);
+  }
+
   /* Brillance dorée pulsée sur les bords du logo (header + footer) */
   @keyframes logo-glow {
     0%   { filter: drop-shadow(0 0 5px rgba(210, 185, 142, 0.35)) drop-shadow(0 0 16px rgba(210, 185, 142, 0.14)); }

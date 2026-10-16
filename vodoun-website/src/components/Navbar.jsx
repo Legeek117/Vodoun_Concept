@@ -1,14 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
 import fr from '../i18n/fr';
 import en from '../i18n/en';
 
+// Navigation avec rechargement complet + scroll en haut
+function NavLink({ to, className, children, onClick }) {
+  const handleClick = (e) => {
+    e.preventDefault();
+    if (onClick) onClick();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.location.href = to;
+  };
+  return (
+    <a href={to} onClick={handleClick} className={className}>
+      {children}
+    </a>
+  );
+}
+
 export default function Navbar({ currentPath }) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navRef = useRef(null);
   const lastScrollY = useRef(0);
@@ -31,28 +45,11 @@ export default function Navbar({ currentPath }) {
     const handleScroll = () => {
       const y = window.scrollY;
       setIsScrolled(y > 50);
-      // Masquer le header quand on scrolle vers le bas (au-delà du seuil),
-      // le réafficher dès qu'on scrolle vers le haut (ou menu ouvert).
-      if (y > 120 && y > lastScrollY.current && !isMenuOpen) {
-        setIsHidden(true);
-      } else if (y < lastScrollY.current || isMenuOpen) {
-        setIsHidden(false);
-      }
       lastScrollY.current = y;
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMenuOpen]);
-
-  // Slide du header géré par GSAP pour éviter tout conflit avec l'animation d'entrée
-  useEffect(() => {
-    if (!navRef.current) return;
-    gsap.to(navRef.current, {
-      y: isHidden ? -140 : 0,
-      duration: 0.55,
-      ease: 'power3.out',
-    });
-  }, [isHidden]);
+  }, []);
 
   useEffect(() => {
     gsap.fromTo(navRef.current, { y: -100, opacity: 0 }, { y: 0, opacity: 1, duration: 1.5, ease: 'expo.out', delay: 1 });
@@ -69,7 +66,7 @@ export default function Navbar({ currentPath }) {
     >
       <div className="max-w-7xl mx-auto px-[5vw]">
         <div className="flex items-center justify-between gap-4 lg:gap-12">
-          <Link
+          <NavLink
             to="/accueil"
             className="cursor-pointer transform hover:scale-105 transition-transform duration-500 flex items-center shrink-0"
             aria-label="Vodun Concept Store — Accueil"
@@ -80,7 +77,7 @@ export default function Navbar({ currentPath }) {
               className="logo-glow"
               style={{ height: 'clamp(42px, 7.5vw, 78px)', width: 'auto', objectFit: 'contain' }}
             />
-          </Link>
+          </NavLink>
 
           {/* Desktop Liquid Glass Menu */}
           <div className="hidden lg:flex items-center">
@@ -95,13 +92,13 @@ export default function Navbar({ currentPath }) {
               {navLinks.map((link) => {
                 const isActive = currentPath === link.path || (link.path === '/boutique' && currentPath?.startsWith('/boutique'));
                 return (
-                  <Link
+                  <NavLink
                     key={link.name}
                     to={link.path}
                     className={`relative px-5 lg:px-6 py-3 rounded-full transition-all duration-500 font-black uppercase tracking-[0.25em] text-[0.55rem] ${isActive ? 'text-noir bg-or shadow-[0_4px_20px_rgba(184,134,11,0.4)]' : 'text-ivoire/80 hover:text-ivoire hover:bg-white/5'}`}
                   >
                     {link.name}
-                  </Link>
+                  </NavLink>
                 );
               })}
             </div>
@@ -182,13 +179,14 @@ export default function Navbar({ currentPath }) {
               {navLinks.map((link) => {
                 const isActive = currentPath === link.path || (link.path === '/boutique' && currentPath?.startsWith('/boutique'));
                 return (
-                  <Link
+                  <NavLink
                     key={link.name}
                     to={link.path}
+                    onClick={() => setIsMenuOpen(false)}
                     className={`text-base font-black uppercase tracking-[0.2em] transition-colors ${isActive ? 'text-or' : 'text-ivoire/80 hover:text-or'}`}
                   >
                     {link.name}
-                  </Link>
+                  </NavLink>
                 );
               })}
             </div>

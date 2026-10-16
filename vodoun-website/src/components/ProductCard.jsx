@@ -2,10 +2,37 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../context/LanguageContext';
+
+// Traduction des catégories FR → EN
+const CATEGORY_EN = {
+  'Décorations Festives': 'Festive Decorations',
+  'Décorations festives': 'Festive Decorations',
+  'Mode': 'Fashion',
+  'Mobilier': 'Furniture',
+  'Bijoux': 'Jewelry',
+  'Accessoires': 'Accessories',
+  'Luminaires': 'Lighting',
+  'Maroquinerie': 'Leather Goods',
+  'Montres': 'Watches',
+  'Casquettes': 'Headwear',
+};
 
 export default function ProductCard({ product, index, isDark = false, variant = 'default' }) {
   const containerRef = useRef(null);
   const { formatPrice } = useCurrency();
+  const { lang } = useLanguage();
+
+  const translateCategory = (cat) => {
+    if (lang === 'en') {
+      // Cherche une correspondance exacte ou partielle
+      const key = Object.keys(CATEGORY_EN).find(k => cat.toLowerCase().includes(k.toLowerCase()));
+      return key ? CATEGORY_EN[key] : cat;
+    }
+    return cat;
+  };
+
+  const discoverLabel = lang === 'fr' ? 'Découvrir' : 'Discover';
 
   useEffect(() => {
     gsap.fromTo(
@@ -38,7 +65,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
           </div>
           <div>
             <span className="text-[0.45rem] md:text-[0.5rem] uppercase tracking-[0.15em] md:tracking-[0.2em] text-or font-bold block mb-1">
-              {product.category.split('/')[1] || product.category}
+              {translateCategory(product.category).split('/')[1] || translateCategory(product.category)}
             </span>
             <h3 className="font-playfair text-base md:text-lg font-black text-white group-hover:text-or transition-colors line-clamp-1">
               {product.name}
@@ -72,7 +99,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
           
           <div className="text-center pt-2 z-10">
             <span className="text-[0.5rem] md:text-[0.6rem] uppercase tracking-[0.25em] md:tracking-[0.3em] text-or font-bold block mb-1 md:mb-2 transition-colors duration-300">
-              {product.category.split('/')[1] || product.category}
+              {translateCategory(product.category).split('/')[1] || translateCategory(product.category)}
             </span>
             <h3 className="font-playfair text-base md:text-xl font-black text-white group-hover:text-or transition-colors duration-300 line-clamp-2">
               {product.name}
@@ -121,7 +148,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
             <span className="btn-premium text-xs px-6 py-2.5
                              translate-y-4 group-hover:translate-y-0
                              transition-transform duration-500 ease-out">
-              Découvrir
+              {discoverLabel}
             </span>
           </div>
         </div>
@@ -130,7 +157,7 @@ export default function ProductCard({ product, index, isDark = false, variant = 
       {/* Texte */}
       <div className="px-1">
         <span className="text-[0.5rem] md:text-[0.6rem] uppercase tracking-[0.25em] text-or font-bold block mb-1.5">
-          {product.category}
+          {translateCategory(product.category)}
         </span>
         <h3 className={`font-playfair text-lg md:text-2xl font-black mb-2 md:mb-3
                         group-hover:text-or transition-colors duration-300

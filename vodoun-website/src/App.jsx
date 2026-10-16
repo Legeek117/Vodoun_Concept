@@ -20,8 +20,10 @@ function App() {
   const t            = lang === 'fr' ? fr : en;
 
   usePageMeta({
-    title: 'Accueil',
-    description: 'Vodoun Concept Store — mobilier d\'art, bijoux, décorations festives et mode inspirés de la culture Vodoun. Artisanat béninois d\'exception à Ouidah, Bénin.',
+    title: lang === 'fr' ? 'Accueil' : 'Home',
+    description: lang === 'fr'
+      ? 'Vodoun Concept Store — mobilier d\'art, bijoux, décorations festives et mode inspirés de la culture Vodoun. Artisanat béninois d\'exception à Ouidah, Bénin.'
+      : 'Vodoun Concept Store — art furniture, jewelry, festive decorations and fashion inspired by Vodoun culture. Exceptional Beninese craftsmanship in Ouidah, Benin.',
   });
 
   // ScrollTrigger → scrollRef 0→1 sur immersive-zone
@@ -66,12 +68,9 @@ function App() {
       {/* Zone immersive scrollable */}
       <div id="immersive-zone" className="relative">
 
-        {/* Canvas absolu — couvre toute la hauteur d'immersive-zone, s'arrête avant le Footer */}
+        {/* Canvas absolu */}
         <div className="absolute inset-0 w-full overflow-hidden z-0 pointer-events-none">
-          <ProceduralCanvas
-            scrollRef={scrollRef}
-            className="w-full h-full"
-          />
+          <ProceduralCanvas scrollRef={scrollRef} className="w-full h-full" />
           <div className="absolute inset-0 bg-gradient-to-b from-noir/40 via-transparent to-noir/60 opacity-80" />
         </div>
 
@@ -85,7 +84,7 @@ function App() {
                 <div key={groupIndex} className="flex">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <span key={i} className="text-ivoire font-playfair text-[6vw] md:text-[5vw] font-black mx-12 uppercase tracking-tighter">
-                      LÀ OÙ LE SACRÉ DEVIENT DÉSIRABLE ✦
+                      {t.home.marquee}
                     </span>
                   ))}
                 </div>
@@ -96,23 +95,23 @@ function App() {
           {/* Section 1 : Collections */}
           <section className="py-24 md:py-40 px-[5vw]">
             <div className="max-w-7xl mx-auto">
-              <span className="section-label text-or mb-6 block">L'Univers</span>
-              <h2 className="editorial-heading text-ivoire mb-16 !text-[clamp(2.5rem,8vw,6rem)]">Les Collections</h2>
+              <span className="section-label text-or mb-6 block">{t.home.catalogLabel}</span>
+              <h2 className="editorial-heading text-ivoire mb-16 !text-[clamp(2.5rem,8vw,6rem)]">{t.home.collectionsTitle}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
                 <div className="flex flex-col gap-6 md:gap-8">
-                  <div className="text-ivoire/80 font-playfair text-sm md:text-xl italic mb-4">Festivités &amp; Rituels</div>
+                  <div className="text-ivoire/80 font-playfair text-sm md:text-xl italic mb-4">{t.home.festive}</div>
                   {universProducts.decorations.map((p, i) => (
                     <ProductCard key={p.id} product={p} index={i} isDark={true} variant="immersive" />
                   ))}
                 </div>
                 <div className="flex flex-col gap-6 md:gap-8 md:pt-24">
-                  <div className="text-ivoire/80 font-playfair text-sm md:text-xl italic mb-4">Parures du Quotidien</div>
+                  <div className="text-ivoire/80 font-playfair text-sm md:text-xl italic mb-4">{t.home.daily}</div>
                   {universProducts.mode.map((p, i) => (
                     <ProductCard key={p.id} product={p} index={i} isDark={true} variant="immersive" />
                   ))}
                 </div>
                 <div className="flex flex-col gap-6 md:gap-8 md:pt-48 col-span-2 md:col-span-1">
-                  <div className="text-ivoire/80 font-playfair text-sm md:text-xl italic mb-4">Demeures Sacrées</div>
+                  <div className="text-ivoire/80 font-playfair text-sm md:text-xl italic mb-4">{t.home.sacred}</div>
                   {universProducts.mobilier.map((p, i) => (
                     <ProductCard key={p.id} product={p} index={i} isDark={true} variant="immersive" />
                   ))}
@@ -124,13 +123,13 @@ function App() {
           {/* Section 2 : Héritage */}
           <section className="py-32 md:py-60 px-[5vw] bg-noir/40">
             <div className="max-w-4xl mx-auto text-center">
-              <span className="section-label text-or mb-8 block">L'Héritage</span>
-              <h2 className="editorial-heading text-ivoire mb-12 !text-[clamp(2rem,6vw,4rem)]">Né du souffle de Ouidah</h2>
+              <span className="section-label text-or mb-8 block">{t.home.heritageLabel}</span>
+              <h2 className="editorial-heading text-ivoire mb-12 !text-[clamp(2rem,6vw,4rem)]">{t.home.heritageSectionTitle}</h2>
               <p className="text-ivoire/70 text-lg md:text-2xl font-playfair leading-relaxed">
-                Plus qu'un store, Vodun Concept est un pont entre les mondes. Chaque pièce porte en elle l'énergie d'un savoir-faire ancestral, magnifié par un design contemporain d'exception.
+                {t.home.heritageSectionText}
               </p>
               <div className="mt-16">
-                <Link to="/boutique" className="btn-premium px-12 py-5">Explorer l'intégralité</Link>
+                <Link to="/boutique" className="btn-premium px-12 py-5">{t.home.exploreAll}</Link>
               </div>
             </div>
           </section>
@@ -139,8 +138,8 @@ function App() {
           <div id="pantheon" className="py-16 md:py-24 lg:py-52 relative z-10">
             <div className="max-w-7xl mx-auto px-[5vw]">
               <div className="mb-12 md:mb-20">
-                <span className="section-label text-or mb-4 block">Panthéon</span>
-                <h2 className="editorial-heading text-ivoire !text-[clamp(2.5rem,8vw,5rem)]">Les Puissances</h2>
+                <span className="section-label text-or mb-4 block">{t.home.pantheonLabel}</span>
+                <h2 className="editorial-heading text-ivoire !text-[clamp(2.5rem,8vw,5rem)]">{t.home.pantheonSectionTitle}</h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-0 border-l border-b border-ivoire/10">
                 {divinities.map((deity, index) => (
@@ -168,7 +167,7 @@ function App() {
             </div>
           </div>
 
-          {/* Section finale : revivre l'initiation (bouton optionnel) */}
+          {/* Section finale : revivre l'initiation */}
           <section className="py-24 md:py-40 px-[5vw]">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="font-playfair text-ivoire text-3xl md:text-5xl font-black mb-6">{t.home.greeting}</h2>

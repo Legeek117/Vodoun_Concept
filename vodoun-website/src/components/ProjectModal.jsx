@@ -55,51 +55,52 @@ Merci de me faire parvenir un devis personnalisé.`;
       {/* Backdrop */}
       <div className="fixed inset-0 bg-noir/70 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative min-h-full flex items-start lg:items-center justify-center p-4 md:p-6 pointer-events-none">
-        <div className="relative w-full max-w-6xl bg-ivoire rounded-[28px] overflow-hidden shadow-2xl pointer-events-auto animate-project-modal-in">
+      {/* Conteneur — padding minimal sur mobile */}
+      <div className="relative min-h-full flex items-start lg:items-center justify-center p-2 sm:p-4 md:p-6 pointer-events-none">
+        <div className="relative w-full max-w-6xl bg-ivoire rounded-2xl sm:rounded-[28px] overflow-hidden shadow-2xl pointer-events-auto animate-project-modal-in">
 
           {/* Fermer */}
           <button
             onClick={onClose}
             aria-label="Fermer"
-            className="absolute top-4 right-4 z-30 w-11 h-11 rounded-full bg-noir/60 backdrop-blur-md text-ivoire border border-ivoire/20 flex items-center justify-center text-xl hover:bg-or hover:text-noir hover:border-or transition-all duration-300"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-noir/60 backdrop-blur-md text-ivoire border border-ivoire/20 flex items-center justify-center text-base sm:text-xl hover:bg-or hover:text-noir hover:border-or transition-all duration-300"
           >
             ✕
           </button>
 
           {/* ── Ligne 1 : visuel + formulaire ── */}
           <div className="grid lg:grid-cols-2">
-            {/* Visuel — compact sur mobile pour que le formulaire domine l'écran */}
-            <div className="relative min-h-[150px] lg:min-h-[500px]">
+            {/* Visuel — pleine hauteur sur mobile pour bien voir la photo */}
+            <div className="relative h-[260px] sm:h-[320px] lg:min-h-[500px]">
               <img
                 src={project.image}
                 alt={project.title}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover object-center"
                 loading="eager"
                 decoding="async"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-noir via-noir/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
+              <div className="absolute inset-0 bg-gradient-to-t from-noir/80 via-noir/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 md:p-8">
                 {project.tag && (
-                  <span className="text-[9px] uppercase tracking-[0.35em] text-or font-bold bg-noir/40 px-3 py-1.5 rounded-full inline-block mb-2 md:mb-3">
+                  <span className="text-[9px] uppercase tracking-[0.35em] text-or font-bold bg-noir/50 px-3 py-1.5 rounded-full inline-block mb-2">
                     {project.tag}
                   </span>
                 )}
-                <h2 className="font-playfair text-2xl md:text-4xl font-black text-ivoire leading-tight drop-shadow-lg">
+                <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-black text-ivoire leading-tight drop-shadow-lg">
                   {project.title}
                 </h2>
-                <p className="hidden sm:block text-ivoire/75 text-sm md:text-base font-playfair italic mt-2 max-w-md">
+                <p className="text-ivoire/80 text-sm font-playfair italic mt-1.5 line-clamp-2 sm:line-clamp-none">
                   {project.desc}
                 </p>
               </div>
             </div>
 
-            {/* Formulaire — visible dès l'ouverture */}
-            <div className="bg-ivoire max-h-[92vh] overflow-y-auto">
+            {/* Formulaire */}
+            <div className="bg-ivoire overflow-y-auto" style={{ maxHeight: 'calc(100dvh - 280px)' }}>
               {sent ? (
-                <div className="min-h-[560px] flex flex-col items-center justify-center text-center p-8 md:p-12">
-                  <div className="w-16 h-16 bg-or/10 rounded-full flex items-center justify-center mx-auto mb-6 text-or text-2xl">✓</div>
-                  <h3 className="font-playfair text-3xl font-bold text-noir mb-3">Demande Reçue</h3>
+                <div className="min-h-[400px] flex flex-col items-center justify-center text-center p-6 sm:p-8 md:p-12">
+                  <div className="w-14 h-14 bg-or/10 rounded-full flex items-center justify-center mx-auto mb-5 text-or text-xl">✓</div>
+                  <h3 className="font-playfair text-2xl sm:text-3xl font-bold text-noir mb-3">Demande Reçue</h3>
                   <p className="text-brun/50 text-sm max-w-xs">
                     Votre demande de devis pour <strong>{project.title}</strong> a bien été envoyée. Notre équipe vous répondra sous 48h.
                   </p>
@@ -108,31 +109,36 @@ Merci de me faire parvenir un devis personnalisé.`;
                   </button>
                 </div>
               ) : (
-                <div className="p-5 md:p-8">
-                  <h3 className="font-playfair text-2xl font-bold text-noir mb-1">Demander un Devis</h3>
+                <div className="p-4 sm:p-5 md:p-8">
+                  <h3 className="font-playfair text-xl sm:text-2xl font-bold text-noir mb-1">Demander un Devis</h3>
                   <p className="text-[10px] uppercase tracking-[0.4em] text-or/70 font-bold mb-2">Projet {project.title}</p>
-                  <p className="hidden sm:block text-brun/50 text-xs mb-5">Formulaire pré-rempli — modifiez librement vos informations.</p>
+                  <p className="hidden sm:block text-brun/50 text-xs mb-4">Formulaire pré-rempli — modifiez librement.</p>
 
-                  <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
+                    {/* Sur mobile : empilés, sur sm+ : côte à côte */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <div>
                         <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Nom complet</label>
-                        <input required type="text" name="nom" placeholder="Jean Dupont" className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
+                        <input required type="text" name="nom" placeholder="Jean Dupont"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
                       </div>
                       <div>
                         <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Email</label>
-                        <input required type="email" name="email" placeholder="contact@entreprise.com" className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
+                        <input required type="email" name="email" placeholder="contact@entreprise.com"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
                       </div>
                     </div>
 
                     <div>
                       <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Téléphone (facultatif)</label>
-                      <input type="tel" name="telephone" placeholder="+229 ..." className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
+                      <input type="tel" name="telephone" placeholder="+229 ..."
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun" />
                     </div>
 
                     <div>
                       <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Type de projet</label>
-                      <select required name="type" defaultValue={project.domain || 'Autre'} className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun">
+                      <select required name="type" defaultValue={project.domain || 'Autre'}
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun">
                         <option value="Hôtel / Restaurant">Hôtel / Restaurant</option>
                         <option value="Bureaux / Siège social">Bureaux / Siège social</option>
                         <option value="Installation monumentale">Installation monumentale</option>
@@ -144,21 +150,25 @@ Merci de me faire parvenir un devis personnalisé.`;
 
                     <div>
                       <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Projet concerné</label>
-                      <input readOnly value={project.title} className="w-full px-4 py-3 bg-or/5 border border-or/30 rounded-xl text-sm text-noir font-semibold cursor-default" />
+                      <input readOnly value={project.title}
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-or/5 border border-or/30 rounded-xl text-sm text-noir font-semibold cursor-default" />
                     </div>
 
                     <div>
                       <label className="text-[10px] uppercase tracking-[0.3em] text-brun/50 block mb-1.5">Description du projet</label>
-                      <textarea required name="message" defaultValue={prefillDesc} rows={5} className="w-full px-4 py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun resize-none" />
+                      <textarea required name="message" defaultValue={prefillDesc} rows={4}
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-brun/15 rounded-xl focus:border-or focus:outline-none transition-all duration-300 text-sm text-brun resize-none" />
                     </div>
 
-                    <button type="submit" className="w-full py-4 rounded-xl font-bold uppercase tracking-[0.4em] text-sm mt-2 shadow-lg hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(135deg, #B8860B, #8a6208)', color: '#F4F0E6' }}>
+                    <button type="submit"
+                      className="w-full py-3.5 sm:py-4 rounded-xl font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] text-sm mt-1 shadow-lg hover:opacity-90 transition-opacity active:scale-[0.98]"
+                      style={{ background: 'linear-gradient(135deg, #B8860B, #8a6208)', color: '#F4F0E6' }}>
                       Initier le Projet
                     </button>
 
                     <a
                       href={`mailto:contact@vodun-concept.com?subject=Devis%20—%20${encodeURIComponent(project.title)}&body=${encodeURIComponent(prefillDesc)}`}
-                      className="block text-center text-[11px] uppercase tracking-[0.25em] text-brun/40 hover:text-or transition-colors duration-300 mt-4"
+                      className="block text-center text-[11px] uppercase tracking-[0.25em] text-brun/40 hover:text-or transition-colors duration-300 mt-3"
                     >
                       ou écrivez-nous directement
                     </a>
@@ -168,8 +178,8 @@ Merci de me faire parvenir un devis personnalisé.`;
             </div>
           </div>
 
-          {/* ── Ligne 2 : détails étendus (sous le formulaire) ── */}
-          <div className="border-t border-brun/10 bg-white/40 px-6 md:px-8 py-6 grid gap-6 md:grid-cols-3">
+          {/* ── Ligne 2 : détails étendus ── */}
+          <div className="border-t border-brun/10 bg-white/40 px-4 sm:px-6 md:px-8 py-5 sm:py-6 grid gap-5 sm:gap-6 md:grid-cols-3">
             <div>
               <span className="text-[10px] uppercase tracking-[0.4em] text-or font-bold block mb-3">Le projet</span>
               <p className="text-brun/70 text-sm leading-relaxed font-playfair">{project.desc}</p>

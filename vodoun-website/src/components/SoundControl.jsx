@@ -1,13 +1,18 @@
 import { useSound } from '../context/SoundContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SoundControl() {
   const { isPlaying, toggleSound } = useSound();
+  const { lang } = useLanguage();
+
+  const labelOn  = lang === 'fr' ? 'Son On'  : 'Sound On';
+  const labelOff = lang === 'fr' ? 'Son Off' : 'Sound Off';
 
   return (
     <button
       onClick={toggleSound}
       className="fixed bottom-8 left-8 z-[100] flex items-center gap-2 px-4 py-3 rounded-full bg-noir border border-or/40 text-ivoire hover:bg-or hover:text-noir hover:border-or transition-all duration-500 group shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-      aria-label={isPlaying ? "Désactiver le son" : "Activer le son"}
+      aria-label={isPlaying ? (lang === 'fr' ? 'Désactiver le son' : 'Disable sound') : (lang === 'fr' ? 'Activer le son' : 'Enable sound')}
     >
       {isPlaying ? (
         <svg className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +25,7 @@ export default function SoundControl() {
         </svg>
       )}
       <span className="text-[9px] uppercase tracking-[0.3em] font-bold hidden sm:block">
-        {isPlaying ? 'Son On' : 'Son Off'}
+        {isPlaying ? labelOn : labelOff}
       </span>
     </button>
   );

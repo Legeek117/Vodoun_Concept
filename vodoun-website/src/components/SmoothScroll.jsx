@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigationType } from 'react-router-dom';
 import Lenis from '@studio-freight/lenis';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
@@ -17,6 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
  */
 export default function SmoothScroll() {
   const { pathname } = useLocation();
+  const navType = useNavigationType(); // 'PUSH' | 'REPLACE' | 'POP'
   const lenisRef = useRef(null);
   const timeoutRef  = useRef(null);
   const pathnameRef = useRef(pathname);
@@ -36,10 +37,9 @@ export default function SmoothScroll() {
     document.body.style.position = '';
 
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 0.9,  // réduit de 1.2 → plus réactif
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      // CRITIQUE : smoothTouch DOIT rester false (voir commentaire ci-dessus)
       smoothTouch: false,
       infinite: false,
     });
@@ -74,11 +74,52 @@ export default function SmoothScroll() {
   useEffect(() => {
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
-    window.scrollTo(0, 0);
-    try { lenisRef.current?.scrollTo(0, { immediate: true }); } catch { /* noop */ }
-    timeoutRef.current = setTimeout(() => ScrollTrigger.refresh(), 150);
-    return () => clearTimeout(timeoutRef.current);
-  }, [pathname]);
+
+    // POP = bouton retour/avant du browser → on ne remet PAS en haut,
+    // on laisse le browser/Lenis rester là où l'utilisateur était.
+    // PUSH/REPLACE = navigation vers une nouvelle page → on remet en haut.
+    if (navType === 'POP') {
+      timeoutRef.current = setTimeout(() => ScrollTrigger.refresh(), 100);
+      return () => clearTimeout(timeoutRef.current);
+    }
+
+    const resetLenis = () => {
+      try {
+        const lenis = lenisRef.current;
+        if (lenis) {
+          lenis.stop();
+          lenis.scrollTo(0, { immediate: true, force: true });
+          lenis.start();
+        }
+      } catch { /* noop */ }
+    };
+
+    // Reset natif immédiat
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    resetLenis();
+
+    // Deuxième reset après le paint React (rAF) pour écraser toute restauration tardive
+    let rafId;
+    rafId = requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      resetLenis();
+
+      timeoutRef.current = setTimeout(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        resetLenis();
+        ScrollTrigger.refresh();
+      }, 100);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timeoutRef.current);
+    };
+  }, [pathname, navType]);
 
   return null;
 }

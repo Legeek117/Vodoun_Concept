@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Canvas } from '@react-three/fiber';
 import gsap from 'gsap';
@@ -159,7 +159,7 @@ const DIVINITIES = [
   },
 ];
 
-// ── Valeurs fondatrices de la marque ────────────────────────────────────────
+// ── Valeurs fondatrices de la marque ───────────────────────────────────────
 const BRAND_VALUES = [
   { title: 'Authenticité', desc: 'Ancré dans une tradition et une spiritualité vivantes. Chaque création respecte la signification profonde des symboles Vodun.' },
   { title: 'Excellence', desc: 'Beau, solide, durable. Des pièces conçues pour traverser les générations et porter la mémoire d\'un symbole.' },
@@ -167,15 +167,18 @@ const BRAND_VALUES = [
   { title: 'Rayonnement', desc: 'Faire de Ouidah la capitale mondiale du design inspiré du Vodun. Chaque vente exporte la beauté béninoise.' },
 ];
 
-// ── Composant carte divinité (vue grille) ───────────────────────────────────
-function DeityCard({ deity, index, onClick, isActive }) {
+// ── Composant carte divinité (vue grille) ──────────────────────────────────
+function DeityCard({ deity, index, onClick, isActive, lang }) {
   return (
     <div
-      className={`group cursor-pointer animate-in transition-all duration-500 ${isActive ? 'ring-2 ring-or' : ''}`}
+      className={`group cursor-pointer animate-in transition-all duration-500 hover:-translate-y-1 ${isActive ? 'ring-2 ring-or ring-offset-2 ring-offset-noir' : ''}`}
       onClick={() => onClick(index)}
+      style={{ animationDelay: `${index * 80}ms` }}
     >
-      {/* Image */}
-      <div className="relative aspect-[3/4] overflow-hidden" style={{ backgroundColor: deity.color }}>
+      {/* ── IMAGE ── */}
+      <div className="relative overflow-hidden" style={{ aspectRatio: '3/4', backgroundColor: deity.color }}>
+
+        {/* Photo */}
         {deity.image && (
           <img
             src={deity.image}
@@ -185,32 +188,71 @@ function DeityCard({ deity, index, onClick, isActive }) {
             className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110 opacity-85"
           />
         )}
-        <div className="absolute inset-0 mix-blend-multiply opacity-30" style={{ backgroundColor: deity.color }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-noir via-noir/30 to-transparent" />
+
+        {/* Overlay couleur divinité */}
+        <div className="absolute inset-0 mix-blend-multiply opacity-20" style={{ backgroundColor: deity.color }} />
+
+        {/* Gradient bas — utilise la vraie couleur */}
+        <div className="absolute inset-0"
+          style={{ background: `linear-gradient(to top, ${deity.color}F0 0%, ${deity.color}50 35%, transparent 65%)` }}
+        />
+
+        {/* Halo hover */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ background: `radial-gradient(ellipse at 50% 100%, ${deity.color}50 0%, transparent 60%)` }}
+        />
+
+        {/* Numéro discret */}
+        <span className="absolute top-3 right-3 z-10 text-[0.5rem] font-black text-ivoire/20 tabular-nums">
+          0{index + 1}
+        </span>
+
         {/* Badge subtitle */}
-        <div className="absolute top-4 left-4">
-          <span className="text-[0.55rem] uppercase tracking-[0.35em] text-ivoire/60 block">{deity.subtitle}</span>
+        <div className="absolute top-3 left-3 z-10">
+          <span
+            className="text-[0.45rem] uppercase tracking-[0.35em] font-bold px-2 py-1 rounded-full backdrop-blur-sm"
+            style={{ background: `${deity.color}60`, color: deity.colorLight, border: `1px solid ${deity.colorLight}35` }}
+          >
+            {deity.subtitle}
+          </span>
         </div>
-        {/* Name overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end p-6 z-10">
-          <span className="text-[0.6rem] uppercase tracking-[0.4em] text-ivoire/50 block mb-2">{deity.title}</span>
-          <h3 className="font-playfair text-3xl md:text-4xl font-black text-ivoire mb-3 drop-shadow-lg">{deity.name}</h3>
-          <p className="text-ivoire/70 text-xs leading-relaxed line-clamp-2 mb-3">{deity.intro}</p>
-          <p className="text-[0.6rem] text-ivoire/40 uppercase tracking-widest">{deity.description}</p>
+
+        {/* Texte bas */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 z-10">
+          <span className="text-[0.5rem] uppercase tracking-[0.4em] text-ivoire/50 block mb-1">{deity.title}</span>
+          <h3
+            className="font-playfair text-3xl md:text-4xl font-black text-ivoire leading-none mb-2"
+            style={{ textShadow: `0 2px 16px ${deity.color}70` }}
+          >
+            {deity.name}
+          </h3>
+          <p className="text-ivoire/60 text-[0.6rem] uppercase tracking-widest">{deity.description}</p>
         </div>
-        {/* Hover CTA */}
+
+        {/* Hover CTA centré */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-          <span className="bg-or/90 text-noir text-[0.6rem] uppercase tracking-[0.3em] font-black px-4 py-2">
-            Découvrir →
+          <span
+            className="text-[0.6rem] uppercase tracking-[0.35em] font-black px-5 py-2.5 rounded-full backdrop-blur-md"
+            style={{ background: `${deity.colorLight}DD`, color: '#0A0705' }}
+          >
+            {lang === 'fr' ? 'Découvrir →' : 'Discover →'}
           </span>
         </div>
       </div>
-      {/* Attributes strip */}
-      <div className="border border-ivoire/10 divide-y divide-ivoire/10">
+
+      {/* ── ATTRIBUTS STRIP ── */}
+      <div style={{ borderLeft: `2px solid ${deity.color}60`, borderRight: `1px solid ${deity.color}25`, borderBottom: `1px solid ${deity.color}25` }}>
         {deity.attributes.slice(0, 3).map((attr, j) => (
-          <div key={j} className="flex justify-between items-center px-4 py-2.5">
-            <span className="text-[0.6rem] uppercase tracking-[0.3em] text-ivoire/40">{attr.label}</span>
-            <span className="text-[0.65rem] font-bold uppercase tracking-wider" style={{ color: deity.colorLight }}>{attr.value}</span>
+          <div
+            key={j}
+            className="flex justify-between items-center px-3 py-2.5 transition-colors duration-200 group-hover:brightness-125"
+            style={{
+              background: j % 2 === 0 ? `${deity.color}12` : `${deity.color}06`,
+              borderBottom: j < 2 ? `1px solid ${deity.color}18` : 'none',
+            }}
+          >
+            <span className="text-[0.5rem] uppercase tracking-[0.25em] text-ivoire/35">{attr.label}</span>
+            <span className="text-[0.55rem] font-black uppercase tracking-wider" style={{ color: deity.colorLight }}>{attr.value}</span>
           </div>
         ))}
       </div>
@@ -219,102 +261,222 @@ function DeityCard({ deity, index, onClick, isActive }) {
 }
 
 // ── Modal détail divinité ───────────────────────────────────────────────────
-function DeityModal({ deity, onClose }) {
+function DeityModal({ deity, onClose, t, lang }) {
   const modalRef = useRef(null);
 
   useEffect(() => {
     if (!modalRef.current) return;
+    // On ne stoppe PAS Lenis globalement — ça bloquerait le scroll interne.
+    // data-lenis-prevent sur le panel gère déjà l'isolation.
+    // On bloque juste le scroll de la page derrière via pointer-events.
     gsap.fromTo(modalRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }
+      { opacity: 0, y: 40, scale: 0.98 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' }
     );
     const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+    };
   }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-[9998] flex items-end md:items-center justify-center p-0 md:p-6" role="dialog" aria-modal="true">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-noir/90 backdrop-blur-md" onClick={onClose} />
+      {/* Backdrop avec couleur de la divinité */}
+      <div
+        className="absolute inset-0 backdrop-blur-md"
+        style={{ background: `linear-gradient(135deg, ${deity.color}40 0%, rgba(10,7,5,0.92) 60%)` }}
+        onClick={onClose}
+      />
+
+      {/* Bouton fermer */}
+      <button
+        onClick={onClose}
+        aria-label="Fermer"
+        style={{ borderRadius: '50%' }}
+        className="fixed top-4 right-4 z-[9999] w-11 h-11 flex items-center justify-center bg-noir/70 backdrop-blur-md border border-ivoire/20 text-ivoire text-base hover:bg-or hover:text-noir hover:border-or transition-all duration-300 shadow-lg"
+      >
+        ✕
+      </button>
+
       {/* Panel */}
-      <div ref={modalRef} className="relative z-10 w-full md:max-w-4xl max-h-[92vh] overflow-y-auto bg-[#0D0B08] border border-ivoire/10 shadow-[0_0_80px_rgba(0,0,0,0.8)]">
-        {/* Header image */}
-        <div className="relative h-56 md:h-72 overflow-hidden" style={{ backgroundColor: deity.color }}>
+      <div
+        ref={modalRef}
+        data-lenis-prevent
+        className="relative z-10 w-full md:max-w-4xl h-[92vh] md:max-h-[92vh] overflow-y-auto md:rounded-3xl shadow-2xl"
+        style={{
+          background: `linear-gradient(160deg, ${deity.color}18 0%, #0D0B08 35%, #0A0705 100%)`,
+          border: `1px solid ${deity.color}35`,
+          boxShadow: `0 0 100px ${deity.color}25, 0 40px 80px rgba(0,0,0,0.8)`,
+        }}
+      >
+        {/* ── HEADER IMAGE ── */}
+        <div className="relative h-64 md:h-80 overflow-hidden flex-shrink-0 md:rounded-t-3xl" style={{ backgroundColor: deity.color }}>
           {deity.image && (
-            <img src={deity.image} alt={deity.name} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-top opacity-70" />
+            <img src={deity.image} alt={deity.name} loading="lazy" decoding="async"
+              className="absolute inset-0 w-full h-full object-cover object-top opacity-75 scale-105"
+            />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0D0B08] via-noir/40 to-transparent" />
-          <button onClick={onClose} className="absolute top-4 right-4 text-ivoire/60 hover:text-ivoire text-2xl font-light z-10" aria-label="Fermer">✕</button>
-          <div className="absolute bottom-0 left-0 p-6 md:p-8 z-10">
-            <span className="text-[0.55rem] uppercase tracking-[0.4em] text-ivoire/50 block mb-1">{deity.title}</span>
-            <h2 className="font-playfair text-4xl md:text-6xl font-black text-ivoire">{deity.name}</h2>
-            <p className="text-or text-xs uppercase tracking-[0.3em] mt-2">{deity.subtitle}</p>
+          {/* Gradient riche avec couleur */}
+          <div className="absolute inset-0"
+            style={{ background: `linear-gradient(to top, #0A0705 0%, ${deity.color}60 50%, transparent 100%)` }}
+          />
+          {/* Halo coloré */}
+          <div className="absolute inset-0"
+            style={{ background: `radial-gradient(ellipse at 30% 60%, ${deity.color}30 0%, transparent 65%)` }}
+          />
+
+          {/* Nom en grand */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <span className="text-[0.55rem] uppercase tracking-[0.5em] text-ivoire/50 block mb-2">{deity.title}</span>
+                <h2 className="font-playfair text-5xl md:text-7xl font-black text-ivoire leading-none drop-shadow-2xl"
+                  style={{ textShadow: `0 0 40px ${deity.color}80` }}>
+                  {deity.name}
+                </h2>
+              </div>
+              {/* Badge subtitle */}
+              <div className="flex-shrink-0 pb-1">
+                <span className="text-[0.6rem] uppercase tracking-[0.3em] font-bold px-3 py-1.5 rounded-full"
+                  style={{ background: `${deity.color}50`, color: deity.colorLight, border: `1px solid ${deity.color}60` }}>
+                  {deity.subtitle}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8">
-          {/* Gauche : textes */}
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-[0.6rem] uppercase tracking-[0.35em] text-or mb-3">L'Essence</h3>
-              <p className="text-ivoire/80 text-sm leading-relaxed font-playfair italic">{deity.intro}</p>
-            </div>
-            <div>
-              <h3 className="text-[0.6rem] uppercase tracking-[0.35em] text-or mb-3">L'Histoire</h3>
-              <p className="text-ivoire/70 text-sm leading-relaxed">{deity.story}</p>
-            </div>
-            <div>
-              <h3 className="text-[0.6rem] uppercase tracking-[0.35em] text-or mb-3">Le Vévé</h3>
-              <p className="text-ivoire/60 text-xs leading-relaxed italic">« {deity.veve} »</p>
-            </div>
-            <div>
-              <h3 className="text-[0.6rem] uppercase tracking-[0.35em] text-or mb-3">Offrandes Traditionnelles</h3>
-              <p className="text-ivoire/60 text-xs leading-relaxed">{deity.offerings}</p>
-            </div>
+        {/* ── BODY ── */}
+        <div className="p-6 md:p-8 pb-16">
+
+          {/* Ligne de séparation décorative */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-px flex-1" style={{ background: `linear-gradient(to right, ${deity.color}60, transparent)` }} />
+            <span className="text-[0.55rem] uppercase tracking-[0.4em] font-bold" style={{ color: deity.colorLight }}>
+              {lang === 'fr' ? 'Univers' : 'Universe'} · {deity.name}
+            </span>
+            <div className="h-px flex-1" style={{ background: `linear-gradient(to left, ${deity.color}60, transparent)` }} />
           </div>
 
-          {/* Droite : attributs + palette + collections */}
-          <div className="space-y-6">
-            <div className="border border-ivoire/10 divide-y divide-ivoire/10">
-              {deity.attributes.map((attr, i) => (
-                <div key={i} className="flex justify-between items-center px-4 py-3">
-                  <span className="text-[0.6rem] uppercase tracking-[0.3em] text-ivoire/40">{attr.label}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-right max-w-[55%]" style={{ color: deity.colorLight }}>{attr.value}</span>
-                </div>
-              ))}
-            </div>
+          <div className="grid md:grid-cols-2 gap-8">
 
-            {/* Palette chromatique */}
-            <div>
-              <h3 className="text-[0.6rem] uppercase tracking-[0.35em] text-or mb-3">Palette Sacrée</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {deity.palette.map((hex, i) => (
-                  <div key={i} className="text-center">
-                    <div className="h-8 w-full mb-1 rounded-sm" style={{ backgroundColor: hex }} />
-                    <span className="text-[0.5rem] text-ivoire/40 uppercase tracking-wider leading-tight block">{deity.paletteLabels[i]}</span>
-                  </div>
-                ))}
+            {/* ── COLONNE GAUCHE : textes ── */}
+            <div className="space-y-6">
+
+              {/* L'Essence */}
+              <div className="rounded-2xl p-5"
+                style={{ background: `${deity.color}12`, border: `1px solid ${deity.color}25` }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1 h-4 rounded-full" style={{ backgroundColor: deity.colorLight }} />
+                  <h3 className="text-[0.6rem] uppercase tracking-[0.4em] font-black" style={{ color: deity.colorLight }}>
+                    {lang === 'fr' ? 'L\'Essence' : 'The Essence'}
+                  </h3>
+                </div>
+                <p className="text-ivoire/90 text-sm leading-relaxed font-playfair italic">{deity.intro}</p>
+              </div>
+
+              {/* L'Histoire */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1 h-4 rounded-full" style={{ backgroundColor: deity.colorLight }} />
+                  <h3 className="text-[0.6rem] uppercase tracking-[0.4em] font-black" style={{ color: deity.colorLight }}>
+                    {lang === 'fr' ? 'L\'Histoire' : 'The Story'}
+                  </h3>
+                </div>
+                <p className="text-ivoire/70 text-sm leading-relaxed">{deity.story}</p>
+              </div>
+
+              {/* Le Vévé */}
+              <div className="rounded-2xl p-4"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-or text-xs">✦</span>
+                  <h3 className="text-[0.6rem] uppercase tracking-[0.4em] text-or/70 font-black">
+                    {lang === 'fr' ? 'Le Vévé' : 'The Vévé'}
+                  </h3>
+                </div>
+                <p className="text-ivoire/50 text-xs leading-relaxed italic">« {deity.veve} »</p>
+              </div>
+
+              {/* Offrandes */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-or text-xs">✦</span>
+                  <h3 className="text-[0.6rem] uppercase tracking-[0.4em] text-or/70 font-black">
+                    {lang === 'fr' ? 'Offrandes' : 'Offerings'}
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {deity.offerings.split(' · ').map((item, i) => (
+                    <span key={i} className="text-[0.6rem] uppercase tracking-wider px-2.5 py-1 rounded-full text-ivoire/50"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Collections liées */}
-            <div>
-              <h3 className="text-[0.6rem] uppercase tracking-[0.35em] text-or mb-3">Collections Inspirées</h3>
-              <ul className="space-y-1.5">
-                {deity.collections.map((c, i) => (
-                  <li key={i} className="flex items-center gap-2 text-xs text-ivoire/60">
-                    <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ backgroundColor: deity.colorLight }} />
-                    {c}
-                  </li>
+            {/* ── COLONNE DROITE : attributs + palette + collections ── */}
+            <div className="space-y-6">
+
+              {/* Attributs */}
+              <div className="rounded-2xl overflow-hidden"
+                style={{ border: `1px solid ${deity.color}30` }}>
+                {deity.attributes.map((attr, i) => (
+                  <div key={i}
+                    className="flex justify-between items-center px-4 py-3 transition-colors duration-200"
+                    style={{
+                      background: i % 2 === 0 ? `${deity.color}10` : 'transparent',
+                      borderBottom: i < deity.attributes.length - 1 ? `1px solid ${deity.color}20` : 'none',
+                    }}>
+                    <span className="text-[0.6rem] uppercase tracking-[0.3em] text-ivoire/40">{attr.label}</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-right max-w-[55%]"
+                      style={{ color: deity.colorLight }}>{attr.value}</span>
+                  </div>
                 ))}
-              </ul>
-              <Link to="/boutique" onClick={onClose}
-                className="inline-block mt-4 text-[0.6rem] uppercase tracking-[0.3em] font-black text-noir px-5 py-2.5 transition-all duration-300"
-                style={{ backgroundColor: deity.colorLight }}>
-                Explorer la collection →
-              </Link>
+              </div>
+
+              {/* Palette chromatique */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-or text-xs">✦</span>
+                  <h3 className="text-[0.6rem] uppercase tracking-[0.4em] text-or/70 font-black">{t.pantheon.sacredPalette}</h3>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {deity.palette.map((hex, i) => (
+                    <div key={i} className="text-center">
+                      <div className="h-10 w-full mb-1.5 rounded-lg shadow-inner" style={{ backgroundColor: hex }} />
+                      <span className="text-[0.5rem] text-ivoire/35 uppercase tracking-wider leading-tight block">{deity.paletteLabels[i]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Collections liées */}
+              <div className="rounded-2xl p-5"
+                style={{ background: `${deity.color}10`, border: `1px solid ${deity.color}25` }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-1 h-4 rounded-full" style={{ backgroundColor: deity.colorLight }} />
+                  <h3 className="text-[0.6rem] uppercase tracking-[0.4em] font-black" style={{ color: deity.colorLight }}>
+                    {t.pantheon.inspiredCollections}
+                  </h3>
+                </div>
+                <ul className="space-y-2 mb-5">
+                  {deity.collections.map((c, i) => (
+                    <li key={i} className="flex items-center gap-2.5 text-xs text-ivoire/65 hover:text-ivoire/90 transition-colors">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: deity.colorLight }} />
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/boutique" onClick={onClose}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-[0.65rem] uppercase tracking-[0.3em] font-black text-noir transition-all duration-300 hover:opacity-90 hover:scale-[0.98] active:scale-[0.96]"
+                  style={{ background: `linear-gradient(135deg, ${deity.colorLight} 0%, ${deity.color} 100%)` }}>
+                  {t.pantheon.exploreCollection}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -323,7 +485,7 @@ function DeityModal({ deity, onClose }) {
   );
 }
 
-// ── Page principale ─────────────────────────────────────────────────────────
+// ── Page principale ──────────────────────────────────────────────────────────
 export default function PantheonPage() {
   const containerRef = useRef(null);
   const [activeDeity, setActiveDeity] = useState(null);
@@ -339,30 +501,35 @@ export default function PantheonPage() {
     window.scrollTo(0, 0);
     if (!containerRef.current) return;
 
-    gsap.fromTo(
-      containerRef.current.querySelectorAll('.animate-in'),
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1.1, stagger: 0.12, ease: 'expo.out',
-        scrollTrigger: { trigger: containerRef.current, start: 'top 75%' } }
-    );
-
-    // Animate sections on scroll
-    gsap.utils.toArray('.section-reveal').forEach((el) => {
-      gsap.fromTo(el,
-        { y: 40, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top 80%', once: true } }
+    // Délai pour laisser Lenis s'initialiser avant de créer les ScrollTriggers
+    const timer = setTimeout(() => {
+      if (!containerRef.current) return;
+      gsap.fromTo(
+        containerRef.current.querySelectorAll('.animate-in'),
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.1, stagger: 0.12, ease: 'expo.out',
+          scrollTrigger: { trigger: containerRef.current, start: 'top 75%' } }
       );
-    });
+
+      gsap.utils.toArray('.section-reveal').forEach((el) => {
+        gsap.fromTo(el,
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 80%', once: true } }
+        );
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <div className="relative min-h-screen text-ivoire" ref={containerRef}>
 
-      {/* ── GALAXIE FIXED — couvre tout le fond de la page ────────────── */}
+      {/* ── GALAXIE FIXED — derrière tout, z-index sous la Navbar (z-[100]) ── */}
       <div
         className="pointer-events-none"
-        style={{ position: 'fixed', inset: 0, zIndex: 0, background: '#0A0705' }}
+        style={{ position: 'fixed', inset: 0, zIndex: 1, background: '#0A0705' }}
       >
         <Canvas
           camera={{ position: [0, 0, 8], fov: 60 }}
@@ -371,7 +538,6 @@ export default function PantheonPage() {
         >
           <PantheonGalaxy />
         </Canvas>
-        {/* Voile sombre pour la lisibilité du texte sur toute la page */}
         <div style={{
           position: 'absolute', inset: 0,
           background: 'rgba(10,7,5,0.55)',
@@ -379,8 +545,8 @@ export default function PantheonPage() {
         }} />
       </div>
 
-      {/* ── HERO ──────────────────────────────────────────────────────── */}
-      <section className="relative z-[1] pt-40 pb-24 overflow-hidden">
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      <section className="relative z-[2] pt-40 pb-24 overflow-hidden">
         {/* Halo or */}
         <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full"
@@ -396,58 +562,73 @@ export default function PantheonPage() {
             {t.pantheon.subtitle}
           </p>
           <p className="animate-in text-ivoire/50 text-sm max-w-3xl leading-relaxed">
-            Chaque divinité du panthéon Vodun inspire une collection — ses couleurs, ses formes, ses matières. 
-            Découvrez les six puissances qui fondent l'identité créative de Vodun Concept Store, née à Ouidah, berceau du Vodun.
+            {lang === 'fr'
+              ? 'Chaque divinité du panthéon Vodun inspire une collection — ses couleurs, ses formes, ses matières. Découvrez les six puissances qui fondent l\'identité créative de Vodun Concept Store, née à Ouidah, berceau du Vodun.'
+              : 'Each deity of the Vodun pantheon inspires a collection — its colors, shapes, materials. Discover the six powers that form the creative identity of Vodun Concept Store, born in Ouidah, cradle of Vodun.'}
           </p>
 
           {/* Séparateur doré */}
           <div className="animate-in flex items-center gap-4 mt-10">
             <div className="h-px flex-1 max-w-[80px] bg-or/40" />
-            <span className="text-or text-xs uppercase tracking-[0.4em]">Les Six Puissances</span>
+            <span className="text-or text-xs uppercase tracking-[0.4em]">{t.pantheon.sixUniverses || 'Les Six Puissances'}</span>
             <div className="h-px flex-1 max-w-[80px] bg-or/40" />
           </div>
         </div>
       </section>
 
-      {/* ── GRILLE DIVINITÉS ──────────────────────────────────────────── */}
-      <section className="relative z-[1] py-8 pb-24">
+      {/* ── GRILLE DIVINITÉS ─────────────────────────────────────────────── */}
+      <section className="relative z-[2] py-8 pb-32">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+
+          {/* Grille 2 colonnes mobile (dents de scie) / 3 colonnes desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-6 items-start">
             {DIVINITIES.map((deity, i) => (
-              <DeityCard
+              <div
                 key={deity.name}
-                deity={deity}
-                index={i}
-                onClick={openDeity}
-                isActive={activeDeity?.name === deity.name}
-              />
+                className={
+                  // Sur sm (2 col) : cartes impaires décalées → dents de scie
+                  // Sur mobile 1 col / desktop 3 col : pas de décalage
+                  i % 2 === 1 ? 'sm:mt-16 md:mt-0' : ''
+                }
+              >
+                <DeityCard
+                  deity={deity}
+                  index={i}
+                  onClick={openDeity}
+                  isActive={activeDeity?.name === deity.name}
+                  lang={lang}
+                />
+              </div>
             ))}
           </div>
-          <p className="text-center text-ivoire/30 text-xs uppercase tracking-[0.3em] mt-10">
-            Cliquez sur une divinité pour découvrir son univers complet
+
+          <p className="text-center text-ivoire/20 text-[0.6rem] uppercase tracking-[0.4em] mt-16">
+            {lang === 'fr' ? '— Cliquez pour entrer dans l\'univers —' : '— Click to enter the universe —'}
           </p>
         </div>
       </section>
 
-      {/* ── SECTION : VISION FONDATRICE ───────────────────────────────── */}
-      <section className="relative z-[1] py-24 md:py-32 border-t border-ivoire/10 section-reveal">
+      {/* ── SECTION : VISION FONDATRICE ────────────────────────────────── */}
+      <section className="relative z-[2] py-24 md:py-32 border-t border-ivoire/10 section-reveal">
         <div className="max-w-7xl mx-auto px-[5vw]">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
               <span className="section-label text-or">Mission</span>
               <h2 className="editorial-heading text-ivoire mb-6 !text-[clamp(2rem,6vw,4rem)]">
-                Vision Fondatrice
+                {t.pantheon.visionLabel}
               </h2>
               <p className="text-ivoire/70 text-base md:text-lg leading-relaxed font-playfair italic mb-8">
-                « Valoriser la richesse symbolique du Vodun en créations contemporaines, conçues au Bénin, pour le monde. »
+                {lang === 'fr'
+                  ? '« Valoriser la richesse symbolique du Vodun en créations contemporaines, conçues au Bénin, pour le monde. »'
+                  : '« Elevate the symbolic richness of Vodun into contemporary creations, made in Benin, for the world. »'}
               </p>
               <p className="text-ivoire/55 text-sm leading-relaxed mb-6">
-                Vodun Concept Store est la meilleure marque ancrée à Ouidah, berceau du Vodun. Notre showroom physique 
-                représente l'âme de la marque ; notre boutique digitale en est le cœur — permettant à chacun, 
-                partout dans le monde, de commander, recevoir et porter l'identité Vodun.
+                {lang === 'fr'
+                  ? 'Vodun Concept Store est la meilleure marque ancrée à Ouidah, berceau du Vodun. Notre showroom physique représente l\'âme de la marque ; notre boutique digitale en est le cœur — permettant à chacun, partout dans le monde, de commander, recevoir et porter l\'identité Vodun.'
+                  : 'Vodun Concept Store is the finest brand rooted in Ouidah, cradle of Vodun. Our physical showroom represents the soul of the brand; our digital boutique is its heart — allowing everyone, everywhere in the world, to order, receive and wear the Vodun identity.'}
               </p>
               <Link to="/a-propos" className="btn-premium-outline text-sm px-8 py-4">
-                L'Histoire de la Marque →
+                {lang === 'fr' ? 'L\'Histoire de la Marque →' : 'The Brand Story →'}
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -462,22 +643,22 @@ export default function PantheonPage() {
         </div>
       </section>
 
-      {/* ── SECTION : TABLEAU RÉCAPITULATIF ───────────────────────────── */}
-      <section className="relative z-[1] py-20 md:py-28 border-t border-ivoire/10 section-reveal">
+      {/* ── SECTION : TABLEAU RÉCAPITULATIF ──────────────────────────── */}
+      <section className="relative z-[2] py-20 md:py-28 border-t border-ivoire/10 section-reveal">
         <div className="max-w-7xl mx-auto px-[5vw]">
-          <span className="section-label text-or">Référence</span>
+          <span className="section-label text-or">{lang === 'fr' ? 'Référence' : 'Reference'}</span>
           <h2 className="editorial-heading text-ivoire mb-12 !text-[clamp(2rem,5vw,3.5rem)]">
-            Les Six Univers
+            {t.pantheon.sixUniverses}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-ivoire/20">
-                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6">Divinité</th>
-                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6">Domaine</th>
-                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6">Couleurs</th>
-                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6 hidden md:table-cell">Formes</th>
-                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 hidden lg:table-cell">Pouvoir</th>
+                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6">{lang === 'fr' ? 'Divinité' : 'Deity'}</th>
+                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6">{lang === 'fr' ? 'Domaine' : 'Domain'}</th>
+                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6">{lang === 'fr' ? 'Couleurs' : 'Colors'}</th>
+                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 pr-6 hidden md:table-cell">{lang === 'fr' ? 'Formes' : 'Shapes'}</th>
+                  <th className="text-[0.6rem] uppercase tracking-[0.35em] text-or pb-4 hidden lg:table-cell">{t.pantheon.power}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ivoire/10">
@@ -511,26 +692,31 @@ export default function PantheonPage() {
         </div>
       </section>
 
-      {/* ── CTA FINAL ─────────────────────────────────────────────────── */}
-      <section className="relative z-[1] py-24 md:py-32 border-t border-ivoire/10 text-center section-reveal">
+      {/* ── CTA FINAL ──────────────────────────────────────────────────── */}
+      <section className="relative z-[2] py-24 md:py-32 border-t border-ivoire/10 text-center section-reveal">
         <div className="max-w-3xl mx-auto px-[5vw]">
-          <span className="section-label text-or">Explorer</span>
+          <span className="section-label text-or">{lang === 'fr' ? 'Explorer' : 'Explore'}</span>
           <h2 className="editorial-heading text-ivoire mb-8 !text-[clamp(2.5rem,7vw,5rem)]">
-            Portez Votre Divinité
+            {lang === 'fr' ? 'Portez Votre Divinité' : 'Wear Your Deity'}
           </h2>
           <p className="text-ivoire/60 text-base md:text-lg font-playfair italic leading-relaxed mb-12">
-            Chaque produit porte en lui l'énergie d'une divinité. Découvrez les collections inspirées du panthéon — 
-            des décorations festives aux accessoires quotidiens.
+            {lang === 'fr'
+              ? 'Chaque produit porte en lui l\'énergie d\'une divinité. Découvrez les collections inspirées du panthéon — des décorations festives aux accessoires quotidiens.'
+              : 'Each product carries within it the energy of a deity. Discover the collections inspired by the pantheon — from festive decorations to everyday accessories.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/boutique" className="btn-premium px-10 py-5">Explorer la Boutique</Link>
-            <Link to="/projets-pro" className="btn-premium-outline px-10 py-5">Projets sur Mesure</Link>
+            <Link to="/boutique" className="btn-premium px-10 py-5">
+              {lang === 'fr' ? 'Explorer la Boutique' : 'Explore the Boutique'}
+            </Link>
+            <Link to="/projets-pro" className="btn-premium-outline px-10 py-5">
+              {lang === 'fr' ? 'Projets sur Mesure' : 'Custom Projects'}
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── MODAL DIVINITÉ ────────────────────────────────────────────── */}
-      {activeDeity && <DeityModal deity={activeDeity} onClose={closeDeity} />}
+      {/* ── MODAL DIVINITÉ ──────────────────────────────────────────────── */}
+      {activeDeity && <DeityModal deity={activeDeity} onClose={closeDeity} t={t} lang={lang} />}
     </div>
   );
 }
